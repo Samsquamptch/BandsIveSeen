@@ -13,6 +13,10 @@ public class Band {
 
 
     public String getBandName() {
-        return bandName;
+        return this.bandName;
     }
+
+    public String getBandGenre() { return this.bandGenre; }
+
+    public String getFromCountry() { return this.fromCountry; }
 }
