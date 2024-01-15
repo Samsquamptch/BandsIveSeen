@@ -3,18 +3,18 @@ package src;
 import java.util.ArrayList;
 
 public class Gig extends Event {
-    private Performance headlineAct;
-    private ArrayList<Performance> supportingActs;
+    private Band headlineAct;
+    private ArrayList<Band> supportingActs;
     private ArrayList<String> wentWith;
 
-    public Gig(String dayDate, Venue location, Performance headline){
+    public Gig(String dayDate, Venue location, Band headline){
         super(dayDate, location);
         this.headlineAct = headline;
-        this.supportingActs = new ArrayList<Performance>();
+        this.supportingActs = new ArrayList<Band>();
         this.wentWith = new ArrayList<String>();
     }
 
-    public void addSupportingAct(Performance supportingBand) {
+    public void addSupportingAct(Band supportingBand) {
         this.supportingActs.add(supportingBand);
     }
 
@@ -30,7 +30,7 @@ public class Gig extends Event {
         }
         else {
             ArrayList<String> supportingString = new ArrayList<String>();
-            for (Performance support : this.supportingActs) {
+            for (Band support : this.supportingActs) {
                 supportingString.add(support.getBandName());
             }
             return "Headliner: " + this.headlineAct.getBandName() + " | Date: " + super.getEventDay() + " | Venue: "
