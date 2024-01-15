@@ -16,6 +16,18 @@ public class Venue {
         return this.venueName + ", " + this.venueLocation;
     }
 
+    public String getVenueName() {
+        return this.venueName;
+    }
+
+    public String getVenueLocation() {
+        return this.venueLocation;
+    }
+
+    public boolean getIsFestival() {
+        return this.isFestival;
+    }
+
     public String checkIfFestival() {
         if(this.isFestival == true){
             return "This is a festival location";
