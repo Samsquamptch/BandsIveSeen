@@ -4,38 +4,43 @@ import java.util.ArrayList;
 
 public class Gig extends Event {
     private Band headlineAct;
-    private ArrayList<Band> supportingActs;
+    private ArrayList<Band> performances;
     private ArrayList<String> wentWith;
 
     public Gig(String dayDate, Venue location, Band headline){
         super(dayDate, location);
         this.headlineAct = headline;
-        this.supportingActs = new ArrayList<Band>();
+        this.performances = new ArrayList<Band>();
+        this.performances.add(headline);
         this.wentWith = new ArrayList<String>();
     }
 
-    public void addSupportingAct(Band supportingBand) {
-        this.supportingActs.add(supportingBand);
+    public void addPerformance(Band supportingBand) {
+        this.performances.add(supportingBand);
     }
 
     public void addWentWith(String name) {
         this.wentWith.add(name);
     }
 
+    public Band getHeadlineAct() { return this.headlineAct; }
+
+    public ArrayList<Band> getPerformances() {
+        return this.performances;
+    }
+
+    public ArrayList<String> getWentWith() {
+        return this.wentWith;
+    }
+
     @Override
     public String toString(){
-        if(this.supportingActs.isEmpty()) {
-            return "Headliner: " + this.headlineAct.getBandName() + " | Date: " + super.getEventDay() + " | Venue: "
-                    + super.getLocation() + " | Supporting: None | Went with: " + String.join(", ", this.wentWith);
-        }
-        else {
             ArrayList<String> supportingString = new ArrayList<String>();
-            for (Band support : this.supportingActs) {
+            for (Band support : this.performances) {
                 supportingString.add(support.getBandName());
             }
-            return "Headliner: " + this.headlineAct.getBandName() + " | Date: " + super.getEventDay() + " | Venue: "
-                    + super.getLocation() + " | Supporting: " + String.join(", ", supportingString)
+            return "Gig: " + this.headlineAct.getBandName() + " | Date: " + super.getEventDay() + " | Venue: "
+                    + super.getLocation() + " | Performances: " + String.join(", ", supportingString)
                     + " | Went with: " + String.join(", ", wentWith);
-        }
     }
 }
