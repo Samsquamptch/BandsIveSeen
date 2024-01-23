@@ -17,7 +17,6 @@ public class WriteDatabase {
             return;
         }
         int venueId = insertVenue(conn, addGig.getLocation());
-        int headlineId = ReadDatabase.getBandId(conn, headline, headlineCountry);
 
 
         for (Band performance : addGig.getPerformances()) {
@@ -30,6 +29,9 @@ public class WriteDatabase {
                 friendIds.add(friendId);
             }
         }
+
+        int headlineId = ReadDatabase.getBandId(conn, headline, headlineCountry);
+        System.out.println(headlineId);
 
         String sql = "INSERT INTO Gig(Date, Venue_Id, Headline) VALUES(?,?,?)";
 
@@ -111,7 +113,7 @@ public class WriteDatabase {
 
     public static void matchGigPerformances(Connection conn, int gigID, ArrayList<Integer> performanceIds) {
         for (int performance : performanceIds) {
-            String sql = "INSERT INTO gig_performance(Gig_Id,Performance_Id) VALUES(?,?)";
+            String sql = "UPDATE Performance SET Gig_Id = ? WHERE Id = ?";
 
             try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
                 pstmt.setInt(1, gigID);

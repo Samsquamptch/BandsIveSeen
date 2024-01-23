@@ -93,20 +93,20 @@ public class ReadDatabase {
         }
     }
 
-    public static void seclectGigs(Connection conn) {
-        String sql = "SELECT * FROM Gig";
+    public static void selectGigs(Connection conn, int headlineID, String gigDate) throws SQLException {
+        PreparedStatement ps = conn.prepareStatement("SELECT Gig.Id AS ID, Gig.Date AS Date, Band.BandName AS Artist, Venue.VenueName " +
+                "AS Venue, Performance.Rating AS Rating FROM Gig JOIN Performance ON Gig.Id = Performance.Gig_Id JOIN Band ON " +
+                "Band.Id = Performance.Band_Id JOIN Venue ON Venue.Id = Gig.Venue_Id WHERE Gig.Headline = ? and Gig.Date = ?");
+        ps.setInt(1, headlineID);
+        ps.setString(2, gigDate);
+        ResultSet rs = ps.executeQuery();
 
-        try (Statement queryStatement = conn.createStatement();
-             ResultSet queryResult = queryStatement.executeQuery(sql)) {
-
-            while (queryResult.next()) {
-                System.out.println(queryResult.getInt("id") + "\t" +
-                        queryResult.getString("Name") + "\t" +
-                        queryResult.getString("Location") + "\t" +
-                        queryResult.getBoolean("isFestival"));
-            }
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
+        while (rs.next()) {
+            System.out.println(rs.getInt("ID") + "\t" +
+                    rs.getString("Date") + "\t" +
+                    rs.getString("Artist") + "\t" +
+                    rs.getString("Venue") + "\t" +
+                    rs.getInt("Rating"));
         }
     }
 
@@ -116,9 +116,7 @@ public class ReadDatabase {
         ps.setString (1, bandName);
         ps.setString (2, bandCountry);
         ResultSet rs = ps.executeQuery();
-        int returnValue = rs.getInt("Id");
-        rs.close();
-        return returnValue;
+        return rs.getInt("Id");
     }
 
     public static int getVenueId(Connection conn, String venueName, String Location) throws SQLException {
