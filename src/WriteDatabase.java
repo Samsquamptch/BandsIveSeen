@@ -7,36 +7,33 @@ import java.util.ArrayList;
 
 public class WriteDatabase {
 
-    public static void insertGig(Gig addGig) throws SQLException {
+    public static void insertGig(Connection conn, Gig addGig) throws SQLException {
         String headline = addGig.getHeadlineAct().getBandName();
         String headlineCountry = addGig.getHeadlineAct().getFromCountry();
         String gigDate = addGig.getEventDay();
         ArrayList<Integer> performanceIds = new ArrayList<Integer>();
         ArrayList<Integer> friendIds = new ArrayList<Integer>();
-        if (ReadDatabase.checkGig(headline, gigDate)) {
+        if (ReadDatabase.checkGig(conn, headline, gigDate)) {
             return;
         }
-        int venueId = insertVenue(addGig.getLocation());
-        int headlineId = ReadDatabase.getBandId(headline, headlineCountry);
+        int venueId = insertVenue(conn, addGig.getLocation());
+        int headlineId = ReadDatabase.getBandId(conn, headline, headlineCountry);
 
-        int perfId = insertBand(addGig.getHeadlineAct());
-        performanceIds.add(perfId);
 
-//        for (Band performance : addGig.getPerformances()) {
-//            int perfId = insertBand(performance);
-//            performanceIds.add(perfId);
-//        }
-//        if (!addGig.getWentWith().isEmpty()) {
-//            for (String friend : addGig.getWentWith()) {
-//                int friendId = insertFriend(friend);
-//            }
-//        }
+        for (Band performance : addGig.getPerformances()) {
+            int perfId = insertBand(conn, performance);
+            performanceIds.add(perfId);
+        }
+        if (!addGig.getWentWith().isEmpty()) {
+            for (String friend : addGig.getWentWith()) {
+                int friendId = insertFriend(conn, friend);
+                friendIds.add(friendId);
+            }
+        }
 
-        System.out.println("test3");
         String sql = "INSERT INTO Gig(Date, Venue_Id, Headline) VALUES(?,?,?)";
 
-        try (Connection conn = DatabaseConnector.connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, gigDate);
             pstmt.setInt(2, venueId);
             pstmt.setInt(3, headlineId);
@@ -44,75 +41,65 @@ public class WriteDatabase {
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
-        System.out.println("test4");
-        int gigID = ReadDatabase.getLastId("Gig");
-        WriteDatabase.matchGigPerformances(gigID, performanceIds);
+        int gigID = ReadDatabase.getLastId(conn, "Gig");
+        WriteDatabase.matchGigPerformances(conn, gigID, performanceIds);
         if (!addGig.getWentWith().isEmpty()) {
-            WriteDatabase.matchGigFriends(gigID, friendIds);
+            WriteDatabase.matchGigFriends(conn, gigID, friendIds);
         }
     }
 
-    public static int insertFriend(String friendName) throws SQLException {
-        if (!ReadDatabase.checkFriend(friendName)) {
+    public static int insertFriend(Connection conn, String friendName) throws SQLException {
+        if (!ReadDatabase.checkFriend(conn, friendName)) {
             String sql = "INSERT INTO Friend(FriendName) VALUES(?)";
-            try (Connection conn = DatabaseConnector.connect();
-                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
                 pstmt.setString(1, friendName);
                 pstmt.executeUpdate();
             } catch (SQLException e) {
                 System.out.println(e.getMessage());
             }
         }
-        return ReadDatabase.getFriendId(friendName);
+        return ReadDatabase.getFriendId(conn, friendName);
     }
 
-    public static int insertBand(Band addBand) throws SQLException {
+    public static int insertBand(Connection conn, Band addBand) throws SQLException {
         String name = addBand.getBandName();
         String genre = addBand.getBandGenre();
         String country = addBand.getFromCountry();
         int performanceRating = addBand.getRating();
-        System.out.println("Check1");
-        if (!ReadDatabase.checkExists("Band", "BandName", "Country", name, country)) {
+        if (!ReadDatabase.checkExists(conn, "Band", "BandName", "Country", name, country)) {
             String sql = "INSERT INTO Band(BandName,Genre, Country) VALUES(?,?,?)";
-            System.out.println("Check2");
-            try (Connection conn = DatabaseConnector.connect();
-                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
                 pstmt.setString(1, name);
                 pstmt.setString(2, genre);
                 pstmt.setString(3, country);
                 pstmt.executeUpdate();
-                System.out.println("Check3");
             } catch (SQLException e) {
                 System.out.println(e.getMessage());
             }
         }
-        System.out.println("Check4");
-        return insertPerformance(name, country, performanceRating);
+        return insertPerformance(conn, name, country, performanceRating);
     }
 
-    public static int insertPerformance(String name, String country, int rating) throws SQLException {
-        int bandId = ReadDatabase.getBandId(name, country);
+    public static int insertPerformance(Connection conn, String name, String country, int rating) throws SQLException {
+        int bandId = ReadDatabase.getBandId(conn, name, country);
 
-        System.out.println("test2");
         String sql = "INSERT INTO Performance(Band_Id,Rating) VALUES(?,?)";
 
-        try (Connection conn = DatabaseConnector.connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, bandId);
             pstmt.setInt(2, rating);
             pstmt.executeUpdate();
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
-        return ReadDatabase.getLastId("Performance");
+        return ReadDatabase.getLastId(conn, "Performance");
     }
 
-    public static void matchGigFriends(int gigID, ArrayList<Integer> friendIds) {
+    public static void matchGigFriends(Connection conn, int gigID, ArrayList<Integer> friendIds) {
         for (int friend : friendIds) {
-            String sql = "INSERT INTO Attended_with(Gig_Id,Friend_Id) VALUES(?,?) r";
+            String sql = "INSERT INTO Attended_with(Gig_Id,Friend_Id) VALUES(?,?)";
 
-            try (Connection conn = DatabaseConnector.connect();
-                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
                 pstmt.setInt(1, gigID);
                 pstmt.setInt(2, friend);
                 pstmt.executeUpdate();
@@ -122,12 +109,11 @@ public class WriteDatabase {
         }
     }
 
-    public static void matchGigPerformances(int gigID, ArrayList<Integer> performanceIds) {
+    public static void matchGigPerformances(Connection conn, int gigID, ArrayList<Integer> performanceIds) {
         for (int performance : performanceIds) {
-            String sql = "INSERT INTO gig_performance(Gig_Id,Performance_Id) VALUES(?,?) r";
+            String sql = "INSERT INTO gig_performance(Gig_Id,Performance_Id) VALUES(?,?)";
 
-            try (Connection conn = DatabaseConnector.connect();
-                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
                 pstmt.setInt(1, gigID);
                 pstmt.setInt(2, performance);
                 pstmt.executeUpdate();
@@ -137,15 +123,14 @@ public class WriteDatabase {
         }
     }
 
-    public static int insertVenue(Venue addVenue) throws SQLException {
+    public static int insertVenue(Connection conn, Venue addVenue) throws SQLException {
         String name = addVenue.getVenueName();
         String location = addVenue.getVenueLocation();
         boolean isFestival = addVenue.getIsFestival();
-        if (!ReadDatabase.checkExists("Venue", "VenueName", "Location", name, location)) {
+        if (!ReadDatabase.checkExists(conn, "Venue", "VenueName", "Location", name, location)) {
             String sql = "INSERT INTO Venue(VenueName, Location, isFestival) VALUES(?,?,?)";
 
-            try (Connection conn = DatabaseConnector.connect();
-                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
                 pstmt.setString(1, name);
                 pstmt.setString(2, location);
                 pstmt.setBoolean(3, isFestival);
@@ -154,6 +139,6 @@ public class WriteDatabase {
                 System.out.println(e.getMessage());
             }
         }
-        return ReadDatabase.getVenueId(name, location);
+        return ReadDatabase.getVenueId(conn, name, location);
     }
 }
