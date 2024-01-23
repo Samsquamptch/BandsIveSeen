@@ -47,11 +47,7 @@ public class ReadDatabase {
         ps.setString (1, name);
         ps.setString (2, identifier);
         ResultSet rs = ps.executeQuery();
-        if (rs.next()) {
-            return true;
-        } else {
-            return false;
-        }
+        return !rs.next();
     }
 
     public static boolean checkFriend(Connection conn, String friendName) throws SQLException {
@@ -61,11 +57,7 @@ public class ReadDatabase {
         ps.setString (1, friendName);
         ResultSet rs = ps.executeQuery();
 
-        if (rs.next()) {
-            return true;
-        } else {
-            return false;
-        }
+        return rs.next();
     }
 
     public static int getFriendId(Connection conn, String friendName) throws SQLException {
@@ -86,11 +78,7 @@ public class ReadDatabase {
         ps.setString(2, headline);
         ResultSet rs = ps.executeQuery();
 
-        if (rs.next()) {
-            return true;
-        } else {
-            return false;
-        }
+        return rs.next();
     }
 
     public static void selectGigs(Connection conn, int headlineID, String gigDate) throws SQLException {

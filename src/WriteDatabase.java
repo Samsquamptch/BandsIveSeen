@@ -11,8 +11,8 @@ public class WriteDatabase {
         String headline = addGig.getHeadlineAct().getBandName();
         String headlineCountry = addGig.getHeadlineAct().getFromCountry();
         String gigDate = addGig.getEventDay();
-        ArrayList<Integer> performanceIds = new ArrayList<Integer>();
-        ArrayList<Integer> friendIds = new ArrayList<Integer>();
+        ArrayList<Integer> performanceIds = new ArrayList<>();
+        ArrayList<Integer> friendIds = new ArrayList<>();
         if (ReadDatabase.checkGig(conn, headline, gigDate)) {
             return;
         }
@@ -68,7 +68,7 @@ public class WriteDatabase {
         String genre = addBand.getBandGenre();
         String country = addBand.getFromCountry();
         int performanceRating = addBand.getRating();
-        if (!ReadDatabase.checkExists(conn, "Band", "BandName", "Country", name, country)) {
+        if (ReadDatabase.checkExists(conn, "Band", "BandName", "Country", name, country)) {
             String sql = "INSERT INTO Band(BandName,Genre, Country) VALUES(?,?,?)";
             try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
                 pstmt.setString(1, name);
@@ -129,7 +129,7 @@ public class WriteDatabase {
         String name = addVenue.getVenueName();
         String location = addVenue.getVenueLocation();
         boolean isFestival = addVenue.getIsFestival();
-        if (!ReadDatabase.checkExists(conn, "Venue", "VenueName", "Location", name, location)) {
+        if (ReadDatabase.checkExists(conn, "Venue", "VenueName", "Location", name, location)) {
             String sql = "INSERT INTO Venue(VenueName, Location, isFestival) VALUES(?,?,?)";
 
             try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
