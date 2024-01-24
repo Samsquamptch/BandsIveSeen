@@ -8,10 +8,13 @@ public class Gui {
     public static void main(String[] args) {
         ImageIcon image = new ImageIcon("meirl.png");
 
-        JButton button = new JButton();
-        button.setBounds(75, 75, 100, 50);
-        button.setText("Woof");
-        button.addActionListener(new ButtonPress());
+        JButton woofButton = new JButton();
+        woofButton.setText("Woof");
+        woofButton.addActionListener(new WoofPress());
+
+        JButton baaButton = new JButton();
+        baaButton.setText("Baa");
+        baaButton.addActionListener(new BaaPress());
 
         JLabel label = new JLabel();
         label.setText("Yo the dog has a beer");
@@ -23,25 +26,25 @@ public class Gui {
         label.setBounds(0, 0, 250, 250);
 
         JPanel redPanel = new JPanel();
-        redPanel.setBackground(Color.red);
-        redPanel.setBounds(0, 0, 250, 250);
-        redPanel.setLayout(null);
-        redPanel.add(button);
+        redPanel.setBackground(Color.lightGray);
+        redPanel.setPreferredSize(new Dimension(100,150));
+        redPanel.setLayout(new FlowLayout(FlowLayout.CENTER,10,10));
+        redPanel.add(woofButton);
+        redPanel.add(baaButton);
 
         JPanel bluePanel = new JPanel();
-        bluePanel.setBackground(Color.blue);
-        bluePanel.setBounds(250, 0, 250, 250);
+        bluePanel.setBackground(Color.lightGray);
+        bluePanel.setPreferredSize(new Dimension(250,100));
         bluePanel.setLayout(new BorderLayout());
 
         JPanel greenPanel = new JPanel();
-        greenPanel.setBackground(Color.green);
-        greenPanel.setBounds(0, 250, 500, 400);
+        greenPanel.setBackground(Color.lightGray);
         greenPanel.setLayout(new BorderLayout());
         greenPanel.add(label);
 
         MyFrame frame = new MyFrame();
-        frame.add(redPanel);
-        frame.add(bluePanel);
-        frame.add(greenPanel);
+        frame.add(redPanel,BorderLayout.NORTH);
+        frame.add(bluePanel,BorderLayout.WEST);
+        frame.add(greenPanel,BorderLayout.CENTER);
     }
 }
