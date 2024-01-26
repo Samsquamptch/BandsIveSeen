@@ -9,8 +9,8 @@ public class GigWindow extends JFrame {
         this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         this.setLayout(null);
         this.setResizable(true);
-        this.setSize(500, 500);
-        this.setLayout(new BorderLayout(5,5));
+        this.setSize(500, 250);
+        this.setLayout(new GridLayout(4,3, 5, 5));
         this.setVisible(true);
     }
 }

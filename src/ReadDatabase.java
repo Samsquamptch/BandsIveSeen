@@ -2,6 +2,7 @@ package src;
 
 import java.sql.*;
 import java.sql.PreparedStatement;
+import java.util.ArrayList;
 
 public class ReadDatabase {
 
@@ -22,21 +23,25 @@ public class ReadDatabase {
         }
     }
 
-    public static void selectVenues(Connection conn) {
-        String sql = "SELECT * FROM Venue";
+    public static String[] selectVenues(Connection conn) {
+        String sql = "SELECT VenueName, Location FROM Venue";
+        ArrayList<String> venueData = new ArrayList<>();
+        venueData.add("Select a Venue");
 
         try (Statement queryStatement = conn.createStatement();
              ResultSet queryResult = queryStatement.executeQuery(sql)) {
 
             while (queryResult.next()) {
-                System.out.println(queryResult.getInt("id") + "\t" +
-                        queryResult.getString("VenueName") + "\t" +
-                        queryResult.getString("Location") + "\t" +
-                        queryResult.getBoolean("isFestival"));
+                venueData.add(queryResult.getString("VenueName") + " - " +
+                        queryResult.getString("Location"));
             }
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
+        venueData.add("Add New Venue");
+        String[] venueArray = new String[venueData.size()];
+        venueArray = venueData.toArray(venueArray);
+        return venueArray;
     }
 
     public static boolean checkExists(Connection conn, String table, String column1, String column2,

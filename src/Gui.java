@@ -2,23 +2,28 @@ package src;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
-public class Gui {
+public class Gui implements ActionListener {
+    JButton addGigButton;
+    JButton editGigButton;
+    JButton delGigButton;
 
-    public static void main(String[] args) {
+    public void newUI() {
         ImageIcon image = new ImageIcon("meirl.png");
 
-        JButton addGigButton = new JButton();
-        addGigButton.setText("Add New Gig");
-        addGigButton.addActionListener(new GigButton(1));
+        this.addGigButton = new JButton();
+        this.addGigButton.setText("Add New Gig");
+        this.addGigButton.addActionListener(this);
 
-        JButton editGigButton = new JButton();
-        editGigButton.setText("Edit a Gig");
-        editGigButton.addActionListener(new GigButton(2));
+        this.editGigButton = new JButton();
+        this.editGigButton.setText("Edit a Gig");
+        this.editGigButton.addActionListener(this);
 
-        JButton delGigButton = new JButton();
-        delGigButton.setText("Delete a Gig");
-        delGigButton.addActionListener(new GigButton(3));
+        this.delGigButton = new JButton();
+        this.delGigButton.setText("Delete a Gig");
+        this.delGigButton.addActionListener(this);
 
         JLabel label = new JLabel();
         label.setText("Yo the dog has a beer");
@@ -28,6 +33,10 @@ public class Gui {
         label.setVerticalAlignment(JLabel.TOP);
         label.setHorizontalAlignment(JLabel.CENTER);
         label.setBounds(0, 0, 250, 250);
+
+        JPanel backPanel = new JPanel();
+        backPanel.setBackground(Color.darkGray);
+        backPanel.setLayout(new BorderLayout(5,5));
 
         JPanel topPanel = new JPanel();
         topPanel.setBackground(Color.lightGray);
@@ -48,8 +57,21 @@ public class Gui {
         mainPanel.add(label);
 
         MyFrame frame = new MyFrame();
-        frame.add(topPanel,BorderLayout.NORTH);
-        frame.add(leftPanel,BorderLayout.WEST);
-        frame.add(mainPanel,BorderLayout.CENTER);
+        backPanel.add(topPanel,BorderLayout.NORTH);
+        backPanel.add(leftPanel,BorderLayout.WEST);
+        backPanel.add(mainPanel,BorderLayout.CENTER);
+        frame.add(backPanel);
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        if(e.getSource()==addGigButton){
+            new AddGigWindow().newWindow();
+        }
+        else if(e.getSource()==editGigButton){
+            new GigWindow("Edit Gig");
+        } else if(e.getSource()==delGigButton){
+            new GigWindow("Delete Gig");
+        }
     }
 }
