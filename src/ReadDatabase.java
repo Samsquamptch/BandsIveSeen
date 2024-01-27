@@ -7,7 +7,7 @@ import java.util.ArrayList;
 public class ReadDatabase {
 
     public static String[] selectFriends(Connection conn) {
-        String sql = "SELECT FriendName FROM Friends";
+        String sql = "SELECT FriendName FROM Friend";
         ArrayList<String> friendList = new ArrayList<>();
         friendList.add("Add Friend");
 
@@ -20,7 +20,7 @@ public class ReadDatabase {
     } catch (SQLException e) {
         System.out.println(e.getMessage());
     }
-        friendList.add("Add New Band");
+        friendList.add("Add New Friend");
         String[] friendArray = new String[friendList.size()];
         friendArray = friendList.toArray(friendArray);
         return friendArray;

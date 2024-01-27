@@ -6,21 +6,23 @@ import java.sql.SQLException;
 
 public class JOptionBand {
     public static void addBand(Connection conn) {
+        //The Text Fields
         JTextField bandName = new JTextField(15);
         JTextField bandGenre = new JTextField(15);
         JTextField bandCountry = new JTextField(10);
 
-        JPanel myPanel = new JPanel();
-        myPanel.add(new JLabel("Name"));
-        myPanel.add(bandName);
-        myPanel.add(Box.createHorizontalStrut(5));
-        myPanel.add(new JLabel("Genre"));
-        myPanel.add(bandGenre);
-        myPanel.add(Box.createHorizontalStrut(5));
-        myPanel.add(new JLabel("Country"));
-        myPanel.add(bandCountry);
+        //The Main Panel
+        JPanel mainPanel = new JPanel();
+        mainPanel.add(new JLabel("Name"));
+        mainPanel.add(bandName);
+        mainPanel.add(Box.createHorizontalStrut(5));
+        mainPanel.add(new JLabel("Genre"));
+        mainPanel.add(bandGenre);
+        mainPanel.add(Box.createHorizontalStrut(5));
+        mainPanel.add(new JLabel("Country"));
+        mainPanel.add(bandCountry);
 
-        int result = JOptionPane.showConfirmDialog(null, myPanel,
+        int result = JOptionPane.showConfirmDialog(null, mainPanel,
                 "Please Enter Band Details", JOptionPane.OK_CANCEL_OPTION);
         if (result == JOptionPane.OK_OPTION) {
             if(bandName.getText().isEmpty() || bandGenre.getText().isEmpty() ||

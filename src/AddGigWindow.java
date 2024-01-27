@@ -7,6 +7,8 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.stream.IntStream;
 
 @SuppressWarnings("ALL")
 public class AddGigWindow implements ActionListener {
@@ -23,9 +25,6 @@ public class AddGigWindow implements ActionListener {
     JComboBox support4Rating;
     JComboBox addFriend;
     JComboBox removeFriend;
-    JPanel addFriendPanel;
-    JPanel removeFriendPanel;
-    JPanel setHeadlinePanel;
     JPanel setSupport1Panel;
     JPanel setSupport2Panel;
     JPanel setSupport3Panel;
@@ -35,6 +34,7 @@ public class AddGigWindow implements ActionListener {
     JPanel support3RatingPanel;
     JPanel support4RatingPanel;
     String[] rating = new String[]{"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"};
+    int[] submitCheckArray = new int[]{0, 0, 0};
     JButton submitButton;
     DatePicker gigDate;
     Venue gigVenue;
@@ -43,6 +43,7 @@ public class AddGigWindow implements ActionListener {
     Band gigSupport2;
     Band gigSupport3;
     Band gigSupport4;
+    GigWindow addWindow;
     private final Connection jdbcConnection;
 
     public AddGigWindow(Connection connection){
@@ -55,6 +56,7 @@ public class AddGigWindow implements ActionListener {
         //Set Date Panel
         this.gigDate = new DatePicker();
         this.gigDate.enableInputMethods(false);
+        this.gigDate.setDateToToday();
         JLabel dateLabel = new JLabel("Gig Date");
         JPanel datePanel = new JPanel();
         datePanel.setLayout(new BorderLayout());
@@ -71,19 +73,14 @@ public class AddGigWindow implements ActionListener {
         venuePanel.add(venueLabel, BorderLayout.NORTH);
         venuePanel.add(this.chooseVenue, BorderLayout.CENTER);
 
-        //Add Friend Panel
-        this.addFriend = new JComboBox();
-        this.addFriendPanel = new JPanel();
-
         //Set Headliner Panel
         this.chooseHeadline = new JComboBox(bandData);
         this.chooseHeadline.addActionListener(this);
         JLabel headlineLabel = new JLabel("Choose Headline Band");
-        this.setHeadlinePanel = new JPanel();
-        this.setHeadlinePanel.setLayout(new BorderLayout());
-        this.setHeadlinePanel.add(headlineLabel, BorderLayout.NORTH);
-        this.setHeadlinePanel.add(this.chooseHeadline, BorderLayout.CENTER);
-
+        JPanel setHeadlinePanel = new JPanel();
+        setHeadlinePanel.setLayout(new BorderLayout());
+        setHeadlinePanel.add(headlineLabel, BorderLayout.NORTH);
+        setHeadlinePanel.add(this.chooseHeadline, BorderLayout.CENTER);
 
         //Headliner Rating Panel
         this.headlineRating = new JComboBox(this.rating);
@@ -95,9 +92,22 @@ public class AddGigWindow implements ActionListener {
         headlineRatingPanel.add(headlineRatingLabel, BorderLayout.NORTH);
         headlineRatingPanel.add(this.headlineRating, BorderLayout.CENTER);
 
+        //Add Friend Panel
+        String[] friendArray = ReadDatabase.selectFriends(this.jdbcConnection);
+        this.addFriend = new JComboBox(friendArray);
+        this.addFriend.addActionListener(this);
+        JPanel addFriendPanel = new JPanel();
+        addFriendPanel.setLayout(new BorderLayout());
+        addFriendPanel.add(new JLabel("Add Friends"), BorderLayout.NORTH);
+        addFriendPanel.add(this.addFriend, BorderLayout.CENTER);
+
         //Remove Friend Panel
-        this.removeFriend = new JComboBox();
-        this.removeFriendPanel = new JPanel();
+        this.removeFriend = new JComboBox(new String[]{"Remove Friend"});
+        this.removeFriend.addActionListener(this);
+        JPanel removeFriendPanel = new JPanel();
+        removeFriendPanel.setLayout(new BorderLayout());
+        removeFriendPanel.add(new JLabel("Remove Friends"), BorderLayout.NORTH);
+        removeFriendPanel.add(this.removeFriend, BorderLayout.CENTER);
 
         //Supporting Act 1 Select Panel
         this.chooseSupport1 = new JComboBox(bandData);
@@ -193,37 +203,47 @@ public class AddGigWindow implements ActionListener {
         buttonPanel.add(new JPanel(), BorderLayout.WEST);
         buttonPanel.add(new JPanel(), BorderLayout.EAST);
 
-        GigWindow addWindow = new GigWindow("Add Gig");
-        addWindow.mainPanel.add(datePanel);
-        addWindow.mainPanel.add(venuePanel);
-        addWindow.mainPanel.add(addFriendPanel);
-        addWindow.mainPanel.add(setHeadlinePanel);
-        addWindow.mainPanel.add(headlineRatingPanel);
-        addWindow.mainPanel.add(removeFriendPanel);
-        addWindow.mainPanel.add(setSupport1Panel);
-        addWindow.mainPanel.add(support1RatingPanel);
-        addWindow.mainPanel.add(new JPanel());
-        addWindow.mainPanel.add(setSupport2Panel);
-        addWindow.mainPanel.add(support2RatingPanel);
-        addWindow.mainPanel.add(new JPanel());
-        addWindow.mainPanel.add(setSupport3Panel);
-        addWindow.mainPanel.add(support3RatingPanel);
-        addWindow.mainPanel.add(new JPanel());
-        addWindow.mainPanel.add(setSupport4Panel);
-        addWindow.mainPanel.add(support4RatingPanel);
-        addWindow.mainPanel.add(buttonPanel);
+        this.addWindow = new GigWindow("Add Gig");
+        this.addWindow.mainPanel.add(datePanel);
+        this.addWindow.mainPanel.add(venuePanel);
+        this.addWindow.mainPanel.add(addFriendPanel);
+        this.addWindow.mainPanel.add(setHeadlinePanel);
+        this.addWindow.mainPanel.add(headlineRatingPanel);
+        this.addWindow.mainPanel.add(removeFriendPanel);
+        this.addWindow.mainPanel.add(setSupport1Panel);
+        this.addWindow.mainPanel.add(support1RatingPanel);
+        this.addWindow.mainPanel.add(new JPanel());
+        this.addWindow.mainPanel.add(setSupport2Panel);
+        this.addWindow.mainPanel.add(support2RatingPanel);
+        this.addWindow.mainPanel.add(new JPanel());
+        this.addWindow.mainPanel.add(setSupport3Panel);
+        this.addWindow.mainPanel.add(support3RatingPanel);
+        this.addWindow.mainPanel.add(new JPanel());
+        this.addWindow.mainPanel.add(setSupport4Panel);
+        this.addWindow.mainPanel.add(support4RatingPanel);
+        this.addWindow.mainPanel.add(buttonPanel);
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == this.chooseVenue) {
             if (this.chooseVenue.getSelectedItem() =="Add New Venue") {
-                System.out.println("New Venue Needs to be Added");
+                JOptionVenue.addVenue(this.jdbcConnection);
+                String[] venueData = ReadDatabase.selectVenues(this.jdbcConnection);
+                this.chooseVenue.removeAllItems();
+                for (String venue : venueData) {
+                    this.chooseVenue.addItem(venue);
+                }
+                this.chooseVenue.revalidate();
+                this.chooseVenue.repaint();
             }
             else if (this.chooseVenue.getSelectedIndex()!=0) {
                 String[] venueDetails = this.chooseVenue.getSelectedItem().toString().split(" - ");
                 this.gigVenue = new Venue(venueDetails[0], venueDetails[1], false);
-                System.out.println(this.gigVenue);
+                this.submitCheckArray[0] = 1;
+            }
+            else {
+                this.submitCheckArray[0] = 0;
             }
         }
         if (e.getSource() == this.chooseHeadline) {
@@ -234,8 +254,8 @@ public class AddGigWindow implements ActionListener {
                 for (String artist : bandData) {
                     this.chooseHeadline.addItem(artist);
                 }
-                this.setHeadlinePanel.revalidate();
-                this.setHeadlinePanel.repaint();
+                this.chooseHeadline.revalidate();
+                this.chooseHeadline.repaint();
             }
             else if (this.chooseHeadline.getSelectedIndex()!=0) {
                 String[] bandDetails = this.chooseHeadline.getSelectedItem().toString().split(" - ");
@@ -243,8 +263,10 @@ public class AddGigWindow implements ActionListener {
                 this.headlineRating.setEnabled(true);
                 this.setSupport1Panel.setVisible(true);
                 this.support1RatingPanel.setVisible(true);
+                this.submitCheckArray[1] = 1;
             }
             else {
+                //If no band is selected then support band panels are hidden
                 this.headlineRating.setEnabled(false);
                 this.setSupport1Panel.setVisible(false);
                 this.support1RatingPanel.setVisible(false);
@@ -254,11 +276,14 @@ public class AddGigWindow implements ActionListener {
                 this.support3RatingPanel.setVisible(false);
                 this.setSupport4Panel.setVisible(false);
                 this.support4RatingPanel.setVisible(false);
+                this.submitCheckArray[1] = 0;
+                this.submitCheckArray[2] = 0;
             }
         }
         if (e.getSource() == this.headlineRating){
             int intRating = Integer.parseInt(this.headlineRating.getSelectedItem().toString());
             this.gigHeadline.setRating(intRating);
+            this.submitCheckArray[2] = 1;
         }
         if (e.getSource() == this.chooseSupport1) {
             if (this.chooseSupport1.getSelectedItem() == "Add New Band") {
@@ -322,9 +347,9 @@ public class AddGigWindow implements ActionListener {
             if (this.chooseSupport3.getSelectedItem() == "Add New Band") {
                 JOptionBand.addBand(this.jdbcConnection);
                 String[] bandData = ReadDatabase.selectBands(this.jdbcConnection);
-                this.chooseSupport2.removeAllItems();
+                this.chooseSupport3.removeAllItems();
                 for (String artist : bandData) {
-                    this.chooseSupport2.addItem(artist);
+                    this.chooseSupport3.addItem(artist);
                 }
                 this.setSupport2Panel.revalidate();
                 this.setSupport2Panel.repaint();
@@ -365,6 +390,67 @@ public class AddGigWindow implements ActionListener {
         if (e.getSource() == this.support4Rating){
             int intRating = Integer.parseInt(this.support4Rating.getSelectedItem().toString());
             this.gigSupport4.setRating(intRating);
+        }
+        if (e.getSource() == this.addFriend){
+            if (this.addFriend.getSelectedItem() == "Add New Friend") {
+                String friendName = JOptionFriend.addFriend(this.jdbcConnection);
+                if (!friendName.equals("")){
+                    addFriend.removeItem("Add New Friend");
+                    addFriend.addItem(friendName);
+                    addFriend.addItem("Add New Friend");
+                }
+            }
+            else if (this.addFriend.getSelectedIndex()!=0) {
+                this.removeFriend.addItem(this.addFriend.getSelectedItem());
+                this.addFriend.removeItem(this.addFriend.getSelectedItem());
+                this.addFriend.revalidate();
+                this.addFriend.repaint();
+                this.removeFriend.revalidate();
+                this.removeFriend.repaint();
+            }
+        }
+        if (e.getSource() == this.removeFriend){
+            if (this.removeFriend.getSelectedIndex()!=0) {
+                this.addFriend.removeItem("Add New Friend");
+                this.addFriend.addItem(this.removeFriend.getSelectedItem());
+                this.addFriend.addItem("Add New Friend");
+                this.removeFriend.removeItem(this.removeFriend.getSelectedItem());
+                this.addFriend.revalidate();
+                this.addFriend.repaint();
+                this.removeFriend.revalidate();
+                this.removeFriend.repaint();
+            }
+        }
+        if (e.getSource() == this.submitButton) {
+            if(IntStream.of(submitCheckArray).anyMatch(x -> x == 0)){
+                JOptionPane.showMessageDialog(null, "Make sure a Headline and Venue have been selected!",
+                        "Input Error", JOptionPane.WARNING_MESSAGE);
+            }
+            else {
+                Gig addGig = new Gig(this.gigDate.toString(), this.gigVenue, this.gigHeadline);
+                Band[] supportBands = new Band[]{this.gigSupport1, this.gigSupport2, this.gigSupport3, this.gigSupport4};
+                for(Band support: supportBands){
+                    if (support!=null) {
+                        addGig.addPerformance(support);
+                    }
+                }
+                if (this.removeFriend.getItemCount() > 1){
+                    for(int i = 0; i < this.removeFriend.getItemCount(); i++){
+                        //Attempting to remove the "Remove Friend" item caused issues, this skip works instead
+                        if (this.removeFriend.getItemAt(i).equals("Remove Friend")){
+                            continue;
+                        }
+                        addGig.addWentWith(this.removeFriend.getItemAt(i).toString());
+                    }
+                }
+                System.out.println(addGig.getWentWith());
+                try {
+                    WriteDatabase.insertGig(this.jdbcConnection, addGig);
+                } catch (SQLException ex) {
+                    throw new RuntimeException(ex);
+                }
+                this.addWindow.dispose();
+            }
         }
     }
 }
