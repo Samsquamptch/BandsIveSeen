@@ -6,21 +6,26 @@ import java.util.ArrayList;
 
 public class ReadDatabase {
 
-    public static void selectBands(Connection conn) {
-        String sql = "SELECT * FROM Band";
+    public static String[] selectBands(Connection conn) {
+        String sql = "SELECT BandName, Genre, Country FROM Band";
+        ArrayList<String> bandData = new ArrayList<>();
+        bandData.add("Select a Band");
 
         try (Statement queryStatement = conn.createStatement();
              ResultSet queryResult = queryStatement.executeQuery(sql)) {
 
             while (queryResult.next()) {
-                System.out.println(queryResult.getInt("id") + "\t" +
-                        queryResult.getString("BandName") + "\t" +
-                        queryResult.getString("Genre") + "\t" +
-                        queryResult.getString("Country"));
+                bandData.add(queryResult.getString("BandName") + " - " +
+                        queryResult.getString("Country") + " - " +
+                        queryResult.getString("Genre"));
             }
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
+        bandData.add("Add New Band");
+        String[] bandArray = new String[bandData.size()];
+        bandArray = bandData.toArray(bandArray);
+        return bandArray;
     }
 
     public static String[] selectVenues(Connection conn) {

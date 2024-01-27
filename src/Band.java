@@ -13,7 +13,7 @@ public class Band {
         this.rating = rating;
     }
 
-
+    public void setRating(int value) { this.rating = value; }
     public String getBandName() {
         return this.bandName;
     }

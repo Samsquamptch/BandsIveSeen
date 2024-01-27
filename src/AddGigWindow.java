@@ -11,9 +11,13 @@ import java.sql.Connection;
 public class AddGigWindow implements ActionListener {
     JComboBox chooseVenue;
     JComboBox chooseHeadline;
+    JComboBox headlineRating;
+    String[] rating = new String[]{"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"};
     DatePicker gigDate;
     JButton testButton;
     Venue gigVenue;
+    Band gigHeadline;
+    Connection conn = DatabaseConnector.connect();
 
     public void newWindow() {
         //Set Date Panel
@@ -26,7 +30,6 @@ public class AddGigWindow implements ActionListener {
         datePanel.add(this.gigDate, BorderLayout.CENTER);
 
         //Set Venue Panel
-        Connection conn = DatabaseConnector.connect();
         String[] venueData = ReadDatabase.selectVenues(conn);
         this.chooseVenue = new JComboBox(venueData);
         this.chooseVenue.addActionListener(this);
@@ -41,15 +44,33 @@ public class AddGigWindow implements ActionListener {
         JPanel addFriendPanel = new JPanel();
 
         //Set Headliner Panel
+        String[] bandData = ReadDatabase.selectBands(conn);
+        this.chooseHeadline = new JComboBox(bandData);
+        this.chooseHeadline.addActionListener(this);
+        JLabel headlineLabel = new JLabel();
+        headlineLabel.setText("Choose Headline Band");
+        JPanel setHeadlinePanel = new JPanel();
+        setHeadlinePanel.setLayout(new BorderLayout());
+        setHeadlinePanel.add(headlineLabel, BorderLayout.NORTH);
+        setHeadlinePanel.add(this.chooseHeadline, BorderLayout.CENTER);
 
-        JPanel headlinePanel = new JPanel();
+        //Headliner Rating Panel
+        this.headlineRating = new JComboBox(this.rating);
+        this.headlineRating.addActionListener(this);
+        this.headlineRating.setEnabled(false);
+        JLabel headlineRatingLabel = new JLabel();
+        headlineRatingLabel.setText("Set Rating");
+        JPanel headlineRatingPanel = new JPanel();
+        headlineRatingPanel.setLayout(new BorderLayout());
+        headlineRatingPanel.add(headlineRatingLabel, BorderLayout.NORTH);
+        headlineRatingPanel.add(this.headlineRating, BorderLayout.CENTER);
 
         GigWindow addWindow = new GigWindow("Add Gig");
         addWindow.add(datePanel);
         addWindow.add(venuePanel);
         addWindow.add(addFriendPanel);
-        addWindow.add(new JPanel());
-        addWindow.add(new JPanel());
+        addWindow.add(setHeadlinePanel);
+        addWindow.add(headlineRatingPanel);
         addWindow.add(new JPanel());
         addWindow.add(new JPanel());
         addWindow.add(new JPanel());
@@ -72,8 +93,22 @@ public class AddGigWindow implements ActionListener {
                 System.out.println(this.gigVenue);
             }
         }
-        if (e.getSource() == this.testButton){
-            System.out.println(this.gigDate);
+        if (e.getSource() == this.chooseHeadline) {
+            if (this.chooseHeadline.getSelectedItem() =="Add New Band") {
+                System.out.println("New Band Needs to be Added");
+            }
+            else if (this.chooseHeadline.getSelectedIndex()!=0) {
+                String[] bandDetails = this.chooseHeadline.getSelectedItem().toString().split(" - ");
+                this.gigHeadline = new Band(bandDetails[0], bandDetails[2], bandDetails[1], 5);
+                this.headlineRating.setEnabled(true);
+            }
+            else {
+                this.headlineRating.setEnabled(false);
+            }
+        }
+        if (e.getSource() == this.headlineRating){
+            int intRating = Integer.parseInt(this.headlineRating.getSelectedItem().toString());
+            this.gigHeadline.setRating(intRating);
         }
     }
 }
