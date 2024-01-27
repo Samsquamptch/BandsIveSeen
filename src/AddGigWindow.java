@@ -232,7 +232,7 @@ public class AddGigWindow implements ActionListener {
         }
         if (e.getSource() == this.chooseHeadline) {
             if (this.chooseHeadline.getSelectedItem()=="Add New Band") {
-                new AddBandWindow();
+                new AddBandWindow().newWindow();
             }
             else if (this.chooseHeadline.getSelectedIndex()!=0) {
                 String[] bandDetails = this.chooseHeadline.getSelectedItem().toString().split(" - ");
@@ -259,15 +259,81 @@ public class AddGigWindow implements ActionListener {
         }
         if (e.getSource() == this.chooseSupport1) {
             if (this.chooseSupport1.getSelectedItem() == "Add New Band") {
-                new AddBandWindow();
-            }
-            else if (this.chooseSupport1.getSelectedIndex()!=0) {
+                new AddBandWindow().newWindow();
+            } else if (this.chooseSupport1.getSelectedIndex() != 0) {
                 String[] bandDetails = this.chooseSupport1.getSelectedItem().toString().split(" - ");
                 this.gigSupport1 = new Band(bandDetails[0], bandDetails[2], bandDetails[1], 5);
                 this.support1Rating.setEnabled(true);
                 this.setSupport2Panel.setVisible(true);
                 this.support2RatingPanel.setVisible(true);
+            } else {
+                this.support1Rating.setEnabled(false);
+                this.setSupport2Panel.setVisible(false);
+                this.support2RatingPanel.setVisible(false);
+                this.setSupport3Panel.setVisible(false);
+                this.support3RatingPanel.setVisible(false);
+                this.setSupport4Panel.setVisible(false);
+                this.support4RatingPanel.setVisible(false);
             }
+        }
+        if (e.getSource() == this.support1Rating){
+            int intRating = Integer.parseInt(this.support1Rating.getSelectedItem().toString());
+            this.gigSupport1.setRating(intRating);
+        }
+        if (e.getSource() == this.chooseSupport2) {
+            if (this.chooseSupport2.getSelectedItem() == "Add New Band") {
+                new AddBandWindow().newWindow();
+            } else if (this.chooseSupport2.getSelectedIndex() != 0) {
+                String[] bandDetails = this.chooseSupport2.getSelectedItem().toString().split(" - ");
+                this.gigSupport2 = new Band(bandDetails[0], bandDetails[2], bandDetails[1], 5);
+                this.support2Rating.setEnabled(true);
+                this.setSupport3Panel.setVisible(true);
+                this.support3RatingPanel.setVisible(true);
+            } else {
+                this.support2Rating.setEnabled(false);
+                this.setSupport3Panel.setVisible(false);
+                this.support3RatingPanel.setVisible(false);
+                this.setSupport4Panel.setVisible(false);
+                this.support4RatingPanel.setVisible(false);
+            }
+        }
+        if (e.getSource() == this.support2Rating){
+            int intRating = Integer.parseInt(this.support2Rating.getSelectedItem().toString());
+            this.gigSupport2.setRating(intRating);
+        }
+        if (e.getSource() == this.chooseSupport3) {
+            if (this.chooseSupport3.getSelectedItem() == "Add New Band") {
+                new AddBandWindow().newWindow();
+            } else if (this.chooseSupport3.getSelectedIndex() != 0) {
+                String[] bandDetails = this.chooseSupport3.getSelectedItem().toString().split(" - ");
+                this.gigSupport3 = new Band(bandDetails[0], bandDetails[2], bandDetails[1], 5);
+                this.support3Rating.setEnabled(true);
+                this.setSupport4Panel.setVisible(true);
+                this.support4RatingPanel.setVisible(true);
+            } else {
+                this.support3Rating.setEnabled(false);
+                this.setSupport4Panel.setVisible(false);
+                this.support4RatingPanel.setVisible(false);
+            }
+        }
+        if (e.getSource() == this.support3Rating){
+            int intRating = Integer.parseInt(this.support3Rating.getSelectedItem().toString());
+            this.gigSupport3.setRating(intRating);
+        }
+        if (e.getSource() == this.chooseSupport4) {
+            if (this.chooseSupport4.getSelectedItem() == "Add New Band") {
+                new AddBandWindow().newWindow();
+            } else if (this.chooseSupport4.getSelectedIndex() != 0) {
+                String[] bandDetails = this.chooseSupport4.getSelectedItem().toString().split(" - ");
+                this.gigSupport4 = new Band(bandDetails[0], bandDetails[2], bandDetails[1], 5);
+                this.support4Rating.setEnabled(true);
+            } else {
+                this.support4Rating.setEnabled(false);
+            }
+        }
+        if (e.getSource() == this.support4Rating){
+            int intRating = Integer.parseInt(this.support4Rating.getSelectedItem().toString());
+            this.gigSupport4.setRating(intRating);
         }
     }
 }
