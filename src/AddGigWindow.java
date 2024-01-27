@@ -22,6 +22,7 @@ public class AddGigWindow implements ActionListener {
     JComboBox support3Rating;
     JComboBox support4Rating;
     String[] rating = new String[]{"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"};
+    JButton submitButton;
     DatePicker gigDate;
     Venue gigVenue;
     Band gigHeadline;
@@ -87,6 +88,7 @@ public class AddGigWindow implements ActionListener {
         JLabel support1Label = new JLabel();
         support1Label.setText("Add Supporting Band");
         JPanel setSupport1Panel = new JPanel();
+        setSupport1Panel.setVisible(false);
         setSupport1Panel.setLayout(new BorderLayout());
         setSupport1Panel.add(support1Label, BorderLayout.NORTH);
         setSupport1Panel.add(this.chooseSupport1, BorderLayout.CENTER);
@@ -98,6 +100,7 @@ public class AddGigWindow implements ActionListener {
         JLabel support1RatingLabel = new JLabel();
         support1RatingLabel.setText("Set Rating");
         JPanel support1RatingPanel = new JPanel();
+        support1RatingPanel.setVisible(false);
         support1RatingPanel.setLayout((new BorderLayout()));
         support1RatingPanel.add(support1RatingLabel, BorderLayout.NORTH);
         support1RatingPanel.add(this.support1Rating, BorderLayout.CENTER);
@@ -108,6 +111,7 @@ public class AddGigWindow implements ActionListener {
         JLabel support2Label = new JLabel();
         support2Label.setText("Add Supporting Band");
         JPanel setSupport2Panel = new JPanel();
+        setSupport2Panel.setVisible(false);
         setSupport2Panel.setLayout(new BorderLayout());
         setSupport2Panel.add(support2Label, BorderLayout.NORTH);
         setSupport2Panel.add(this.chooseSupport2, BorderLayout.CENTER);
@@ -119,6 +123,7 @@ public class AddGigWindow implements ActionListener {
         JLabel support2RatingLabel = new JLabel();
         support2RatingLabel.setText("Set Rating");
         JPanel support2RatingPanel = new JPanel();
+        support2RatingPanel.setVisible(false);
         support2RatingPanel.setLayout((new BorderLayout()));
         support2RatingPanel.add(support2RatingLabel, BorderLayout.NORTH);
         support2RatingPanel.add(this.support2Rating, BorderLayout.CENTER);
@@ -129,6 +134,7 @@ public class AddGigWindow implements ActionListener {
         JLabel support3Label = new JLabel();
         support3Label.setText("Add Supporting Band");
         JPanel setSupport3Panel = new JPanel();
+        setSupport3Panel.setVisible(false);
         setSupport3Panel.setLayout(new BorderLayout());
         setSupport3Panel.add(support3Label, BorderLayout.NORTH);
         setSupport3Panel.add(this.chooseSupport3, BorderLayout.CENTER);
@@ -140,6 +146,7 @@ public class AddGigWindow implements ActionListener {
         JLabel support3RatingLabel = new JLabel();
         support3RatingLabel.setText("Set Rating");
         JPanel support3RatingPanel = new JPanel();
+        support3RatingPanel.setVisible(false);
         support3RatingPanel.setLayout((new BorderLayout()));
         support3RatingPanel.add(support3RatingLabel, BorderLayout.NORTH);
         support3RatingPanel.add(this.support3Rating, BorderLayout.CENTER);
@@ -150,6 +157,7 @@ public class AddGigWindow implements ActionListener {
         JLabel support4Label = new JLabel();
         support4Label.setText("Add Supporting Band");
         JPanel setSupport4Panel = new JPanel();
+        setSupport4Panel.setVisible(false);
         setSupport4Panel.setLayout(new BorderLayout());
         setSupport4Panel.add(support4Label, BorderLayout.NORTH);
         setSupport4Panel.add(this.chooseSupport4, BorderLayout.CENTER);
@@ -161,10 +169,21 @@ public class AddGigWindow implements ActionListener {
         JLabel support4RatingLabel = new JLabel();
         support4RatingLabel.setText("Set Rating");
         JPanel support4RatingPanel = new JPanel();
+        support4RatingPanel.setVisible(false);
         support4RatingPanel.setLayout((new BorderLayout()));
         support4RatingPanel.add(support4RatingLabel, BorderLayout.NORTH);
         support4RatingPanel.add(this.support4Rating, BorderLayout.CENTER);
 
+        //Button for adding the Gig
+        this.submitButton = new JButton();
+        this.submitButton.addActionListener(this);
+        this.submitButton.setText("Submit");
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.setLayout(new BorderLayout());
+        buttonPanel.add(submitButton, BorderLayout.CENTER);
+        buttonPanel.add(new JPanel(), BorderLayout.NORTH);
+        buttonPanel.add(new JPanel(), BorderLayout.WEST);
+        buttonPanel.add(new JPanel(), BorderLayout.EAST);
 
         GigWindow addWindow = new GigWindow("Add Gig");
         addWindow.mainPanel.add(datePanel);
@@ -184,7 +203,7 @@ public class AddGigWindow implements ActionListener {
         addWindow.mainPanel.add(new JPanel());
         addWindow.mainPanel.add(setSupport4Panel);
         addWindow.mainPanel.add(support4RatingPanel);
-        addWindow.mainPanel.add(new JPanel());
+        addWindow.mainPanel.add(buttonPanel);
     }
 
     @Override
