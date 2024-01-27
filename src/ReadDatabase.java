@@ -6,6 +6,26 @@ import java.util.ArrayList;
 
 public class ReadDatabase {
 
+    public static String[] selectFriends(Connection conn) {
+        String sql = "SELECT FriendName FROM Friends";
+        ArrayList<String> friendList = new ArrayList<>();
+        friendList.add("Add Friend");
+
+        try (Statement queryStatement = conn.createStatement();
+             ResultSet queryResult = queryStatement.executeQuery(sql))
+        {
+            while (queryResult.next()) {
+                friendList.add(queryResult.getString("FriendName"));
+            }
+    } catch (SQLException e) {
+        System.out.println(e.getMessage());
+    }
+        friendList.add("Add New Band");
+        String[] friendArray = new String[friendList.size()];
+        friendArray = friendList.toArray(friendArray);
+        return friendArray;
+    }
+
     public static String[] selectBands(Connection conn) {
         String sql = "SELECT BandName, Genre, Country FROM Band";
         ArrayList<String> bandData = new ArrayList<>();

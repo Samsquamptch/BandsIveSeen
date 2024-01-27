@@ -4,11 +4,17 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.sql.Connection;
 
 public class Gui implements ActionListener {
     JButton addGigButton;
     JButton editGigButton;
     JButton delGigButton;
+    private final Connection jdbcConnection;
+
+    public Gui(Connection connection){
+        this.jdbcConnection = connection;
+    }
 
     public void newUI() {
         ImageIcon image = new ImageIcon("meirl.png");
@@ -66,7 +72,7 @@ public class Gui implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         if(e.getSource()==addGigButton){
-            new AddGigWindow().newWindow();
+            new AddGigWindow(this.jdbcConnection).newWindow();
         }
         else if(e.getSource()==editGigButton){
             new GigWindow("Edit Gig");

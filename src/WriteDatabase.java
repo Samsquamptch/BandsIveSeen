@@ -20,7 +20,7 @@ public class WriteDatabase {
 
 
         for (Band performance : addGig.getPerformances()) {
-            int perfId = insertBand(conn, performance);
+            int perfId = insertPerformance(conn, performance);
             performanceIds.add(perfId);
         }
         if (!addGig.getWentWith().isEmpty()) {
@@ -63,11 +63,7 @@ public class WriteDatabase {
         return ReadDatabase.getFriendId(conn, friendName);
     }
 
-    public static int insertBand(Connection conn, Band addBand) throws SQLException {
-        String name = addBand.getBandName();
-        String genre = addBand.getBandGenre();
-        String country = addBand.getFromCountry();
-        int performanceRating = addBand.getRating();
+    public static void addBand(Connection conn, String name, String genre, String country) throws SQLException {
         if (ReadDatabase.checkExists(conn, "Band", "BandName", "Country", name, country)) {
             String sql = "INSERT INTO Band(BandName,Genre, Country) VALUES(?,?,?)";
             try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -79,10 +75,13 @@ public class WriteDatabase {
                 System.out.println(e.getMessage());
             }
         }
-        return insertPerformance(conn, name, country, performanceRating);
     }
 
-    public static int insertPerformance(Connection conn, String name, String country, int rating) throws SQLException {
+    public static int insertPerformance(Connection conn, Band addBand) throws SQLException {
+        String name = addBand.getBandName();
+        String country = addBand.getFromCountry();
+        int rating = addBand.getRating();
+
         int bandId = ReadDatabase.getBandId(conn, name, country);
 
         String sql = "INSERT INTO Performance(Band_Id,Rating) VALUES(?,?)";

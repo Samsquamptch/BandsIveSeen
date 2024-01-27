@@ -4,12 +4,20 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.sql.Connection;
+import java.sql.SQLException;
 
 public class AddBandWindow extends JFrame implements ActionListener {
     JTextField nameTextField;
     JTextField genreTextField;
     JTextField countryTextField;
     JButton submitButton;
+    private final Connection jdbcConnection;
+
+    public AddBandWindow(Connection connection){
+        this.jdbcConnection = connection;
+    }
+
 
     public void newWindow(){
         //Panel for the Band Name
@@ -59,6 +67,7 @@ public class AddBandWindow extends JFrame implements ActionListener {
         this.setLayout(new GridLayout(2,3,5,5));
         this.setVisible(true);
 
+        //Add panels to window
         this.add(namePanel);
         this.add(genrePanel);
         this.add(countryPanel);
@@ -69,13 +78,18 @@ public class AddBandWindow extends JFrame implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        if(this.nameTextField.getText().isEmpty() || this.genreTextField.getText().isEmpty() || this.countryTextField.getText().isEmpty()){
+        if(this.nameTextField.getText().isEmpty() || this.genreTextField.getText().isEmpty() ||
+                this.countryTextField.getText().isEmpty()){
             System.out.println("field is empty");
         }
         else {
-            System.out.println(this.nameTextField.getText());
-            System.out.println(this.genreTextField.getText());
-            System.out.println(this.countryTextField.getText());
+            try {
+                WriteDatabase.addBand(this.jdbcConnection, this.nameTextField.getText(),
+                        this.genreTextField.getText(), this.countryTextField.getText());
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            }
+            this.dispose();
         }
     }
 }
