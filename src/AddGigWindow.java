@@ -8,13 +8,13 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.Connection;
 
+@SuppressWarnings("ALL")
 public class AddGigWindow implements ActionListener {
     JComboBox chooseVenue;
     JComboBox chooseHeadline;
     JComboBox headlineRating;
     String[] rating = new String[]{"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"};
     DatePicker gigDate;
-    JButton testButton;
     Venue gigVenue;
     Band gigHeadline;
     Connection conn = DatabaseConnector.connect();
@@ -82,8 +82,7 @@ public class AddGigWindow implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        if (e.getSource() == this.chooseVenue) ;
-        {
+        if (e.getSource() == this.chooseVenue) {
             if (this.chooseVenue.getSelectedItem() =="Add New Venue") {
                 System.out.println("New Venue Needs to be Added");
             }
