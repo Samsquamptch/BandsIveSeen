@@ -5,6 +5,7 @@ import java.awt.*;
 
 public class MyFrame extends JFrame {
     MyFrame() {
+        this.setIconImage(Toolkit.getDefaultToolkit().getImage("appIcon.png"));
         this.setTitle("Bands I've Seen");
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setLayout(null);
