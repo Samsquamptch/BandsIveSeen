@@ -2,7 +2,7 @@ package src;
 
 public class Band {
     final private String bandName;
-    private String bandGenre;
+    final private String bandGenre;
     final private String fromCountry;
     private int rating;
 
@@ -14,7 +14,6 @@ public class Band {
     }
 
     public void setRating(int value) { this.rating = value; }
-    public void setBandGenre(String value) { this.bandGenre = value; }
     public String getBandName() {
         return this.bandName;
     }

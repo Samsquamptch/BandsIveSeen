@@ -134,7 +134,7 @@ public class ReadDatabase {
         return returnValue;
     }
 
-    public static String[] getVenueData(Connection conn, String name) throws SQLException {
+/*    public static String[] getVenueData(Connection conn, String name) throws SQLException {
         PreparedStatement ps =
                 conn.prepareStatement
                         ("SELECT Name, Location FROM Venue WHERE Name = ?");
@@ -144,5 +144,5 @@ public class ReadDatabase {
         result[0] = rs.getString("Name");
         result[1] = rs.getString("Location");
         return result;
-    }
+    }*/
 }
