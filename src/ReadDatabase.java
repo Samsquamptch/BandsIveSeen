@@ -111,21 +111,25 @@ public class ReadDatabase {
         return rs.next();
     }
 
-    public static void selectGigs(Connection conn, int headlineID, String gigDate) throws SQLException {
+    public static Object[][] selectGigs(Connection conn) throws SQLException {
+        int arrayLength = getLastId(conn, "Performance");
+
         PreparedStatement ps = conn.prepareStatement("SELECT Gig.Id AS ID, Gig.Date AS Date, Band.BandName AS Artist, Venue.VenueName " +
                 "AS Venue, Performance.Rating AS Rating FROM Gig JOIN Performance ON Gig.Id = Performance.Gig_Id JOIN Band ON " +
-                "Band.Id = Performance.Band_Id JOIN Venue ON Venue.Id = Gig.Venue_Id WHERE Gig.Headline = ? and Gig.Date = ?");
-        ps.setInt(1, headlineID);
-        ps.setString(2, gigDate);
+                "Band.Id = Performance.Band_Id JOIN Venue ON Venue.Id = Gig.Venue_Id ORDER BY Gig.Date, Performance.Id");
         ResultSet rs = ps.executeQuery();
 
+        Object[][] bandTable = new String[arrayLength][4];
+        int i = 0;
+
         while (rs.next()) {
-            System.out.println(rs.getInt("ID") + "\t" +
-                    rs.getString("Date") + "\t" +
-                    rs.getString("Artist") + "\t" +
-                    rs.getString("Venue") + "\t" +
-                    rs.getInt("Rating"));
+            bandTable[i][0] = rs.getString("Artist");
+            bandTable[i][1] = rs.getString("Date");
+            bandTable[i][2] = rs.getString("Venue");
+            bandTable[i][3] = rs.getString("Rating");
+            i++;
         }
+    return bandTable;
     }
 
     public static int getBandId(Connection conn, String bandName, String bandCountry) throws SQLException {
@@ -149,9 +153,7 @@ public class ReadDatabase {
     public static int getLastId(Connection conn, String table) throws SQLException {
         PreparedStatement ps = conn.prepareStatement("SELECT Max(Id) AS tableId FROM " + table);
         ResultSet rs = ps.executeQuery();
-        int returnValue = rs.getInt("tableId");
-        rs.close();
-        return returnValue;
+        return rs.getInt("tableId");
     }
 
 /*    public static String[] getVenueData(Connection conn, String name) throws SQLException {

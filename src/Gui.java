@@ -5,6 +5,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.Connection;
+import java.sql.SQLException;
 
 public class Gui implements ActionListener {
     JButton addGigButton;
@@ -16,8 +17,7 @@ public class Gui implements ActionListener {
         this.jdbcConnection = connection;
     }
 
-    public void newUI() {
-        ImageIcon image = new ImageIcon("meirl.png");
+    public void newUI() throws SQLException {
 
         this.addGigButton = new JButton();
         this.addGigButton.setText("Add New Gig");
@@ -31,14 +31,12 @@ public class Gui implements ActionListener {
         this.delGigButton.setText("Delete a Gig");
         this.delGigButton.addActionListener(this);
 
-        JLabel label = new JLabel();
-        label.setText("Yo the dog has a beer");
-        label.setIcon(image);
-        label.setHorizontalTextPosition(JLabel.CENTER);
-        label.setVerticalTextPosition(JLabel.TOP);
-        label.setVerticalAlignment(JLabel.TOP);
-        label.setHorizontalAlignment(JLabel.CENTER);
-        label.setBounds(0, 0, 250, 250);
+        //The table
+        String[] columnNames = {"Band Name", "Date", "Venue", "Rating"};
+        Object[][] tableData = ReadDatabase.selectGigs(this.jdbcConnection);
+        JTable bandTable = new JTable(tableData, columnNames);
+        JScrollPane tableScrollPane = new JScrollPane(bandTable);
+
 
         JPanel backPanel = new JPanel();
         backPanel.setBackground(Color.darkGray);
@@ -60,7 +58,7 @@ public class Gui implements ActionListener {
         JPanel mainPanel = new JPanel();
         mainPanel.setBackground(Color.lightGray);
         mainPanel.setLayout(new BorderLayout());
-        mainPanel.add(label);
+        mainPanel.add(tableScrollPane, BorderLayout.CENTER);
 
         MyFrame frame = new MyFrame();
         backPanel.add(topPanel,BorderLayout.NORTH);
