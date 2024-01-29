@@ -6,7 +6,7 @@ import java.sql.SQLException;
 public class Main {
     public static void main(String[] args) throws SQLException {
         Connection conn = DatabaseConnector.connect();
-        Gui userInterface = new Gui(conn);
+        MainWindow userInterface = new MainWindow(conn);
         userInterface.newUI();
     }
 }

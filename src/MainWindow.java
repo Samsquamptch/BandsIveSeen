@@ -7,13 +7,13 @@ import java.awt.event.ActionListener;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-public class Gui implements ActionListener {
+public class MainWindow implements ActionListener {
     JButton addGigButton;
     JButton editGigButton;
     JButton delGigButton;
     private final Connection jdbcConnection;
 
-    public Gui(Connection connection){
+    public MainWindow(Connection connection){
         this.jdbcConnection = connection;
     }
 
