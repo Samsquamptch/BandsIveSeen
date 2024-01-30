@@ -26,6 +26,46 @@ public class ReadDatabase {
         return friendArray;
     }
 
+    public static String[] selectGigs(Connection conn) {
+        String sql = "SELECT Gig.Date AS Date, Band.BandName AS Band FROM Gig JOIN " +
+                "Band on Gig.Headline = Band.Id ORDER BY Band.BandName, Gig.Date";
+        ArrayList<String> gigList = new ArrayList<>();
+        gigList.add("Select Gig");
+        try (Statement queryStatement = conn.createStatement();
+             ResultSet queryResult = queryStatement.executeQuery(sql))
+        {
+            while (queryResult.next()) {
+                gigList.add(queryResult.getString("Band") + " - " + queryResult.getString("Date"));
+            }
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+        String[] gigArray = new String[gigList.size()];
+        gigArray = gigList.toArray(gigArray);
+        return gigArray;
+    }
+
+    public static Object[][] selectPerformances(Connection conn) throws SQLException {
+        int arrayLength = getLastId(conn, "Performance");
+
+        PreparedStatement ps = conn.prepareStatement("SELECT Gig.Id AS ID, Gig.Date AS Date, Band.BandName AS Artist, Venue.VenueName " +
+                "AS Venue, Performance.Rating AS Rating FROM Gig JOIN Performance ON Gig.Id = Performance.Gig_Id JOIN Band ON " +
+                "Band.Id = Performance.Band_Id JOIN Venue ON Venue.Id = Gig.Venue_Id ORDER BY Gig.Date, Performance.Id");
+        ResultSet rs = ps.executeQuery();
+
+        Object[][] bandTable = new String[arrayLength][4];
+        int i = 0;
+
+        while (rs.next()) {
+            bandTable[i][0] = rs.getString("Artist");
+            bandTable[i][1] = rs.getString("Date");
+            bandTable[i][2] = rs.getString("Venue");
+            bandTable[i][3] = rs.getString("Rating");
+            i++;
+        }
+        return bandTable;
+    }
+
     public static String[] selectBands(Connection conn) {
         String sql = "SELECT BandName, Genre, Country FROM Band";
         ArrayList<String> bandData = new ArrayList<>();
@@ -111,25 +151,17 @@ public class ReadDatabase {
         return rs.next();
     }
 
-    public static Object[][] selectGigs(Connection conn) throws SQLException {
-        int arrayLength = getLastId(conn, "Performance");
+//    public static Gig getGigDetails(Connection conn, int gigId) throws SQLException {
+//
+//    }
 
-        PreparedStatement ps = conn.prepareStatement("SELECT Gig.Id AS ID, Gig.Date AS Date, Band.BandName AS Artist, Venue.VenueName " +
-                "AS Venue, Performance.Rating AS Rating FROM Gig JOIN Performance ON Gig.Id = Performance.Gig_Id JOIN Band ON " +
-                "Band.Id = Performance.Band_Id JOIN Venue ON Venue.Id = Gig.Venue_Id ORDER BY Gig.Date, Performance.Id");
+    public static int getGigId(Connection conn, String bandName, String gigDate) throws SQLException {
+        PreparedStatement ps = conn.prepareStatement("SELECT Gig.Id as Id FROM Gig JOIN Band ON Gig.Headline = Band.Id " +
+                "WHERE Band.BandName = ? AND Gig.Date = ?");
+        ps.setString(1, bandName);
+        ps.setString(2, gigDate);
         ResultSet rs = ps.executeQuery();
-
-        Object[][] bandTable = new String[arrayLength][4];
-        int i = 0;
-
-        while (rs.next()) {
-            bandTable[i][0] = rs.getString("Artist");
-            bandTable[i][1] = rs.getString("Date");
-            bandTable[i][2] = rs.getString("Venue");
-            bandTable[i][3] = rs.getString("Rating");
-            i++;
-        }
-    return bandTable;
+        return rs.getInt("Id");
     }
 
     public static int getBandId(Connection conn, String bandName, String bandCountry) throws SQLException {
@@ -155,16 +187,4 @@ public class ReadDatabase {
         ResultSet rs = ps.executeQuery();
         return rs.getInt("tableId");
     }
-
-/*    public static String[] getVenueData(Connection conn, String name) throws SQLException {
-        PreparedStatement ps =
-                conn.prepareStatement
-                        ("SELECT Name, Location FROM Venue WHERE Name = ?");
-        ps.setString (1, name);
-        ResultSet rs = ps.executeQuery();
-        String[] result = new String[2];
-        result[0] = rs.getString("Name");
-        result[1] = rs.getString("Location");
-        return result;
-    }*/
 }
