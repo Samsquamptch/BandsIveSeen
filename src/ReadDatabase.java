@@ -151,9 +151,33 @@ public class ReadDatabase {
         return rs.next();
     }
 
-//    public static Gig getGigDetails(Connection conn, int gigId) throws SQLException {
-//
-//    }
+    public static String[] getGigHeadlineDetails(Connection conn, int bandId, int gigId) throws SQLException {
+        String[] bandDetails = new String[4];
+        PreparedStatement ps = conn.prepareStatement("SELECT Band.BandName AS Name, Band.Genre As Genre, Band.Country " +
+                "AS Country, Performance.Rating AS Rating FROM Band JOIN Performance ON Band.Id = Performance.Band_Id " +
+                "WHERE Band.Id = ? and Performance.Gig_Id = ?");
+        ps.setInt(1, bandId);
+        ps.setInt(2, gigId);
+        ResultSet rs = ps.executeQuery();
+        bandDetails[0] = rs.getString("BandName");
+        bandDetails[1] = rs.getString("Genre");
+        bandDetails[2] = rs.getString("Country");
+        bandDetails[3] = rs.getString("Rating");
+        return bandDetails;
+    }
+
+    public static String[] getGigDetails(Connection conn, int gigId) throws SQLException {
+        String[] gigDetails = new String[4];
+        PreparedStatement ps = conn.prepareStatement("SELECT Venue.Id, Venue.VenueName, Venue.Location, Gig.Headline" +
+                " FROM Venue JOIN Gig ON Venue.Id = Gig.Venue_ID WHERE Gig.Id = ?");
+        ps.setInt(1, gigId);
+        ResultSet rs = ps.executeQuery();
+        gigDetails[0] = rs.getString("Id");
+        gigDetails[1] = rs.getString("VenueName");
+        gigDetails[2] = rs.getString("Location");
+        gigDetails[3] = rs.getString("Headline");
+        return gigDetails;
+    }
 
     public static int getGigId(Connection conn, String bandName, String gigDate) throws SQLException {
         PreparedStatement ps = conn.prepareStatement("SELECT Gig.Id as Id FROM Gig JOIN Band ON Gig.Headline = Band.Id " +

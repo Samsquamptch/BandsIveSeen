@@ -24,6 +24,7 @@ public class EditGigWindow implements ActionListener {
     String gigVenue;
     ArrayList<Band> gigPerformances;
     ArrayList<String> attendedWith;
+    Gig selectedGig;
     Gig editedGig;
     private final Connection jdbcConnection;
 
@@ -61,7 +62,11 @@ public class EditGigWindow implements ActionListener {
             String[] gigDetails = this.gigList.getSelectedItem().toString().split(" - ");
             try {
                 int gigID = ReadDatabase.getGigId(this.jdbcConnection, gigDetails[0], gigDetails[1]);
-
+                String[] venueAndBandId = ReadDatabase.getGigDetails(this.jdbcConnection, gigID);
+                Venue selectedVenue = new Venue(venueAndBandId[1], venueAndBandId[2], false);
+                String[] bandDetails = ReadDatabase.getGigHeadlineDetails(this.jdbcConnection, Integer.parseInt(venueAndBandId[3]), gigID);
+                Band selectedHeadline = new Band(bandDetails[0], bandDetails[1], bandDetails[2], Integer.parseInt(bandDetails[3]));
+                this.selectedGig = new Gig(gigDetails[1], selectedVenue, selectedHeadline);
             } catch (SQLException ex) {
                 throw new RuntimeException(ex);
             }
