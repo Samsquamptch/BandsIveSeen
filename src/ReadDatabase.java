@@ -45,7 +45,7 @@ public class ReadDatabase {
         return gigArray;
     }
 
-    public static Object[][] selectPerformances(Connection conn) throws SQLException {
+    public static String[][] selectPerformances(Connection conn) throws SQLException {
         int arrayLength = getLastId(conn, "Performance");
 
         PreparedStatement ps = conn.prepareStatement("SELECT Gig.Id AS ID, Gig.Date AS Date, Band.BandName AS Artist, Venue.VenueName " +
@@ -53,7 +53,7 @@ public class ReadDatabase {
                 "Band.Id = Performance.Band_Id JOIN Venue ON Venue.Id = Gig.Venue_Id ORDER BY Gig.Date, Performance.Id");
         ResultSet rs = ps.executeQuery();
 
-        Object[][] bandTable = new String[arrayLength][4];
+        String[][] bandTable = new String[arrayLength][4];
         int i = 0;
 
         while (rs.next()) {
@@ -130,6 +130,20 @@ public class ReadDatabase {
         return rs.next();
     }
 
+    public static ArrayList<Band> getGigPerformances(Connection conn, int gigId) throws SQLException {
+        ArrayList<Band> performanceList = new ArrayList<>();
+        PreparedStatement ps = conn.prepareStatement("SELECT Band.BandName, Band.Genre, Band.Country, Performance.Rating " +
+                "FROM Performance JOIN Band ON Band.Id = Performance.Band_Id WHERE Performance.Gig_Id = ?");
+        ps.setInt(1, gigId);
+        ResultSet rs = ps.executeQuery();
+        while (rs.next()){
+            Band addBand = new Band(rs.getString("BandName"), rs.getString("Genre"),
+                    rs.getString("Country"), rs.getInt("Rating"));
+            performanceList.add(addBand);
+        }
+        return performanceList;
+    }
+
     public static int getFriendId(Connection conn, String friendName) throws SQLException {
 
         PreparedStatement ps =
@@ -159,7 +173,7 @@ public class ReadDatabase {
         ps.setInt(1, bandId);
         ps.setInt(2, gigId);
         ResultSet rs = ps.executeQuery();
-        bandDetails[0] = rs.getString("BandName");
+        bandDetails[0] = rs.getString("Name");
         bandDetails[1] = rs.getString("Genre");
         bandDetails[2] = rs.getString("Country");
         bandDetails[3] = rs.getString("Rating");

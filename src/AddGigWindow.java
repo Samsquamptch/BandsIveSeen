@@ -212,6 +212,13 @@ public class AddGigWindow implements ActionListener {
         this.addWindow.mainPanel.add(buttonPanel);
     }
 
+    public void friendRevalidator() {
+        this.addFriend.revalidate();
+        this.addFriend.repaint();
+        this.removeFriend.revalidate();
+        this.removeFriend.repaint();
+    }
+
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == this.chooseVenue) {
@@ -391,10 +398,7 @@ public class AddGigWindow implements ActionListener {
             else if (this.addFriend.getSelectedIndex()!=0) {
                 this.removeFriend.addItem(this.addFriend.getSelectedItem());
                 this.addFriend.removeItem(this.addFriend.getSelectedItem());
-                this.addFriend.revalidate();
-                this.addFriend.repaint();
-                this.removeFriend.revalidate();
-                this.removeFriend.repaint();
+                friendRevalidator();
             }
         }
         if (e.getSource() == this.removeFriend){
@@ -403,10 +407,7 @@ public class AddGigWindow implements ActionListener {
                 this.addFriend.addItem(this.removeFriend.getSelectedItem());
                 this.addFriend.addItem("Add New Friend");
                 this.removeFriend.removeItem(this.removeFriend.getSelectedItem());
-                this.addFriend.revalidate();
-                this.addFriend.repaint();
-                this.removeFriend.revalidate();
-                this.removeFriend.repaint();
+                friendRevalidator();
             }
         }
         if (e.getSource() == this.submitButton) {

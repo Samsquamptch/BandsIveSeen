@@ -7,6 +7,7 @@ import java.awt.event.ActionListener;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class EditGigWindow implements ActionListener {
     JComboBox gigList;
@@ -25,7 +26,6 @@ public class EditGigWindow implements ActionListener {
     ArrayList<Band> gigPerformances;
     ArrayList<String> attendedWith;
     Gig selectedGig;
-    Gig editedGig;
     private final Connection jdbcConnection;
 
     public EditGigWindow(Connection connection){
@@ -40,37 +40,68 @@ public class EditGigWindow implements ActionListener {
         searchPanel.add(this.gigList);
 
         this.gigDetails = new JPanel();
-        gigDetails.setLayout(new GridLayout(9,1));
-        gigDetails.setBounds(0,0,100,100);
-        gigDetails.add(new JPanel().add(new JLabel("GIG DETAILS")));
-        gigDetails.add(new JPanel().add(new JLabel("Date: ")));
-        gigDetails.add(new JPanel().add(new JLabel("Venue: ")));
-        gigDetails.add(new JPanel().add(new JLabel("Headline: ")));
-        gigDetails.add(new JPanel().add(new JLabel("Performances: ")));
-        gigDetails.add(new JPanel());
-        gigDetails.add(new JPanel());
-        gigDetails.add(new JPanel());
+        setSidePanel("", "", "", null);
+
+        JPanel test = new JPanel();
+        test.add(new JLabel("test"));
 
         this.addWindow = new GigWindow("Edit Gig");
         this.addWindow.add(searchPanel, BorderLayout.NORTH);
         this.addWindow.add(gigDetails, BorderLayout.WEST);
+        this.addWindow.add(test, BorderLayout.CENTER);
+    }
+
+    public void setSidePanel(String dateLabel, String venueLabel, String headlineLabel, ArrayList<Band> performancesList) {
+        gigDetails.removeAll();
+        gigDetails.setLayout(new GridLayout(10,1));
+        gigDetails.setBounds(0,0,150,100);
+        gigDetails.add(new JPanel().add(new JLabel("GIG DETAILS")));
+        gigDetails.add(new JPanel().add(new JLabel("Date: " + dateLabel)));
+        gigDetails.add(new JPanel().add(new JLabel("Venue: " + venueLabel)));
+        gigDetails.add(new JPanel().add(new JLabel("Headline: " + headlineLabel)));
+        gigDetails.add(new JPanel().add(new JLabel("Performances: ")));
+        int sparePanels = 5;
+        if (performancesList != null){
+            for (Band performance : performancesList) {
+                gigDetails.add(new JPanel().add(new JLabel(performance.toString())));
+                sparePanels--;
+            }
+        }
+        for (int i = 0; i < sparePanels; i++) {
+            gigDetails.add(new JPanel());
+        }
+        gigDetails.revalidate();
+        gigDetails.repaint();
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == this.gigList){
-            String[] gigDetails = this.gigList.getSelectedItem().toString().split(" - ");
-            try {
-                int gigID = ReadDatabase.getGigId(this.jdbcConnection, gigDetails[0], gigDetails[1]);
-                String[] venueAndBandId = ReadDatabase.getGigDetails(this.jdbcConnection, gigID);
-                Venue selectedVenue = new Venue(venueAndBandId[1], venueAndBandId[2], false);
-                String[] bandDetails = ReadDatabase.getGigHeadlineDetails(this.jdbcConnection, Integer.parseInt(venueAndBandId[3]), gigID);
-                Band selectedHeadline = new Band(bandDetails[0], bandDetails[1], bandDetails[2], Integer.parseInt(bandDetails[3]));
-                this.selectedGig = new Gig(gigDetails[1], selectedVenue, selectedHeadline);
-            } catch (SQLException ex) {
-                throw new RuntimeException(ex);
+            if (this.gigList.getSelectedIndex()==0){
+                setSidePanel("", "", "", null);
+            }
+            else {
+                String[] gigDetails = this.gigList.getSelectedItem().toString().split(" - ");
+                try {
+                    int gigID = ReadDatabase.getGigId(this.jdbcConnection, gigDetails[0], gigDetails[1]);
+                    String[] venueAndBandId = ReadDatabase.getGigDetails(this.jdbcConnection, gigID);
+                    Venue selectedVenue = new Venue(venueAndBandId[1], venueAndBandId[2], false);
+                    String[] bandDetails = ReadDatabase.getGigHeadlineDetails(this.jdbcConnection, Integer.parseInt(venueAndBandId[3]), gigID);
+                    Band selectedHeadline = new Band(bandDetails[0], bandDetails[1], bandDetails[2], Integer.parseInt(bandDetails[3]));
+                    this.gigPerformances = ReadDatabase.getGigPerformances(this.jdbcConnection, gigID);
+                    this.selectedGig = new Gig(gigDetails[1], selectedVenue, selectedHeadline);
+                    for (Band performance : this.gigPerformances) {
+                        if (!Objects.equals(performance.getBandName(), this.selectedGig.getHeadlineAct().getBandName())) {
+                            this.selectedGig.addPerformance(performance);
+                        }
+                    }
+                    setSidePanel(this.selectedGig.getEventDay(), this.selectedGig.getLocation().toString(),
+                            this.selectedGig.getHeadlineAct().getBandName(), this.selectedGig.getPerformances());
+                } catch (SQLException ex) {
+                    throw new RuntimeException(ex);
+                }
             }
         }
-        }
     }
+}
 

@@ -13,6 +13,9 @@ public class Band {
         this.rating = rating;
     }
 
+    @Override
+    public String toString() {return this.bandName + " - " + this.bandGenre + " - "
+    + this.fromCountry + " - " + this.rating + "/10";}
     public void setRating(int value) { this.rating = value; }
     public String getBandName() {
         return this.bandName;

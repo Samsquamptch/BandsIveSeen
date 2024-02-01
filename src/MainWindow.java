@@ -33,7 +33,7 @@ public class MainWindow implements ActionListener {
 
         //The table
         String[] columnNames = {"Band Name", "Date", "Venue", "Rating"};
-        Object[][] tableData = ReadDatabase.selectPerformances(this.jdbcConnection);
+        String[][] tableData = ReadDatabase.selectPerformances(this.jdbcConnection);
         JTable bandTable = new JTable(tableData, columnNames);
         JScrollPane tableScrollPane = new JScrollPane(bandTable);
 
