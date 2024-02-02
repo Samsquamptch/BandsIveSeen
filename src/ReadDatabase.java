@@ -92,7 +92,7 @@ public class ReadDatabase {
     }
 
     public static String[] selectVenues(Connection conn) {
-        String sql = "SELECT VenueName, Location FROM Venue";
+        String sql = "SELECT VenueName, Location FROM Venue ORDER BY VenueName";
         ArrayList<String> venueData = new ArrayList<>();
         venueData.add("Select a Venue");
 

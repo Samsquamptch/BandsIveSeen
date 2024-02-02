@@ -93,6 +93,7 @@ public class EditGigWindow implements ActionListener, DateChangeListener {
         String[] friendArray = ReadDatabase.selectFriends(this.jdbcConnection, this.selectedGig.getWentWith().toArray(new String[0]));
         this.addFriend = new JComboBox(friendArray);
         this.addFriend.addActionListener(this);
+        this.addFriend.setEnabled(false);
         JPanel addFriendPanel = createPanel("Add Friend");
         addFriendPanel.add(this.addFriend, BorderLayout.CENTER);
 
@@ -104,8 +105,13 @@ public class EditGigWindow implements ActionListener, DateChangeListener {
         }
         this.removeFriend = new JComboBox(removeArray);
         this.removeFriend.addActionListener(this);
+        this.removeFriend.setEnabled(false);
         JPanel removeFriendPanel = createPanel("Remove Friend");
         removeFriendPanel.add(this.removeFriend);
+        if (this.selectedGig.getLocation()!=null){
+            this.addFriend.setEnabled(true);
+            this.removeFriend.setEnabled(true);
+        }
 
         //Headline select panel
         this.headlineSelect = new JComboBox(bandData);
@@ -166,8 +172,43 @@ public class EditGigWindow implements ActionListener, DateChangeListener {
                 this.selectedGig.getPerformances());
     }
 
+    public void friendRevalidator() {
+        this.addFriend.revalidate();
+        this.addFriend.repaint();
+        this.removeFriend.revalidate();
+        this.removeFriend.repaint();
+    }
+
     @Override
     public void actionPerformed(ActionEvent e) {
+        if (e.getSource() == this.addFriend){
+            if (this.addFriend.getSelectedItem() == "Add New Friend") {
+                String friendName = JOptionFriend.addFriend(this.jdbcConnection);
+                if (!friendName.isEmpty()){
+                    addFriend.removeItem("Add New Friend");
+                    addFriend.addItem(friendName);
+                    addFriend.addItem("Add New Friend");
+                }
+            }
+            else if (this.addFriend.getSelectedIndex()!=0) {
+                this.selectedGig.addWentWith(this.addFriend.getSelectedItem().toString());
+                refreshPanels(false);
+                this.removeFriend.addItem(this.addFriend.getSelectedItem());
+                this.addFriend.removeItem(this.addFriend.getSelectedItem());
+                friendRevalidator();
+            }
+        }
+        if (e.getSource() == this.removeFriend){
+            this.selectedGig.removeWentWith(this.removeFriend.getSelectedItem().toString());
+            refreshPanels(false);
+            if (this.removeFriend.getSelectedIndex()!=0) {
+                this.addFriend.removeItem("Add New Friend");
+                this.addFriend.addItem(this.removeFriend.getSelectedItem());
+                this.addFriend.addItem("Add New Friend");
+                this.removeFriend.removeItem(this.removeFriend.getSelectedItem());
+                friendRevalidator();
+            }
+        }
         if (e.getSource() == this.venueSelect){
             if (this.venueSelect.getSelectedItem()=="Add New Venue") {
                 JOptionVenue.addVenue(this.jdbcConnection);
