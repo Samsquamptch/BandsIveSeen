@@ -13,7 +13,7 @@ public class Venue {
 
     @Override
     public String toString(){
-        return this.venueName + ", " + this.venueLocation;
+        return this.venueName + " - " + this.venueLocation;
     }
 
     public String getVenueName() {

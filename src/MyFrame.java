@@ -10,7 +10,7 @@ public class MyFrame extends JFrame {
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setLayout(null);
         this.setResizable(true);
-        this.setSize(1000, 750);
+        this.setSize(1200, 800);
         //I need this BorderLayout to make the BorderLayout in the back panel work
         this.setLayout(new BorderLayout());
         this.setVisible(true);

@@ -25,6 +25,7 @@ public class AddGigWindow implements ActionListener {
     JComboBox support4Rating;
     JComboBox addFriend;
     JComboBox removeFriend;
+    JPanel mainPanel;
     JPanel setSupport1Panel;
     JPanel setSupport2Panel;
     JPanel setSupport3Panel;
@@ -89,7 +90,8 @@ public class AddGigWindow implements ActionListener {
         headlineRatingPanel.add(this.headlineRating, BorderLayout.CENTER);
 
         //Add Friend Panel
-        String[] friendArray = ReadDatabase.selectFriends(this.jdbcConnection);
+        String[] friendArray = null;
+        friendArray = ReadDatabase.selectFriends(this.jdbcConnection, friendArray);
         this.addFriend = new JComboBox(friendArray);
         this.addFriend.addActionListener(this);
         JPanel addFriendPanel = new JPanel();
@@ -191,25 +193,28 @@ public class AddGigWindow implements ActionListener {
         buttonPanel.add(new JPanel(), BorderLayout.WEST);
         buttonPanel.add(new JPanel(), BorderLayout.EAST);
 
+        this.mainPanel = new JPanel();
+        this.mainPanel.setLayout(new GridLayout(6,3, 5, 10));
         this.addWindow = new GigWindow("Add Gig");
-        this.addWindow.mainPanel.add(datePanel);
-        this.addWindow.mainPanel.add(venuePanel);
-        this.addWindow.mainPanel.add(addFriendPanel);
-        this.addWindow.mainPanel.add(setHeadlinePanel);
-        this.addWindow.mainPanel.add(headlineRatingPanel);
-        this.addWindow.mainPanel.add(removeFriendPanel);
-        this.addWindow.mainPanel.add(setSupport1Panel);
-        this.addWindow.mainPanel.add(support1RatingPanel);
-        this.addWindow.mainPanel.add(new JPanel());
-        this.addWindow.mainPanel.add(setSupport2Panel);
-        this.addWindow.mainPanel.add(support2RatingPanel);
-        this.addWindow.mainPanel.add(new JPanel());
-        this.addWindow.mainPanel.add(setSupport3Panel);
-        this.addWindow.mainPanel.add(support3RatingPanel);
-        this.addWindow.mainPanel.add(new JPanel());
-        this.addWindow.mainPanel.add(setSupport4Panel);
-        this.addWindow.mainPanel.add(support4RatingPanel);
-        this.addWindow.mainPanel.add(buttonPanel);
+        this.addWindow.add(this.mainPanel, BorderLayout.CENTER);
+        this.mainPanel.add(datePanel);
+        this.mainPanel.add(venuePanel);
+        this.mainPanel.add(addFriendPanel);
+        this.mainPanel.add(setHeadlinePanel);
+        this.mainPanel.add(headlineRatingPanel);
+        this.mainPanel.add(removeFriendPanel);
+        this.mainPanel.add(setSupport1Panel);
+        this.mainPanel.add(support1RatingPanel);
+        this.mainPanel.add(new JPanel());
+        this.mainPanel.add(setSupport2Panel);
+        this.mainPanel.add(support2RatingPanel);
+        this.mainPanel.add(new JPanel());
+        this.mainPanel.add(setSupport3Panel);
+        this.mainPanel.add(support3RatingPanel);
+        this.mainPanel.add(new JPanel());
+        this.mainPanel.add(setSupport4Panel);
+        this.mainPanel.add(support4RatingPanel);
+        this.mainPanel.add(buttonPanel);
     }
 
     public void friendRevalidator() {

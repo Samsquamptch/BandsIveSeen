@@ -3,10 +3,11 @@ package src;
 import java.sql.*;
 import java.sql.PreparedStatement;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class ReadDatabase {
 
-    public static String[] selectFriends(Connection conn) {
+    public static String[] selectFriends(Connection conn, String[] friendsList) {
         String sql = "SELECT FriendName FROM Friend";
         ArrayList<String> friendList = new ArrayList<>();
         friendList.add("Add Friend");
@@ -15,7 +16,9 @@ public class ReadDatabase {
              ResultSet queryResult = queryStatement.executeQuery(sql))
         {
             while (queryResult.next()) {
-                friendList.add(queryResult.getString("FriendName"));
+                String friend = queryResult.getString("FriendName");
+                if (friendsList==null || !Arrays.asList(friendsList).contains(friend))
+                friendList.add(friend);
             }
     } catch (SQLException e) {
         System.out.println(e.getMessage());
@@ -178,6 +181,20 @@ public class ReadDatabase {
         bandDetails[2] = rs.getString("Country");
         bandDetails[3] = rs.getString("Rating");
         return bandDetails;
+    }
+
+    public static String[] getGigFriends(Connection conn, int gigId) throws SQLException {
+        ArrayList<String> friendList = new ArrayList<>();
+        PreparedStatement ps = conn.prepareStatement("SELECT FriendName FROM Friend JOIN Attended_With " +
+                "ON Friend.Id = Attended_With.Friend_Id WHERE Attended_WIth.Gig_Id = ?");
+        ps.setInt(1, gigId);
+        ResultSet rs = ps.executeQuery();
+        while (rs.next()) {
+            friendList.add(rs.getString("FriendName"));
+        }
+        String[] friendArray = new String[friendList.size()];
+        friendArray = friendList.toArray(friendArray);
+        return friendArray;
     }
 
     public static String[] getGigDetails(Connection conn, int gigId) throws SQLException {
