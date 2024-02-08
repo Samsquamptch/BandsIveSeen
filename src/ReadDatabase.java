@@ -86,6 +86,7 @@ public class ReadDatabase {
             System.out.println(e.getMessage());
         }
         bandData.add("Add New Band");
+        bandData.add("Remove Band");
         String[] bandArray = new String[bandData.size()];
         bandArray = bandData.toArray(bandArray);
         return bandArray;

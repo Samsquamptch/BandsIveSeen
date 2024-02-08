@@ -32,8 +32,6 @@ public class EditGigWindow implements ActionListener, DateChangeListener {
     JPanel sidePanel;
     JPanel editPanel;
     String[] rating = new String[]{"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"};
-    JComboBox[] bandSelectArray;
-    JComboBox[] bandRatingArray;
     GigWindow addWindow;
     int gigDatabaseId;
     Gig selectedGig;
@@ -124,6 +122,7 @@ public class EditGigWindow implements ActionListener, DateChangeListener {
 
         //Headline select panel
         this.headlineSelect = new JComboBox(bandData);
+        this.headlineSelect.removeItem("Remove Band");
         this.headlineSelect.addActionListener(this);
         JPanel headlineSelectPanel = createPanel("Gig Headline");
         headlineSelectPanel.add(this.headlineSelect, BorderLayout.CENTER);
@@ -205,9 +204,9 @@ public class EditGigWindow implements ActionListener, DateChangeListener {
     }
 
     public void setBandSelectors(int startVal) {
-        bandSelectArray = new JComboBox[]{this.headlineSelect, this.support1Select, this.support2Select,
+        JComboBox[] bandSelectArray = new JComboBox[]{this.headlineSelect, this.support1Select, this.support2Select,
                 this.support3Select, this.support4Select};
-        bandRatingArray = new JComboBox[]{this.headlineRating, this.support1Rating, this.support2Rating,
+        JComboBox[] bandRatingArray = new JComboBox[]{this.headlineRating, this.support1Rating, this.support2Rating,
                 this.support3Rating, this.support4Rating};
         if (this.selectedGig.getHeadlineAct()==null) {
             for (int i = startVal; i < 5; i++) {
@@ -222,10 +221,15 @@ public class EditGigWindow implements ActionListener, DateChangeListener {
                     bandRatingArray[i].setSelectedIndex(this.selectedGig.getPerformances().get(i).getRating());
                     bandSelectArray[i].setEnabled(true);
                     bandRatingArray[i].setEnabled(true);
+                } else if (this.selectedGig.getPerformances().size() == i) {
+                    bandSelectArray[i].setEnabled(true);
+                    bandRatingArray[i].setEnabled(true);
                 } else {
                     bandSelectArray[i].setEnabled(false);
                     bandRatingArray[i].setEnabled(false);
                 }
+                bandRatingArray[i].revalidate();
+                bandRatingArray[i].repaint();
             }
         }
     }
@@ -273,32 +277,68 @@ public class EditGigWindow implements ActionListener, DateChangeListener {
         this.removeFriend.repaint();
     }
 
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        if (e.getSource() == this.headlineSelect) {
-            if (this.headlineSelect.getSelectedItem() =="Add New Band") {
-                String bandName = JOptionBand.addBand(this.jdbcConnection);
-                if (!bandName.isEmpty()){
-                    this.headlineSelect.removeItem("Add New Band");
-                    this.headlineSelect.addItem(bandName);
-                    this.headlineSelect.addItem("Add New Band");
-                    this.headlineSelect.setSelectedItem(bandName);
-                    this.headlineSelect.revalidate();
-                    this.headlineSelect.repaint();
-                }
+    public void bandSelectSettings(JComboBox selectorItem, int selectValue) {
+        if (selectorItem.getSelectedItem() =="Add New Band") {
+            String bandName = JOptionBand.addBand(this.jdbcConnection);
+            if (!bandName.isEmpty()){
+                selectorItem.removeItem("Add New Band");
+                selectorItem.addItem(bandName);
+                selectorItem.addItem("Add New Band");
+                selectorItem.setSelectedItem(bandName);
+                selectorItem.revalidate();
+                selectorItem.repaint();
             }
-            else if (this.headlineSelect.getSelectedIndex()!=0) {
-                String[] bandDetails = this.headlineSelect.getSelectedItem().toString().split(" - ");
+        }
+        else if (selectorItem.getSelectedItem() =="Remove Band") {
+            int answer = JOptionPane.showConfirmDialog(null, "Are you sure you want to remove this band?",
+                    "Confirm remove band", JOptionPane.YES_NO_OPTION);
+            if (answer != 0) {
+                selectorItem.setSelectedItem(this.selectedGig.getPerformances().get(selectValue-1).toString());
+            }
+            else {
+                //TODO update this to remove the band!
+                System.out.println("blank");
+            }
+        }
+        else if (selectorItem.getSelectedIndex()!=0) {
+            String[] bandDetails = selectorItem.getSelectedItem().toString().split(" - ");
+            if (selectValue == 1) {
                 this.selectedGig.setHeadlineAct(new Band(bandDetails[0],
                         bandDetails[2],
                         bandDetails[1],
                         this.selectedGig.getHeadlineAct().getRating()));
-                this.headlineRating.setEnabled(true);
-                refreshPanels(false);
             }
-            else {
-                this.headlineSelect.setSelectedItem(this.selectedGig.getHeadlineAct().toString());
+            else if (this.selectedGig.getPerformances().size() < selectValue) {
+                this.selectedGig.addPerformance(new Band(bandDetails[0], bandDetails[2], bandDetails[1], 5));
+            } else {
+                this.selectedGig.changePerformance(this.selectedGig.getPerformances().get(selectValue-1),
+                        new Band(bandDetails[0], bandDetails[2], bandDetails[1],
+                                this.selectedGig.getPerformances().get(selectValue-1).getRating()));
             }
+            setBandSelectors(selectValue);
+            refreshPanels(false);
+        }
+        else {
+            selectorItem.setSelectedItem(this.selectedGig.getPerformances().get(selectValue-1).toString());
+        }
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        if (e.getSource() == this.headlineSelect) {
+            bandSelectSettings(this.headlineSelect, 1);
+        }
+        if (e.getSource() == this.support1Select) {
+            bandSelectSettings(this.support1Select, 2);
+        }
+        if (e.getSource() == this.support2Select) {
+            bandSelectSettings(this.support2Select, 3);
+        }
+        if (e.getSource() == this.support3Select) {
+            bandSelectSettings(this.support3Select, 4);
+        }
+        if (e.getSource() == this.support4Select) {
+            bandSelectSettings(this.support4Select, 5);
         }
         if (e.getSource() == this.headlineRating) {
             int intRating = Integer.parseInt(this.headlineRating.getSelectedItem().toString());
