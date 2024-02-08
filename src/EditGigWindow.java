@@ -32,6 +32,8 @@ public class EditGigWindow implements ActionListener, DateChangeListener {
     JPanel sidePanel;
     JPanel editPanel;
     String[] rating = new String[]{"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"};
+    JComboBox[] bandSelectArray;
+    JComboBox[] bandRatingArray;
     GigWindow addWindow;
     int gigDatabaseId;
     Gig selectedGig;
@@ -132,16 +134,6 @@ public class EditGigWindow implements ActionListener, DateChangeListener {
         JPanel headlineRatingPanel = createPanel("Set Rating");
         headlineRatingPanel.add(this.headlineRating, BorderLayout.CENTER);
 
-        if (this.selectedGig.getHeadlineAct()!=null) {
-            this.headlineSelect.setSelectedItem(this.selectedGig.getHeadlineAct().toString());
-            this.headlineRating.setSelectedIndex(this.selectedGig.getHeadlineAct().getRating());
-            this.headlineSelect.setEnabled(true);
-            this.headlineRating.setEnabled(true);
-        } else {
-            this.headlineSelect.setEnabled(false);
-            this.headlineRating.setEnabled(false);
-        }
-
         //Support 1 select panel
         this.support1Select = new JComboBox(bandData);
         this.support1Select.addActionListener(this);
@@ -153,19 +145,6 @@ public class EditGigWindow implements ActionListener, DateChangeListener {
         this.support1Rating.addActionListener(this);
         JPanel support1RatingPanel = createPanel("Set Rating");
         support1RatingPanel.add(this.support1Rating, BorderLayout.CENTER);
-
-        if (this.selectedGig.getHeadlineAct()==null) {
-            this.support1Select.setEnabled(false);
-            this.support1Rating.setEnabled(false);
-        } else if (this.selectedGig.getPerformances().size() >= 2) {
-            this.support1Select.setSelectedItem(this.selectedGig.getPerformances().get(1).toString());
-            this.support1Rating.setSelectedIndex(this.selectedGig.getPerformances().get(1).getRating());
-            this.support1Select.setEnabled(true);
-            this.support1Rating.setEnabled(true);
-        } else {
-            this.support1Select.setEnabled(true);
-            this.support1Rating.setEnabled(true);
-        }
 
         //Support 2 select panel
         this.support2Select = new JComboBox(bandData);
@@ -203,6 +182,7 @@ public class EditGigWindow implements ActionListener, DateChangeListener {
         JPanel support4RatingPanel = createPanel("Set Rating");
         support4RatingPanel.add(this.support4Rating, BorderLayout.CENTER);
 
+        setBandSelectors(0);
 
         this.editPanel.add(datePickerPanel);
         this.editPanel.add(venuePickerPanel);
@@ -224,6 +204,31 @@ public class EditGigWindow implements ActionListener, DateChangeListener {
         this.editPanel.repaint();
     }
 
+    public void setBandSelectors(int startVal) {
+        bandSelectArray = new JComboBox[]{this.headlineSelect, this.support1Select, this.support2Select,
+                this.support3Select, this.support4Select};
+        bandRatingArray = new JComboBox[]{this.headlineRating, this.support1Rating, this.support2Rating,
+                this.support3Rating, this.support4Rating};
+        if (this.selectedGig.getHeadlineAct()==null) {
+            for (int i = startVal; i < 5; i++) {
+                bandSelectArray[i].setEnabled(false);
+                bandRatingArray[i].setEnabled(false);
+            }
+        }
+        else {
+            for (int i = startVal; i < 5; i++) {
+                if (this.selectedGig.getPerformances().size() > i) {
+                    bandSelectArray[i].setSelectedItem(this.selectedGig.getPerformances().get(i).toString());
+                    bandRatingArray[i].setSelectedIndex(this.selectedGig.getPerformances().get(i).getRating());
+                    bandSelectArray[i].setEnabled(true);
+                    bandRatingArray[i].setEnabled(true);
+                } else {
+                    bandSelectArray[i].setEnabled(false);
+                    bandRatingArray[i].setEnabled(false);
+                }
+            }
+        }
+    }
 
     public void setSidePanel(String dateLabel, String venueLabel, String headlineLabel, String friends,
                              ArrayList<Band> performancesList) {
