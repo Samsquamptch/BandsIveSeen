@@ -65,11 +65,14 @@ public class Gig extends Event {
     }
 
     public String getFriendsString() {
+        if (this.wentWith.isEmpty()) {
+            return "";
+        }
         StringBuilder friendsString = new StringBuilder();
         for (String friend : this.wentWith) {
             friendsString.append(friend + ", ");
         }
-        friendsString.delete(friendsString.length()-2, friendsString.length()-1);
+        friendsString.delete(friendsString.length() - 2, friendsString.length() - 1);
         return friendsString.toString();
     }
 

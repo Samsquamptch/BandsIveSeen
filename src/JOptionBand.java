@@ -5,7 +5,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 public class JOptionBand {
-    public static void addBand(Connection conn) {
+    public static String addBand(Connection conn) {
         //The Text Fields
         JTextField bandName = new JTextField(15);
         JTextField bandGenre = new JTextField(15);
@@ -33,12 +33,13 @@ public class JOptionBand {
             }
             else {
                 try {
-                    WriteDatabase.addBand(conn, bandName.getText(),
-                            bandGenre.getText(), bandCountry.getText());
+                    WriteDatabase.addBand(conn, bandName.getText(), bandGenre.getText(), bandCountry.getText());
+                    return bandName.getText() + " - " + bandCountry.getText() + " - " + bandGenre.getText();
                 } catch (SQLException ex) {
                     throw new RuntimeException(ex);
                 }
             }
         }
+        return "";
     }
 }

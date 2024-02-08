@@ -14,8 +14,8 @@ public class Band {
     }
 
     @Override
-    public String toString() {return this.bandName + " - " + this.bandGenre + " - "
-    + this.fromCountry + " - " + this.rating + "/10";}
+    public String toString() {return this.bandName + " - " + this.fromCountry + " - "
+    + this.bandGenre;}
 
     public String performanceDetails() {return this.bandName + " - " + this.rating + "/10";}
 
