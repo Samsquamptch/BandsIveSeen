@@ -15,20 +15,20 @@ import java.util.Objects;
 
 public class EditGigWindow implements ActionListener, DateChangeListener {
     DatePicker gigDate;
-    JComboBox gigList;
-    JComboBox venueSelect;
-    JComboBox headlineSelect;
-    JComboBox support1Select;
-    JComboBox support2Select;
-    JComboBox support3Select;
-    JComboBox support4Select;
-    JComboBox headlineRating;
-    JComboBox support1Rating;
-    JComboBox support2Rating;
-    JComboBox support3Rating;
-    JComboBox support4Rating;
-    JComboBox addFriend;
-    JComboBox removeFriend;
+    JComboBox<String> gigList;
+    JComboBox<String> venueSelect;
+    JComboBox<String> headlineSelect;
+    JComboBox<String> support1Select;
+    JComboBox<String> support2Select;
+    JComboBox<String> support3Select;
+    JComboBox<String> support4Select;
+    JComboBox<String> headlineRating;
+    JComboBox<String> support1Rating;
+    JComboBox<String> support2Rating;
+    JComboBox<String> support3Rating;
+    JComboBox<String> support4Rating;
+    JComboBox<String> addFriend;
+    JComboBox<String> removeFriend;
     JPanel sidePanel;
     JPanel editPanel;
     String[] rating = new String[]{"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"};
@@ -44,7 +44,7 @@ public class EditGigWindow implements ActionListener, DateChangeListener {
 
     public void newWindow() {
         String[] gigData = ReadDatabase.selectGigs(this.jdbcConnection);
-        this.gigList = new JComboBox(gigData);
+        this.gigList = new JComboBox<>(gigData);
         this.gigList.addActionListener(this);
         JPanel searchPanel = new JPanel();
         searchPanel.add(this.gigList);
@@ -84,7 +84,7 @@ public class EditGigWindow implements ActionListener, DateChangeListener {
 
         //Venue select panel
         String[] venueData = ReadDatabase.selectVenues(this.jdbcConnection);
-        this.venueSelect = new JComboBox(venueData);
+        this.venueSelect = new JComboBox<>(venueData);
         this.venueSelect.addActionListener(this);
         this.venueSelect.setEnabled(false);
         if (this.selectedGig.getLocation()!=null){
@@ -96,7 +96,7 @@ public class EditGigWindow implements ActionListener, DateChangeListener {
 
         //Add Friends panel
         String[] friendArray = ReadDatabase.selectFriends(this.jdbcConnection, this.selectedGig.getWentWith().toArray(new String[0]));
-        this.addFriend = new JComboBox(friendArray);
+        this.addFriend = new JComboBox<>(friendArray);
         this.addFriend.addActionListener(this);
         JPanel addFriendPanel = createPanel("Add Friend");
         addFriendPanel.add(this.addFriend, BorderLayout.CENTER);
@@ -107,7 +107,7 @@ public class EditGigWindow implements ActionListener, DateChangeListener {
         for (int i = 1; i <= this.selectedGig.getWentWith().size(); i++) {
             removeArray[i] = this.selectedGig.getWentWith().get(i-1);
         }
-        this.removeFriend = new JComboBox(removeArray);
+        this.removeFriend = new JComboBox<>(removeArray);
         this.removeFriend.addActionListener(this);
         JPanel removeFriendPanel = createPanel("Remove Friend");
         removeFriendPanel.add(this.removeFriend, BorderLayout.CENTER);
@@ -121,66 +121,67 @@ public class EditGigWindow implements ActionListener, DateChangeListener {
         }
 
         //Headline select panel
-        this.headlineSelect = new JComboBox(bandData);
+        this.headlineSelect = new JComboBox<>(bandData);
         this.headlineSelect.removeItem("Remove Band");
         this.headlineSelect.addActionListener(this);
         JPanel headlineSelectPanel = createPanel("Gig Headline");
         headlineSelectPanel.add(this.headlineSelect, BorderLayout.CENTER);
 
         //Headline rating select panel
-        this.headlineRating = new JComboBox(this.rating);
+        this.headlineRating = new JComboBox<>(this.rating);
         this.headlineRating.addActionListener(this);
         JPanel headlineRatingPanel = createPanel("Set Rating");
         headlineRatingPanel.add(this.headlineRating, BorderLayout.CENTER);
 
         //Support 1 select panel
-        this.support1Select = new JComboBox(bandData);
+        this.support1Select = new JComboBox<>(bandData);
         this.support1Select.addActionListener(this);
         JPanel support1SelectPanel = createPanel("Supporting Band");
         support1SelectPanel.add(this.support1Select, BorderLayout.CENTER);
 
         //Support 1 rating select panel
-        this.support1Rating = new JComboBox(this.rating);
+        this.support1Rating = new JComboBox<>(this.rating);
         this.support1Rating.addActionListener(this);
         JPanel support1RatingPanel = createPanel("Set Rating");
         support1RatingPanel.add(this.support1Rating, BorderLayout.CENTER);
 
         //Support 2 select panel
-        this.support2Select = new JComboBox(bandData);
+        this.support2Select = new JComboBox<>(bandData);
         this.support2Select.addActionListener(this);
         JPanel support2SelectPanel = createPanel("Supporting Band");
         support2SelectPanel.add(this.support2Select, BorderLayout.CENTER);
 
         //Support 2 rating select panel
-        this.support2Rating = new JComboBox(this.rating);
+        this.support2Rating = new JComboBox<>(this.rating);
         this.support2Rating.addActionListener(this);
         JPanel support2RatingPanel = createPanel("Set Rating");
         support2RatingPanel.add(this.support2Rating, BorderLayout.CENTER);
 
         //Support 3 select panel
-        this.support3Select = new JComboBox(bandData);
+        this.support3Select = new JComboBox<>(bandData);
         this.support3Select.addActionListener(this);
         JPanel support3SelectPanel = createPanel("Supporting Band");
         support3SelectPanel.add(this.support3Select, BorderLayout.CENTER);
 
         //Support 3 rating select panel
-        this.support3Rating = new JComboBox(this.rating);
+        this.support3Rating = new JComboBox<>(this.rating);
         this.support3Rating.addActionListener(this);
         JPanel support3RatingPanel = createPanel("Set Rating");
         support3RatingPanel.add(this.support3Rating, BorderLayout.CENTER);
 
         //Support 4 select panel
-        this.support4Select = new JComboBox(bandData);
+        this.support4Select = new JComboBox<>(bandData);
         this.support4Select.addActionListener(this);
         JPanel support4SelectPanel = createPanel("Supporting Band");
         support4SelectPanel.add(this.support4Select, BorderLayout.CENTER);
 
         //Support 4 rating select panel
-        this.support4Rating = new JComboBox(this.rating);
+        this.support4Rating = new JComboBox<>(this.rating);
         this.support4Rating.addActionListener(this);
         JPanel support4RatingPanel = createPanel("Set Rating");
         support4RatingPanel.add(this.support4Rating, BorderLayout.CENTER);
 
+        //Initialise the selectors, populate them, and enable/disable them
         setBandSelectors(0);
 
         this.editPanel.add(datePickerPanel);
@@ -296,8 +297,8 @@ public class EditGigWindow implements ActionListener, DateChangeListener {
                 selectorItem.setSelectedItem(this.selectedGig.getPerformances().get(selectValue-1).toString());
             }
             else {
-                //TODO update this to remove the band!
-                System.out.println("blank");
+                this.selectedGig.removePerformance(this.selectedGig.getPerformances().get(selectValue-1));
+                refreshPanels(true);
             }
         }
         else if (selectorItem.getSelectedIndex()!=0) {
@@ -358,7 +359,7 @@ public class EditGigWindow implements ActionListener, DateChangeListener {
             else if (this.addFriend.getSelectedIndex()!=0) {
                 this.selectedGig.addWentWith(this.addFriend.getSelectedItem().toString());
                 refreshPanels(false);
-                this.removeFriend.addItem(this.addFriend.getSelectedItem());
+                this.removeFriend.addItem(this.addFriend.getSelectedItem().toString());
                 this.addFriend.removeItem(this.addFriend.getSelectedItem());
                 this.addFriend.setSelectedIndex(0);
                 friendRevalidator();
@@ -369,7 +370,7 @@ public class EditGigWindow implements ActionListener, DateChangeListener {
             refreshPanels(false);
             if (this.removeFriend.getSelectedIndex()!=0) {
                 this.addFriend.removeItem("Add New Friend");
-                this.addFriend.addItem(this.removeFriend.getSelectedItem());
+                this.addFriend.addItem(this.removeFriend.getSelectedItem().toString());
                 this.addFriend.addItem("Add New Friend");
                 this.removeFriend.removeItem(this.removeFriend.getSelectedItem());
                 this.removeFriend.setSelectedIndex(0);
