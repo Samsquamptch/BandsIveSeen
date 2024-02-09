@@ -5,7 +5,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 public class JOptionVenue {
-    public static void addVenue(Connection conn){
+    public static String addVenue(Connection conn){
         //The Text Fields
         JTextField venueName = new JTextField(15);
         JTextField venueLocation = new JTextField(15);
@@ -25,6 +25,7 @@ public class JOptionVenue {
                 System.out.println("field is empty");
                 JOptionPane.showMessageDialog(null, "Field was empty, Venue not added",
                         "Input Error", JOptionPane.WARNING_MESSAGE);
+                return "";
             }
             else {
                 try {
@@ -34,5 +35,6 @@ public class JOptionVenue {
                 }
             }
         }
+        return venueName.getText() + " - " + venueLocation.getText();
     }
 }
