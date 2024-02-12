@@ -52,7 +52,7 @@ public class AddGigWindow implements ActionListener {
     }
 
     public void newWindow() {
-        String[] bandData = ReadDatabase.selectBands(this.jdbcConnection);
+        String[] bandData = ReadFromDatabase.selectBands(this.jdbcConnection);
 
         //Set Date Panel
         this.gigDate = new DatePicker();
@@ -64,7 +64,7 @@ public class AddGigWindow implements ActionListener {
         datePanel.add(this.gigDate, BorderLayout.CENTER);
 
         //Set Venue Panel
-        String[] venueData = ReadDatabase.selectVenues(this.jdbcConnection);
+        String[] venueData = ReadFromDatabase.selectVenues(this.jdbcConnection);
         this.chooseVenue = new JComboBox(venueData);
         this.chooseVenue.addActionListener(this);
         JPanel venuePanel = new JPanel();
@@ -91,7 +91,7 @@ public class AddGigWindow implements ActionListener {
 
         //Add Friend Panel
         String[] friendArray = null;
-        friendArray = ReadDatabase.selectFriends(this.jdbcConnection, friendArray);
+        friendArray = ReadFromDatabase.selectFriends(this.jdbcConnection, friendArray);
         this.addFriend = new JComboBox(friendArray);
         this.addFriend.addActionListener(this);
         JPanel addFriendPanel = new JPanel();
@@ -228,12 +228,13 @@ public class AddGigWindow implements ActionListener {
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == this.chooseVenue) {
             if (this.chooseVenue.getSelectedItem() =="Add New Venue") {
-                JOptionVenue.addVenue(this.jdbcConnection);
-                String[] venueData = ReadDatabase.selectVenues(this.jdbcConnection);
+                String venue = JOptionVenue.addVenue(this.jdbcConnection);
+                String[] venueData = ReadFromDatabase.selectVenues(this.jdbcConnection);
                 this.chooseVenue.removeAllItems();
-                for (String venue : venueData) {
-                    this.chooseVenue.addItem(venue);
+                for (String venueItem : venueData) {
+                    this.chooseVenue.addItem(venueItem);
                 }
+                this.chooseVenue.setSelectedItem(venue);
                 this.chooseVenue.revalidate();
                 this.chooseVenue.repaint();
             }
@@ -248,12 +249,13 @@ public class AddGigWindow implements ActionListener {
         }
         if (e.getSource() == this.chooseHeadline) {
             if (this.chooseHeadline.getSelectedItem()=="Add New Band") {
-                JOptionBand.addBand(this.jdbcConnection);
-                String[] bandData = ReadDatabase.selectBands(this.jdbcConnection);
+                String band = JOptionBand.addBand(this.jdbcConnection);
+                String[] bandData = ReadFromDatabase.selectBands(this.jdbcConnection);
                 this.chooseHeadline.removeAllItems();
                 for (String artist : bandData) {
                     this.chooseHeadline.addItem(artist);
                 }
+                this.chooseHeadline.setSelectedItem(band);
                 this.chooseHeadline.revalidate();
                 this.chooseHeadline.repaint();
             }
@@ -287,12 +289,13 @@ public class AddGigWindow implements ActionListener {
         }
         if (e.getSource() == this.chooseSupport1) {
             if (this.chooseSupport1.getSelectedItem() == "Add New Band") {
-                JOptionBand.addBand(this.jdbcConnection);
-                String[] bandData = ReadDatabase.selectBands(this.jdbcConnection);
+                String band = JOptionBand.addBand(this.jdbcConnection);
+                String[] bandData = ReadFromDatabase.selectBands(this.jdbcConnection);
                 this.chooseSupport1.removeAllItems();
                 for (String artist : bandData) {
                     this.chooseSupport1.addItem(artist);
                 }
+                this.chooseSupport1.setSelectedItem(band);
                 this.setSupport1Panel.revalidate();
                 this.setSupport1Panel.repaint();
             } else if (this.chooseSupport1.getSelectedIndex() != 0) {
@@ -318,7 +321,7 @@ public class AddGigWindow implements ActionListener {
         if (e.getSource() == this.chooseSupport2) {
             if (this.chooseSupport2.getSelectedItem() == "Add New Band") {
                 JOptionBand.addBand(this.jdbcConnection);
-                String[] bandData = ReadDatabase.selectBands(this.jdbcConnection);
+                String[] bandData = ReadFromDatabase.selectBands(this.jdbcConnection);
                 this.chooseSupport2.removeAllItems();
                 for (String artist : bandData) {
                     this.chooseSupport2.addItem(artist);
@@ -346,7 +349,7 @@ public class AddGigWindow implements ActionListener {
         if (e.getSource() == this.chooseSupport3) {
             if (this.chooseSupport3.getSelectedItem() == "Add New Band") {
                 JOptionBand.addBand(this.jdbcConnection);
-                String[] bandData = ReadDatabase.selectBands(this.jdbcConnection);
+                String[] bandData = ReadFromDatabase.selectBands(this.jdbcConnection);
                 this.chooseSupport3.removeAllItems();
                 for (String artist : bandData) {
                     this.chooseSupport3.addItem(artist);
@@ -372,7 +375,7 @@ public class AddGigWindow implements ActionListener {
         if (e.getSource() == this.chooseSupport4) {
             if (this.chooseSupport4.getSelectedItem() == "Add New Band") {
                 JOptionBand.addBand(this.jdbcConnection);
-                String[] bandData = ReadDatabase.selectBands(this.jdbcConnection);
+                String[] bandData = ReadFromDatabase.selectBands(this.jdbcConnection);
                 this.chooseSupport4.removeAllItems();
                 for (String artist : bandData) {
                     this.chooseSupport4.addItem(artist);
@@ -398,6 +401,7 @@ public class AddGigWindow implements ActionListener {
                     addFriend.removeItem("Add New Friend");
                     addFriend.addItem(friendName);
                     addFriend.addItem("Add New Friend");
+                    addFriend.setSelectedItem(friendName);
                 }
             }
             else if (this.addFriend.getSelectedIndex()!=0) {
@@ -438,7 +442,7 @@ public class AddGigWindow implements ActionListener {
                     }
                 }
                 try {
-                    WriteDatabase.insertGig(this.jdbcConnection, addGig);
+                    InsertToDatabase.insertGig(this.jdbcConnection, addGig);
                 } catch (SQLException ex) {
                     throw new RuntimeException(ex);
                 }

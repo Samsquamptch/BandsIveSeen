@@ -20,7 +20,7 @@ public class JOptionFriend {
                         "Input Error", JOptionPane.WARNING_MESSAGE);
             } else {
                 try {
-                    WriteDatabase.insertFriend(conn, friendName.getText());
+                    InsertToDatabase.insertFriend(conn, friendName.getText());
                     return friendName.getText();
                 } catch (SQLException ex) {
                     throw new RuntimeException(ex);

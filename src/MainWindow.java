@@ -11,6 +11,10 @@ public class MainWindow implements ActionListener {
     JButton addGigButton;
     JButton editGigButton;
     JButton delGigButton;
+    JButton refreshButton;
+    JTable bandTable;
+    JScrollPane tableScrollPane;
+    JPanel mainPanel;
     private final Connection jdbcConnection;
 
     public MainWindow(Connection connection){
@@ -33,10 +37,15 @@ public class MainWindow implements ActionListener {
 
         //The table
         String[] columnNames = {"Band Name", "Date", "Venue", "Rating"};
-        String[][] tableData = ReadDatabase.selectPerformances(this.jdbcConnection);
-        JTable bandTable = new JTable(tableData, columnNames);
-        JScrollPane tableScrollPane = new JScrollPane(bandTable);
+        String[][] tableData = ReadFromDatabase.selectPerformances(this.jdbcConnection);
+        this.bandTable = new JTable(tableData, columnNames);
+        this.tableScrollPane = new JScrollPane(bandTable);
 
+        //Refresh button
+        this.refreshButton = new JButton("Refresh");
+        this.refreshButton.addActionListener(this);
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.add(this.refreshButton);
 
         JPanel backPanel = new JPanel();
         backPanel.setBackground(Color.darkGray);
@@ -55,27 +64,30 @@ public class MainWindow implements ActionListener {
         leftPanel.setPreferredSize(new Dimension(250,100));
         leftPanel.setLayout(new BorderLayout());
 
-        JPanel mainPanel = new JPanel();
-        mainPanel.setBackground(Color.lightGray);
-        mainPanel.setLayout(new BorderLayout());
-        mainPanel.add(tableScrollPane, BorderLayout.CENTER);
+        this.mainPanel = new JPanel();
+        this.mainPanel.setBackground(Color.lightGray);
+        this.mainPanel.setLayout(new BorderLayout());
+        this.mainPanel.add(buttonPanel, BorderLayout.NORTH);
+        this.mainPanel.add(tableScrollPane, BorderLayout.CENTER);
 
         MyFrame frame = new MyFrame();
         backPanel.add(topPanel,BorderLayout.NORTH);
         backPanel.add(leftPanel,BorderLayout.WEST);
-        backPanel.add(mainPanel,BorderLayout.CENTER);
+        backPanel.add(this.mainPanel,BorderLayout.CENTER);
         frame.add(backPanel);
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        if(e.getSource()==addGigButton){
+        if (e.getSource()==addGigButton) {
             new AddGigWindow(this.jdbcConnection).newWindow();
         }
-        else if(e.getSource()==editGigButton){
+        else if (e.getSource()==editGigButton) {
             new EditGigWindow(this.jdbcConnection).newWindow();
-        } else if(e.getSource()==delGigButton){
+        } else if (e.getSource()==delGigButton) {
             new GigWindow("Delete Gig");
+        } else if (e.getSource()==this.refreshButton) {
+            System.out.println("refresh");
         }
     }
 }

@@ -33,7 +33,6 @@ public class EditGigWindow implements ActionListener, DateChangeListener {
     JButton saveButton;
     JPanel sidePanel;
     JPanel editPanel;
-    String[] rating = new String[]{"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"};
     GigWindow addWindow;
     int gigDatabaseId;
     Gig selectedGig;
@@ -46,7 +45,7 @@ public class EditGigWindow implements ActionListener, DateChangeListener {
 
     public void newWindow() {
         //Gig select menu
-        String[] gigData = ReadDatabase.selectGigs(this.jdbcConnection);
+        String[] gigData = ReadFromDatabase.selectGigs(this.jdbcConnection);
         this.gigList = new JComboBox<>(gigData);
         this.gigList.addActionListener(this);
         JPanel searchPanel = new JPanel();
@@ -61,8 +60,8 @@ public class EditGigWindow implements ActionListener, DateChangeListener {
 
         //Save changes button
         this.saveButton = new JButton("Save");
-        this.saveButton.addActionListener(this);
         this.saveButton.setPreferredSize(new Dimension(200,30));
+        this.saveButton.addActionListener(this);
         JPanel saveButtonPanel = createPanel("Save Changes");
         saveButtonPanel.add(this.saveButton, BorderLayout.CENTER);
 
@@ -75,6 +74,7 @@ public class EditGigWindow implements ActionListener, DateChangeListener {
         setSidePanel("", "", "", "", null);
         this.editPanel = new JPanel();
         setEditPanel();
+        setBottomPanel();
 
         this.addWindow = new GigWindow("Edit Gig");
         this.addWindow.add(searchPanel, BorderLayout.NORTH);
@@ -90,8 +90,13 @@ public class EditGigWindow implements ActionListener, DateChangeListener {
         return panel;
     }
 
+    public void setBottomPanel() {
+
+    }
+
     public void setEditPanel() {
-        String[] bandData = ReadDatabase.selectBands(this.jdbcConnection);
+        String[] bandData = ReadFromDatabase.selectBands(this.jdbcConnection);
+        String[] rating = new String[]{"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"};
         this.editPanel.removeAll();
         this.editPanel.setLayout(new GridLayout(7,2, 5, 10));
 
@@ -106,7 +111,7 @@ public class EditGigWindow implements ActionListener, DateChangeListener {
         datePickerPanel.add(this.gigDate, BorderLayout.CENTER);
 
         //Venue select panel
-        String[] venueData = ReadDatabase.selectVenues(this.jdbcConnection);
+        String[] venueData = ReadFromDatabase.selectVenues(this.jdbcConnection);
         this.venueSelect = new JComboBox<>(venueData);
         this.venueSelect.addActionListener(this);
         this.venueSelect.setEnabled(false);
@@ -118,7 +123,7 @@ public class EditGigWindow implements ActionListener, DateChangeListener {
         venuePickerPanel.add(this.venueSelect, BorderLayout.CENTER);
 
         //Add Friends panel
-        String[] friendArray = ReadDatabase.selectFriends(this.jdbcConnection, this.selectedGig.getWentWith().toArray(new String[0]));
+        String[] friendArray = ReadFromDatabase.selectFriends(this.jdbcConnection, this.selectedGig.getWentWith().toArray(new String[0]));
         this.addFriend = new JComboBox<>(friendArray);
         this.addFriend.addActionListener(this);
         JPanel addFriendPanel = createPanel("Add Friend");
@@ -151,7 +156,7 @@ public class EditGigWindow implements ActionListener, DateChangeListener {
         headlineSelectPanel.add(this.headlineSelect, BorderLayout.CENTER);
 
         //Headline rating select panel
-        this.headlineRating = new JComboBox<>(this.rating);
+        this.headlineRating = new JComboBox<>(rating);
         this.headlineRating.addActionListener(this);
         JPanel headlineRatingPanel = createPanel("Set Rating");
         headlineRatingPanel.add(this.headlineRating, BorderLayout.CENTER);
@@ -163,7 +168,7 @@ public class EditGigWindow implements ActionListener, DateChangeListener {
         support1SelectPanel.add(this.support1Select, BorderLayout.CENTER);
 
         //Support 1 rating select panel
-        this.support1Rating = new JComboBox<>(this.rating);
+        this.support1Rating = new JComboBox<>(rating);
         this.support1Rating.addActionListener(this);
         JPanel support1RatingPanel = createPanel("Set Rating");
         support1RatingPanel.add(this.support1Rating, BorderLayout.CENTER);
@@ -175,7 +180,7 @@ public class EditGigWindow implements ActionListener, DateChangeListener {
         support2SelectPanel.add(this.support2Select, BorderLayout.CENTER);
 
         //Support 2 rating select panel
-        this.support2Rating = new JComboBox<>(this.rating);
+        this.support2Rating = new JComboBox<>(rating);
         this.support2Rating.addActionListener(this);
         JPanel support2RatingPanel = createPanel("Set Rating");
         support2RatingPanel.add(this.support2Rating, BorderLayout.CENTER);
@@ -187,7 +192,7 @@ public class EditGigWindow implements ActionListener, DateChangeListener {
         support3SelectPanel.add(this.support3Select, BorderLayout.CENTER);
 
         //Support 3 rating select panel
-        this.support3Rating = new JComboBox<>(this.rating);
+        this.support3Rating = new JComboBox<>(rating);
         this.support3Rating.addActionListener(this);
         JPanel support3RatingPanel = createPanel("Set Rating");
         support3RatingPanel.add(this.support3Rating, BorderLayout.CENTER);
@@ -199,13 +204,13 @@ public class EditGigWindow implements ActionListener, DateChangeListener {
         support4SelectPanel.add(this.support4Select, BorderLayout.CENTER);
 
         //Support 4 rating select panel
-        this.support4Rating = new JComboBox<>(this.rating);
+        this.support4Rating = new JComboBox<>(rating);
         this.support4Rating.addActionListener(this);
         JPanel support4RatingPanel = createPanel("Set Rating");
         support4RatingPanel.add(this.support4Rating, BorderLayout.CENTER);
 
         //Initialise the selectors, populate them, and enable/disable them
-        setBandSelectors(0);
+        revalidateEditPanel(0);
 
         this.editPanel.add(datePickerPanel);
         this.editPanel.add(venuePickerPanel);
@@ -225,7 +230,7 @@ public class EditGigWindow implements ActionListener, DateChangeListener {
         this.editPanel.repaint();
     }
 
-    public void setBandSelectors(int startVal) {
+    public void revalidateEditPanel(int startVal) {
         JComboBox[] bandSelectArray = new JComboBox[]{this.headlineSelect, this.support1Select, this.support2Select,
                 this.support3Select, this.support4Select};
         JComboBox[] bandRatingArray = new JComboBox[]{this.headlineRating, this.support1Rating, this.support2Rating,
@@ -293,7 +298,7 @@ public class EditGigWindow implements ActionListener, DateChangeListener {
     }
 
     public void friendSelectSettings(JComboBox<String> selectorItem) {
-        if (selectorItem.getSelectedItem() == "Add New Friend") {
+        if (selectorItem.getSelectedItem().equals("Add New Friend")) {
             String friendName = JOptionFriend.addFriend(this.jdbcConnection);
             if (!friendName.isEmpty()) {
                 addFriend.removeItem("Add New Friend");
@@ -326,18 +331,29 @@ public class EditGigWindow implements ActionListener, DateChangeListener {
     }
 
     public void bandSelectSettings(JComboBox<String> selectorItem, int selectValue) {
-        if (selectorItem.getSelectedItem() =="Add New Band") {
+        JComboBox[] bandSelectArray = new JComboBox[]{this.headlineSelect, this.support1Select, this.support2Select,
+                this.support3Select, this.support4Select};
+        if (selectorItem.getSelectedItem().equals("Add New Band")) {
             String bandName = JOptionBand.addBand(this.jdbcConnection);
-            if (!bandName.isEmpty()){
-                selectorItem.removeItem("Add New Band");
-                selectorItem.addItem(bandName);
-                selectorItem.addItem("Add New Band");
-                selectorItem.setSelectedItem(bandName);
-                selectorItem.revalidate();
-                selectorItem.repaint();
+            if (bandName.isEmpty()) {
+                return;
             }
+            for (JComboBox<String> bandSelector : bandSelectArray) {
+                bandSelector.removeItem("Remove Band");
+                bandSelector.removeItem("Add New Band");
+                bandSelector.addItem(bandName);
+                bandSelector.addItem("Remove Band");
+                bandSelector.addItem("Add New Band");
+                bandSelector.revalidate();
+                bandSelector.repaint();
+            }
+            selectorItem.setSelectedItem(bandName);
         }
-        else if (selectorItem.getSelectedItem() =="Remove Band") {
+        else if (selectorItem.getSelectedItem().equals("Remove Band")) {
+            if (this.selectedGig.getPerformances().size() < selectValue){
+                JOptionPane.showMessageDialog(null,"You cannot remove a band when nothing has been selected!");
+                return;
+            }
             int answer = JOptionPane.showConfirmDialog(null, "Are you sure you want to remove this band?",
                     "Confirm remove band", JOptionPane.YES_NO_OPTION);
             if (answer != 0) {
@@ -363,8 +379,11 @@ public class EditGigWindow implements ActionListener, DateChangeListener {
                         new Band(bandDetails[0], bandDetails[2], bandDetails[1],
                                 this.selectedGig.getPerformances().get(selectValue-1).getRating()));
             }
-            setBandSelectors(selectValue);
+            revalidateEditPanel(selectValue);
             refreshPanels(false);
+        }
+        else if (this.selectedGig.getPerformances().size() < selectValue) {
+            selectorItem.setSelectedIndex(0);
         }
         else {
             selectorItem.setSelectedItem(this.selectedGig.getPerformances().get(selectValue-1).toString());
@@ -383,7 +402,32 @@ public class EditGigWindow implements ActionListener, DateChangeListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        if (e.getSource() == this.headlineSelect) {
+        if ((e.getSource() == this.deleteButton || e.getSource() == this.saveButton) && this.selectedGig.getHeadlineAct()==null) {
+            JOptionPane.showMessageDialog(null,"Please select a gig before choosing this option",
+                    "No Gig Selected!", JOptionPane.WARNING_MESSAGE);
+        }
+        else if (e.getSource() == this.deleteButton) {
+            int deleteResponse = JOptionPane.showConfirmDialog(null,
+                "Are you sure you want to delete this gig permanently?",
+                "Confirm delete gig", JOptionPane.YES_NO_OPTION);
+            if (deleteResponse==0) {
+                /*try {
+                    EditDatabase.deleteGig(this.jdbcConnection, this.gigDatabaseId);
+                    JOptionPane.showMessageDialog(null, "Gig has been deleted");
+                } catch (SQLException ex) {
+                    throw new RuntimeException(ex);
+                }*/
+            }
+        }
+        else if (e.getSource() == this.saveButton) {
+            int saveResponse = JOptionPane.showConfirmDialog(null,
+                "Are you sure you want to save your changes to this gig?",
+                "Confirm save gig", JOptionPane.YES_NO_OPTION);
+            if (saveResponse==0) {
+                System.out.println("Save changes");
+        }
+        }
+        else if (e.getSource() == this.headlineSelect) {
             bandSelectSettings(this.headlineSelect, 1);
         }
         else if (e.getSource() == this.support1Select) {
@@ -420,7 +464,7 @@ public class EditGigWindow implements ActionListener, DateChangeListener {
             friendSelectSettings(this.removeFriend);
         }
         else if (e.getSource() == this.venueSelect){
-            if (this.venueSelect.getSelectedItem()=="Add New Venue") {
+            if (this.venueSelect.getSelectedItem().equals("Add New Venue")) {
                 String addedVenue = JOptionVenue.addVenue(this.jdbcConnection);
                 this.venueSelect.removeItem("Add New Venue");
                 this.venueSelect.addItem(addedVenue);
@@ -439,38 +483,41 @@ public class EditGigWindow implements ActionListener, DateChangeListener {
                 this.selectedGig = new Gig();
                 setSidePanel("", "", "", "", null);
                 setEditPanel();
+                return;
             }
-            else {
-                String[] gigDetails = this.gigList.getSelectedItem().toString().split(" - ");
-                try {
-                    this.gigDatabaseId = ReadDatabase.getGigId(this.jdbcConnection, gigDetails[0], gigDetails[1]);
-                    String[] venueAndBandId = ReadDatabase.getGigDetails(this.jdbcConnection, gigDatabaseId);
-                    Venue selectedVenue = new Venue(venueAndBandId[1], venueAndBandId[2], false);
-                    String[] bandDetails = ReadDatabase.getGigHeadlineDetails(this.jdbcConnection,
-                            Integer.parseInt(venueAndBandId[3]), gigDatabaseId);
-                    Band selectedHeadline = new Band(bandDetails[0], bandDetails[1], bandDetails[2],
-                            Integer.parseInt(bandDetails[3]));
-                    ArrayList<Band> gigPerformances = ReadDatabase.getGigPerformances(this.jdbcConnection, gigDatabaseId);
-                    this.selectedGig = new Gig(gigDetails[1], selectedVenue, selectedHeadline);
-                    for (Band performance : gigPerformances) {
-                        if (!Objects.equals(performance.getBandName(), this.selectedGig.getHeadlineAct().getBandName())) {
-                            this.selectedGig.addPerformance(performance);
-                        }
+            String[] gigDetails = this.gigList.getSelectedItem().toString().split(" - ");
+            try {
+                this.gigDatabaseId = ReadFromDatabase.getGigId(this.jdbcConnection, gigDetails[0], gigDetails[1]);
+                String[] venueAndBandId = ReadFromDatabase.getGigDetails(this.jdbcConnection, gigDatabaseId);
+                Venue selectedVenue = new Venue(venueAndBandId[1], venueAndBandId[2], false);
+                String[] bandDetails = ReadFromDatabase.getGigHeadlineDetails(this.jdbcConnection,
+                        Integer.parseInt(venueAndBandId[3]), gigDatabaseId);
+                Band selectedHeadline = new Band(bandDetails[0], bandDetails[1], bandDetails[2],
+                        Integer.parseInt(bandDetails[3]));
+                ArrayList<Band> gigPerformances = ReadFromDatabase.getGigPerformances(this.jdbcConnection, gigDatabaseId);
+                this.selectedGig = new Gig(gigDetails[1], selectedVenue, selectedHeadline);
+                for (Band performance : gigPerformances) {
+                    if (!Objects.equals(performance.getBandName(), this.selectedGig.getHeadlineAct().getBandName())) {
+                        this.selectedGig.addPerformance(performance);
                     }
-                    String[] gigFriends = ReadDatabase.getGigFriends(this.jdbcConnection, gigDatabaseId);
-                    for (String friend : gigFriends) {
-                        this.selectedGig.addWentWith(friend);
-                    }
-                    refreshPanels(true);
-                } catch (SQLException ex) {
-                    throw new RuntimeException(ex);
                 }
+                String[] gigFriends = ReadFromDatabase.getGigFriends(this.jdbcConnection, gigDatabaseId);
+                for (String friend : gigFriends) {
+                    this.selectedGig.addWentWith(friend);
+                }
+                refreshPanels(true);
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
             }
         }
     }
 
     @Override
     public void dateChanged(DateChangeEvent dateChangeEvent) {
+        if (this.selectedGig.getHeadlineAct()==null) {
+            this.gigDate.clear();
+            return;
+        }
         this.selectedGig.setEventDay(this.gigDate.toString());
         refreshPanels(false);
     }

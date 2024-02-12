@@ -5,7 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
-public class WriteDatabase {
+public class InsertToDatabase {
 
     public static void insertGig(Connection conn, Gig addGig) throws SQLException {
         String headline = addGig.getHeadlineAct().getBandName();
@@ -13,7 +13,7 @@ public class WriteDatabase {
         String gigDate = addGig.getEventDay();
         ArrayList<Integer> performanceIds = new ArrayList<>();
         ArrayList<Integer> friendIds = new ArrayList<>();
-        if (ReadDatabase.checkGig(conn, headline, gigDate)) {
+        if (ReadFromDatabase.checkGig(conn, headline, gigDate)) {
             return;
         }
         int venueId = insertVenue(conn, addGig.getLocation());
@@ -30,7 +30,7 @@ public class WriteDatabase {
             }
         }
 
-        int headlineId = ReadDatabase.getBandId(conn, headline, headlineCountry);
+        int headlineId = ReadFromDatabase.getBandId(conn, headline, headlineCountry);
         System.out.println(headlineId);
 
         String sql = "INSERT INTO Gig(Date, Venue_Id, Headline) VALUES(?,?,?)";
@@ -43,15 +43,15 @@ public class WriteDatabase {
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
-        int gigID = ReadDatabase.getLastId(conn, "Gig");
-        WriteDatabase.matchGigPerformances(conn, gigID, performanceIds);
+        int gigID = ReadFromDatabase.getLastId(conn, "Gig");
+        InsertToDatabase.matchGigPerformances(conn, gigID, performanceIds);
         if (!addGig.getWentWith().isEmpty()) {
-            WriteDatabase.matchGigFriends(conn, gigID, friendIds);
+            InsertToDatabase.matchGigFriends(conn, gigID, friendIds);
         }
     }
 
     public static int insertFriend(Connection conn, String friendName) throws SQLException {
-        if (!ReadDatabase.checkFriend(conn, friendName)) {
+        if (!ReadFromDatabase.checkFriend(conn, friendName)) {
             String sql = "INSERT INTO Friend(FriendName) VALUES(?)";
             try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
                 pstmt.setString(1, friendName);
@@ -60,11 +60,11 @@ public class WriteDatabase {
                 System.out.println(e.getMessage());
             }
         }
-        return ReadDatabase.getFriendId(conn, friendName);
+        return ReadFromDatabase.getFriendId(conn, friendName);
     }
 
     public static void addBand(Connection conn, String name, String genre, String country) throws SQLException {
-        if (ReadDatabase.checkExists(conn, "Band", "BandName", "Country", name, country)) {
+        if (ReadFromDatabase.checkExists(conn, "Band", "BandName", "Country", name, country)) {
             String sql = "INSERT INTO Band(BandName,Genre, Country) VALUES(?,?,?)";
             try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
                 pstmt.setString(1, name);
@@ -82,7 +82,7 @@ public class WriteDatabase {
         String country = addBand.getFromCountry();
         int rating = addBand.getRating();
 
-        int bandId = ReadDatabase.getBandId(conn, name, country);
+        int bandId = ReadFromDatabase.getBandId(conn, name, country);
 
         String sql = "INSERT INTO Performance(Band_Id,Rating) VALUES(?,?)";
 
@@ -93,7 +93,7 @@ public class WriteDatabase {
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
-        return ReadDatabase.getLastId(conn, "Performance");
+        return ReadFromDatabase.getLastId(conn, "Performance");
     }
 
     public static void matchGigFriends(Connection conn, int gigID, ArrayList<Integer> friendIds) {
@@ -128,7 +128,7 @@ public class WriteDatabase {
         String name = addVenue.getVenueName();
         String location = addVenue.getVenueLocation();
         boolean isFestival = addVenue.getIsFestival();
-        if (ReadDatabase.checkExists(conn, "Venue", "VenueName", "Location", name, location)) {
+        if (ReadFromDatabase.checkExists(conn, "Venue", "VenueName", "Location", name, location)) {
             String sql = "INSERT INTO Venue(VenueName, Location, isFestival) VALUES(?,?,?)";
 
             try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -140,6 +140,6 @@ public class WriteDatabase {
                 System.out.println(e.getMessage());
             }
         }
-        return ReadDatabase.getVenueId(conn, name, location);
+        return ReadFromDatabase.getVenueId(conn, name, location);
     }
 }

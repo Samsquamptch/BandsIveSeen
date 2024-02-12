@@ -29,7 +29,7 @@ public class JOptionVenue {
             }
             else {
                 try {
-                    WriteDatabase.insertVenue(conn, new Venue(venueName.getText(), venueLocation.getText(),false));
+                    InsertToDatabase.insertVenue(conn, new Venue(venueName.getText(), venueLocation.getText(),false));
                 } catch (SQLException ex) {
                     throw new RuntimeException(ex);
                 }

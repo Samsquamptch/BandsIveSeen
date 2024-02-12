@@ -5,7 +5,7 @@ import java.sql.PreparedStatement;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class ReadDatabase {
+public class ReadFromDatabase {
 
     public static String[] selectFriends(Connection conn, String[] friendsList) {
         String sql = "SELECT FriendName FROM Friend";

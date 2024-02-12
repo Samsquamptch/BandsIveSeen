@@ -33,7 +33,7 @@ public class JOptionBand {
             }
             else {
                 try {
-                    WriteDatabase.addBand(conn, bandName.getText(), bandGenre.getText(), bandCountry.getText());
+                    InsertToDatabase.addBand(conn, bandName.getText(), bandGenre.getText(), bandCountry.getText());
                     return bandName.getText() + " - " + bandCountry.getText() + " - " + bandGenre.getText();
                 } catch (SQLException ex) {
                     throw new RuntimeException(ex);
