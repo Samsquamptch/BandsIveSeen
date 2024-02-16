@@ -31,7 +31,6 @@ public class InsertToDatabase {
         }
 
         int headlineId = ReadFromDatabase.getBandId(conn, headline, headlineCountry);
-        System.out.println(headlineId);
 
         String sql = "INSERT INTO Gig(Date, Venue_Id, Headline) VALUES(?,?,?)";
 

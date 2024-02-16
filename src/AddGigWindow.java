@@ -1,6 +1,8 @@
 package src;
 
 import com.github.lgooddatepicker.components.DatePicker;
+import com.github.lgooddatepicker.optionalusertools.DateChangeListener;
+import com.github.lgooddatepicker.zinternaltools.DateChangeEvent;
 
 import javax.swing.*;
 import java.awt.*;
@@ -8,446 +10,451 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.stream.IntStream;
+import java.util.ArrayList;
 
-@SuppressWarnings("ALL")
-public class AddGigWindow implements ActionListener {
-    JComboBox chooseVenue;
-    JComboBox chooseHeadline;
-    JComboBox chooseSupport1;
-    JComboBox chooseSupport2;
-    JComboBox chooseSupport3;
-    JComboBox chooseSupport4;
-    JComboBox headlineRating;
-    JComboBox support1Rating;
-    JComboBox support2Rating;
-    JComboBox support3Rating;
-    JComboBox support4Rating;
-    JComboBox addFriend;
-    JComboBox removeFriend;
-    JPanel mainPanel;
-    JPanel setSupport1Panel;
-    JPanel setSupport2Panel;
-    JPanel setSupport3Panel;
-    JPanel setSupport4Panel;
-    JPanel support1RatingPanel;
-    JPanel support2RatingPanel;
-    JPanel support3RatingPanel;
-    JPanel support4RatingPanel;
-    String[] rating = new String[]{"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"};
-    int[] submitCheckArray = new int[]{0, 0, 0};
-    JButton submitButton;
+public class AddGigWindow implements ActionListener, DateChangeListener {
     DatePicker gigDate;
-    Venue gigVenue;
-    Band gigHeadline;
-    Band gigSupport1;
-    Band gigSupport2;
-    Band gigSupport3;
-    Band gigSupport4;
+    JComboBox<String> venueSelect;
+    JComboBox<String> headlineSelect;
+    JComboBox<String> support1Select;
+    JComboBox<String> support2Select;
+    JComboBox<String> support3Select;
+    JComboBox<String> support4Select;
+    JComboBox<String> headlineRating;
+    JComboBox<String> support1Rating;
+    JComboBox<String> support2Rating;
+    JComboBox<String> support3Rating;
+    JComboBox<String> support4Rating;
+    JComboBox<String> addFriend;
+    JComboBox<String> removeFriend;
+    JButton saveButton;
+    JPanel sidePanel;
+    JPanel editPanel;
     GigWindow addWindow;
+    Gig selectedGig;
     private final Connection jdbcConnection;
 
     public AddGigWindow(Connection connection){
         this.jdbcConnection = connection;
+        this.selectedGig = new Gig();
     }
 
     public void newWindow() {
-        String[] bandData = ReadFromDatabase.selectBands(this.jdbcConnection);
+        //Save changes button
+        this.saveButton = new JButton("Save");
+        this.saveButton.setPreferredSize(new Dimension(200,30));
+        this.saveButton.addActionListener(this);
+        JPanel saveButtonPanel = createPanel("Save Changes");
+        saveButtonPanel.add(this.saveButton, BorderLayout.CENTER);
 
-        //Set Date Panel
-        this.gigDate = new DatePicker();
-        this.gigDate.enableInputMethods(false);
-        this.gigDate.setDateToToday();
-        JPanel datePanel = new JPanel();
-        datePanel.setLayout(new BorderLayout());
-        datePanel.add(new JLabel("Gig Date"), BorderLayout.NORTH);
-        datePanel.add(this.gigDate, BorderLayout.CENTER);
+        JPanel optionPanel = new JPanel();
+        optionPanel.add(this.saveButton);
 
-        //Set Venue Panel
-        String[] venueData = ReadFromDatabase.selectVenues(this.jdbcConnection);
-        this.chooseVenue = new JComboBox(venueData);
-        this.chooseVenue.addActionListener(this);
-        JPanel venuePanel = new JPanel();
-        venuePanel.setLayout(new BorderLayout());
-        venuePanel.add(new JLabel("Select Venue"), BorderLayout.NORTH);
-        venuePanel.add(this.chooseVenue, BorderLayout.CENTER);
+        this.sidePanel = new JPanel();
+        setSidePanel("", "", "", "", null);
+        this.editPanel = new JPanel();
+        setEditPanel();
 
-        //Set Headliner Panel
-        this.chooseHeadline = new JComboBox(bandData);
-        this.chooseHeadline.addActionListener(this);
-        JPanel setHeadlinePanel = new JPanel();
-        setHeadlinePanel.setLayout(new BorderLayout());
-        setHeadlinePanel.add(new JLabel("Choose Headline Band"), BorderLayout.NORTH);
-        setHeadlinePanel.add(this.chooseHeadline, BorderLayout.CENTER);
-
-        //Headliner Rating Panel
-        this.headlineRating = new JComboBox(this.rating);
-        this.headlineRating.addActionListener(this);
-        this.headlineRating.setEnabled(false);
-        JPanel headlineRatingPanel = new JPanel();
-        headlineRatingPanel.setLayout(new BorderLayout());
-        headlineRatingPanel.add(new JLabel("Set Rating"), BorderLayout.NORTH);
-        headlineRatingPanel.add(this.headlineRating, BorderLayout.CENTER);
-
-        //Add Friend Panel
-        String[] friendArray = null;
-        friendArray = ReadFromDatabase.selectFriends(this.jdbcConnection, friendArray);
-        this.addFriend = new JComboBox(friendArray);
-        this.addFriend.addActionListener(this);
-        JPanel addFriendPanel = new JPanel();
-        addFriendPanel.setLayout(new BorderLayout());
-        addFriendPanel.add(new JLabel("Add Friends"), BorderLayout.NORTH);
-        addFriendPanel.add(this.addFriend, BorderLayout.CENTER);
-
-        //Remove Friend Panel
-        this.removeFriend = new JComboBox(new String[]{"Remove Friend"});
-        this.removeFriend.addActionListener(this);
-        JPanel removeFriendPanel = new JPanel();
-        removeFriendPanel.setLayout(new BorderLayout());
-        removeFriendPanel.add(new JLabel("Remove Friends"), BorderLayout.NORTH);
-        removeFriendPanel.add(this.removeFriend, BorderLayout.CENTER);
-
-        //Supporting Act 1 Select Panel
-        this.chooseSupport1 = new JComboBox(bandData);
-        this.chooseSupport1.addActionListener(this);
-        this.setSupport1Panel = new JPanel();
-        this.setSupport1Panel.setVisible(false);
-        this.setSupport1Panel.setLayout(new BorderLayout());
-        this.setSupport1Panel.add(new JLabel("Add Supporting Band"), BorderLayout.NORTH);
-        this.setSupport1Panel.add(this.chooseSupport1, BorderLayout.CENTER);
-
-        //Supporting Act 1 Rating Panel
-        this.support1Rating = new JComboBox(this.rating);
-        this.support1Rating.addActionListener(this);
-        this.support1Rating.setEnabled(false);
-        this.support1RatingPanel = new JPanel();
-        this.support1RatingPanel.setVisible(false);
-        this.support1RatingPanel.setLayout((new BorderLayout()));
-        this.support1RatingPanel.add(new JLabel("Set Rating"), BorderLayout.NORTH);
-        this.support1RatingPanel.add(this.support1Rating, BorderLayout.CENTER);
-
-        //Supporting Act 2 Select Panel
-        this.chooseSupport2 = new JComboBox(bandData);
-        this.chooseSupport2.addActionListener(this);
-        this.setSupport2Panel = new JPanel();
-        this.setSupport2Panel.setVisible(false);
-        this.setSupport2Panel.setLayout(new BorderLayout());
-        this.setSupport2Panel.add(new JLabel("Add Supporting Band"), BorderLayout.NORTH);
-        this.setSupport2Panel.add(this.chooseSupport2, BorderLayout.CENTER);
-
-        //Supporting Act 2 Rating Panel
-        this.support2Rating = new JComboBox(this.rating);
-        this.support2Rating.addActionListener(this);
-        this.support2Rating.setEnabled(false);
-        this.support2RatingPanel = new JPanel();
-        this.support2RatingPanel.setVisible(false);
-        this.support2RatingPanel.setLayout((new BorderLayout()));
-        this.support2RatingPanel.add(new JLabel("Set Rating"), BorderLayout.NORTH);
-        this.support2RatingPanel.add(this.support2Rating, BorderLayout.CENTER);
-
-        //Supporting Act 3 Select Panel
-        this.chooseSupport3 = new JComboBox(bandData);
-        this.chooseSupport3.addActionListener(this);
-        this.setSupport3Panel = new JPanel();
-        this.setSupport3Panel.setVisible(false);
-        this.setSupport3Panel.setLayout(new BorderLayout());
-        this.setSupport3Panel.add(new JLabel("Add Supporting Band"), BorderLayout.NORTH);
-        this.setSupport3Panel.add(this.chooseSupport3, BorderLayout.CENTER);
-
-        //Supporting Act 3 Rating Panel
-        this.support3Rating = new JComboBox(this.rating);
-        this.support3Rating.addActionListener(this);
-        this.support3Rating.setEnabled(false);
-        this.support3RatingPanel = new JPanel();
-        this.support3RatingPanel.setVisible(false);
-        this.support3RatingPanel.setLayout((new BorderLayout()));
-        this.support3RatingPanel.add(new JLabel("Set Rating"), BorderLayout.NORTH);
-        this.support3RatingPanel.add(this.support3Rating, BorderLayout.CENTER);
-
-        //Supporting Act 4 Select Panel
-        this.chooseSupport4 = new JComboBox(bandData);
-        this.chooseSupport4.addActionListener(this);
-        this.setSupport4Panel = new JPanel();
-        this.setSupport4Panel.setVisible(false);
-        this.setSupport4Panel.setLayout(new BorderLayout());
-        this.setSupport4Panel.add(new JLabel("Add Supporting Band"), BorderLayout.NORTH);
-        this.setSupport4Panel.add(this.chooseSupport4, BorderLayout.CENTER);
-
-        //Supporting Act 4 Rating Panel
-        this.support4Rating = new JComboBox(this.rating);
-        this.support4Rating.addActionListener(this);
-        this.support4Rating.setEnabled(false);
-        this.support4RatingPanel = new JPanel();
-        this.support4RatingPanel.setVisible(false);
-        this.support4RatingPanel.setLayout((new BorderLayout()));
-        this.support4RatingPanel.add(new JLabel("Set Rating"), BorderLayout.NORTH);
-        this.support4RatingPanel.add(this.support4Rating, BorderLayout.CENTER);
-
-        //Button for adding the Gig
-        this.submitButton = new JButton("Submit");
-        this.submitButton.addActionListener(this);
-        JPanel buttonPanel = new JPanel();
-        buttonPanel.setLayout(new BorderLayout());
-        buttonPanel.add(submitButton, BorderLayout.CENTER);
-        buttonPanel.add(new JPanel(), BorderLayout.NORTH);
-        buttonPanel.add(new JPanel(), BorderLayout.WEST);
-        buttonPanel.add(new JPanel(), BorderLayout.EAST);
-
-        this.mainPanel = new JPanel();
-        this.mainPanel.setLayout(new GridLayout(6,3, 5, 10));
-        this.addWindow = new GigWindow("Add Gig");
-        this.addWindow.add(this.mainPanel, BorderLayout.CENTER);
-        this.mainPanel.add(datePanel);
-        this.mainPanel.add(venuePanel);
-        this.mainPanel.add(addFriendPanel);
-        this.mainPanel.add(setHeadlinePanel);
-        this.mainPanel.add(headlineRatingPanel);
-        this.mainPanel.add(removeFriendPanel);
-        this.mainPanel.add(setSupport1Panel);
-        this.mainPanel.add(support1RatingPanel);
-        this.mainPanel.add(new JPanel());
-        this.mainPanel.add(setSupport2Panel);
-        this.mainPanel.add(support2RatingPanel);
-        this.mainPanel.add(new JPanel());
-        this.mainPanel.add(setSupport3Panel);
-        this.mainPanel.add(support3RatingPanel);
-        this.mainPanel.add(new JPanel());
-        this.mainPanel.add(setSupport4Panel);
-        this.mainPanel.add(support4RatingPanel);
-        this.mainPanel.add(buttonPanel);
+        this.addWindow = new GigWindow("Edit Gig");
+        this.addWindow.add(new JPanel(), BorderLayout.NORTH);
+        this.addWindow.add(this.sidePanel, BorderLayout.WEST);
+        this.addWindow.add(this.editPanel, BorderLayout.CENTER);
+        this.addWindow.add(optionPanel, BorderLayout.SOUTH);
     }
 
-    public void friendRevalidator() {
+    public JPanel createPanel(String labelText) {
+        JPanel panel = new JPanel();
+        panel.setLayout(new BorderLayout());
+        panel.add(new JLabel(labelText), BorderLayout.NORTH);
+        return panel;
+    }
+
+    public void setEditPanel() {
+        String[] bandData = ReadFromDatabase.selectBands(this.jdbcConnection);
+        String[] rating = new String[]{"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"};
+        this.editPanel.removeAll();
+        this.editPanel.setLayout(new GridLayout(7,2, 5, 10));
+
+        //Date picker panel
+        this.gigDate = new DatePicker();
+        this.gigDate.enableInputMethods(false);
+        if (this.selectedGig.getEventDay().isEmpty()) {
+            this.gigDate.setDateToToday();
+            this.selectedGig.setEventDay(this.gigDate.toString());
+        } else {
+            gigDate.setDate(this.selectedGig.getLocalDate());
+        }
+        this.gigDate.addDateChangeListener(this::dateChanged);
+        JPanel datePickerPanel = createPanel("Gig Date");
+        datePickerPanel.add(this.gigDate, BorderLayout.CENTER);
+
+        //Venue select panel
+        String[] venueData = ReadFromDatabase.selectVenues(this.jdbcConnection);
+        this.venueSelect = new JComboBox<>(venueData);
+        this.venueSelect.addActionListener(this);
+        if (this.selectedGig.getLocation()!=null){
+            this.venueSelect.setSelectedItem(this.selectedGig.getLocation().toString());
+        }
+        JPanel venuePickerPanel = createPanel("Gig Venue");
+        venuePickerPanel.add(this.venueSelect, BorderLayout.CENTER);
+
+        //Add Friends panel
+        String[] friendArray = ReadFromDatabase.selectFriends(this.jdbcConnection, this.selectedGig.getWentWith().toArray(new String[0]));
+        this.addFriend = new JComboBox<>(friendArray);
+        this.addFriend.addActionListener(this);
+        JPanel addFriendPanel = createPanel("Add Friend");
+        addFriendPanel.add(this.addFriend, BorderLayout.CENTER);
+
+        //Remove Friends panel
+        String[] removeArray = new String[this.selectedGig.getWentWith().size()+1];
+        removeArray[0] = "Remove a Friend";
+        for (int i = 1; i <= this.selectedGig.getWentWith().size(); i++) {
+            removeArray[i] = this.selectedGig.getWentWith().get(i-1);
+        }
+        this.removeFriend = new JComboBox<>(removeArray);
+        this.removeFriend.addActionListener(this);
+        JPanel removeFriendPanel = createPanel("Remove Friend");
+        removeFriendPanel.add(this.removeFriend, BorderLayout.CENTER);
+
+        //Headline select panel
+        this.headlineSelect = new JComboBox<>(bandData);
+        this.headlineSelect.removeItem("Remove Band");
+        this.headlineSelect.addActionListener(this);
+        JPanel headlineSelectPanel = createPanel("Gig Headline");
+        headlineSelectPanel.add(this.headlineSelect, BorderLayout.CENTER);
+
+        //Headline rating select panel
+        this.headlineRating = new JComboBox<>(rating);
+        this.headlineRating.addActionListener(this);
+        JPanel headlineRatingPanel = createPanel("Set Rating");
+        headlineRatingPanel.add(this.headlineRating, BorderLayout.CENTER);
+
+        //Support 1 select panel
+        this.support1Select = new JComboBox<>(bandData);
+        this.support1Select.addActionListener(this);
+        JPanel support1SelectPanel = createPanel("Supporting Band");
+        support1SelectPanel.add(this.support1Select, BorderLayout.CENTER);
+
+        //Support 1 rating select panel
+        this.support1Rating = new JComboBox<>(rating);
+        this.support1Rating.addActionListener(this);
+        JPanel support1RatingPanel = createPanel("Set Rating");
+        support1RatingPanel.add(this.support1Rating, BorderLayout.CENTER);
+
+        //Support 2 select panel
+        this.support2Select = new JComboBox<>(bandData);
+        this.support2Select.addActionListener(this);
+        JPanel support2SelectPanel = createPanel("Supporting Band");
+        support2SelectPanel.add(this.support2Select, BorderLayout.CENTER);
+
+        //Support 2 rating select panel
+        this.support2Rating = new JComboBox<>(rating);
+        this.support2Rating.addActionListener(this);
+        JPanel support2RatingPanel = createPanel("Set Rating");
+        support2RatingPanel.add(this.support2Rating, BorderLayout.CENTER);
+
+        //Support 3 select panel
+        this.support3Select = new JComboBox<>(bandData);
+        this.support3Select.addActionListener(this);
+        JPanel support3SelectPanel = createPanel("Supporting Band");
+        support3SelectPanel.add(this.support3Select, BorderLayout.CENTER);
+
+        //Support 3 rating select panel
+        this.support3Rating = new JComboBox<>(rating);
+        this.support3Rating.addActionListener(this);
+        JPanel support3RatingPanel = createPanel("Set Rating");
+        support3RatingPanel.add(this.support3Rating, BorderLayout.CENTER);
+
+        //Support 4 select panel
+        this.support4Select = new JComboBox<>(bandData);
+        this.support4Select.addActionListener(this);
+        JPanel support4SelectPanel = createPanel("Supporting Band");
+        support4SelectPanel.add(this.support4Select, BorderLayout.CENTER);
+
+        //Support 4 rating select panel
+        this.support4Rating = new JComboBox<>(rating);
+        this.support4Rating.addActionListener(this);
+        JPanel support4RatingPanel = createPanel("Set Rating");
+        support4RatingPanel.add(this.support4Rating, BorderLayout.CENTER);
+
+        //Initialise the selectors, populate them, and enable/disable them
+        revalidateEditPanel(0);
+
+        this.editPanel.add(datePickerPanel);
+        this.editPanel.add(venuePickerPanel);
+        this.editPanel.add(addFriendPanel);
+        this.editPanel.add(removeFriendPanel);
+        this.editPanel.add(headlineSelectPanel);
+        this.editPanel.add(headlineRatingPanel);
+        this.editPanel.add(support1SelectPanel);
+        this.editPanel.add(support1RatingPanel);
+        this.editPanel.add(support2SelectPanel);
+        this.editPanel.add(support2RatingPanel);
+        this.editPanel.add(support3SelectPanel);
+        this.editPanel.add(support3RatingPanel);
+        this.editPanel.add(support4SelectPanel);
+        this.editPanel.add(support4RatingPanel);
+        this.editPanel.revalidate();
+        this.editPanel.repaint();
+    }
+
+    public void revalidateEditPanel(int startVal) {
+        JComboBox[] bandSelectArray = new JComboBox[]{this.headlineSelect, this.support1Select, this.support2Select,
+                this.support3Select, this.support4Select};
+        JComboBox[] bandRatingArray = new JComboBox[]{this.headlineRating, this.support1Rating, this.support2Rating,
+                this.support3Rating, this.support4Rating};
+        if (this.selectedGig.getHeadlineAct()==null) {
+            this.headlineSelect.setEnabled(true);
+            this.headlineRating.setEnabled(true);
+            for (int i = 1; i < 5; i++) {
+                bandSelectArray[i].setEnabled(false);
+                bandRatingArray[i].setEnabled(false);
+            }
+        }
+        else {
+            for (int i = startVal; i < 5; i++) {
+                if (this.selectedGig.getPerformances().size() > i) {
+                    bandSelectArray[i].setSelectedItem(this.selectedGig.getPerformances().get(i).toString());
+                    bandRatingArray[i].setSelectedIndex(this.selectedGig.getPerformances().get(i).getRating());
+                    bandSelectArray[i].setEnabled(true);
+                    bandRatingArray[i].setEnabled(true);
+                } else if (this.selectedGig.getPerformances().size() == i) {
+                    bandSelectArray[i].setEnabled(true);
+                    bandRatingArray[i].setEnabled(true);
+                } else {
+                    bandSelectArray[i].setEnabled(false);
+                    bandRatingArray[i].setEnabled(false);
+                }
+                bandRatingArray[i].revalidate();
+                bandRatingArray[i].repaint();
+            }
+        }
+    }
+
+    public void setSidePanel(String dateLabel, String venueLabel, String headlineLabel, String friends,
+                             ArrayList<Band> performancesList) {
+        sidePanel.removeAll();
+        sidePanel.setPreferredSize(new Dimension(300,150));
+        sidePanel.setLayout(new GridLayout(11,1));
+        sidePanel.add(new JPanel().add(new JLabel("GIG DETAILS")));
+        sidePanel.add(new JPanel().add(new JLabel("Date: " + dateLabel)));
+        sidePanel.add(new JPanel().add(new JLabel("Venue: " + venueLabel)));
+        sidePanel.add(new JPanel().add(new JLabel("Headline: " + headlineLabel)));
+        sidePanel.add(new JPanel().add(new JLabel("Friends: " + friends)));
+        sidePanel.add(new JPanel().add(new JLabel("Performances: ")));
+        int sparePanels = 5;
+        if (performancesList != null){
+            for (Band performance : performancesList) {
+                sidePanel.add(new JPanel().add(new JLabel(performance.performanceDetails())));
+                sparePanels--;
+            }
+        }
+        for (int i = 0; i < sparePanels; i++) {
+            sidePanel.add(new JPanel());
+        }
+        sidePanel.revalidate();
+        sidePanel.repaint();
+    }
+
+    public void refreshPanels(boolean editPanel) {
+        if (editPanel) {
+            setEditPanel();
+        }
+        String bandName = "";
+        String venueName = "";
+        if (this.selectedGig.getHeadlineAct() != null) {
+            bandName = this.selectedGig.getHeadlineAct().getBandName();
+        }
+        if (this.selectedGig.getLocation() != null) {
+            venueName = this.selectedGig.getLocation().toString();
+        }
+        setSidePanel(this.selectedGig.getEventDay(),
+                venueName,
+                bandName,
+                this.selectedGig.getFriendsString(),
+                this.selectedGig.getPerformances());
+    }
+
+    public void friendSelectSettings(JComboBox<String> selectorItem) {
+        if (selectorItem.getSelectedItem().equals("Add New Friend")) {
+            String friendName = JOptionFriend.addFriend(this.jdbcConnection);
+            if (!friendName.isEmpty()) {
+                addFriend.removeItem("Add New Friend");
+                addFriend.addItem(friendName);
+                addFriend.addItem("Add New Friend");
+                this.addFriend.setSelectedItem(friendName);
+                friendSelectSettings(this.addFriend);
+            }
+        }
+        if (selectorItem.getSelectedIndex() != 0) {
+            if (selectorItem == this.addFriend) {
+                this.selectedGig.addWentWith(this.addFriend.getSelectedItem().toString());
+                this.removeFriend.addItem(this.addFriend.getSelectedItem().toString());
+                this.addFriend.removeItem(this.addFriend.getSelectedItem());
+                this.addFriend.setSelectedIndex(0);
+            } else {
+                this.selectedGig.removeWentWith(this.removeFriend.getSelectedItem().toString());
+                this.addFriend.removeItem("Add New Friend");
+                this.addFriend.addItem(this.removeFriend.getSelectedItem().toString());
+                this.addFriend.addItem("Add New Friend");
+                this.removeFriend.removeItem(this.removeFriend.getSelectedItem());
+                this.removeFriend.setSelectedIndex(0);
+            }
+        }
+        refreshPanels(false);
         this.addFriend.revalidate();
         this.addFriend.repaint();
         this.removeFriend.revalidate();
         this.removeFriend.repaint();
     }
 
+    public void bandSelectSettings(JComboBox<String> selectorItem, int selectValue) {
+        JComboBox[] bandSelectArray = new JComboBox[]{this.headlineSelect, this.support1Select, this.support2Select,
+                this.support3Select, this.support4Select};
+        if (selectorItem.getSelectedItem().equals("Add New Band")) {
+            String bandName = JOptionBand.addBand(this.jdbcConnection);
+            if (bandName.isEmpty()) {
+                return;
+            }
+            for (JComboBox<String> bandSelector : bandSelectArray) {
+                bandSelector.removeItem("Remove Band");
+                bandSelector.removeItem("Add New Band");
+                bandSelector.addItem(bandName);
+                bandSelector.addItem("Remove Band");
+                bandSelector.addItem("Add New Band");
+                bandSelector.revalidate();
+                bandSelector.repaint();
+            }
+            selectorItem.setSelectedItem(bandName);
+            bandSelectSettings(selectorItem, selectValue);
+        }
+        else if (selectorItem.getSelectedItem().equals("Remove Band")) {
+            if (this.selectedGig.getPerformances().size() < selectValue){
+                JOptionPane.showMessageDialog(null,"You cannot remove a band when nothing has been selected!");
+                return;
+            }
+            int answer = JOptionPane.showConfirmDialog(null, "Are you sure you want to remove this band?",
+                    "Confirm remove band", JOptionPane.YES_NO_OPTION);
+            if (answer != 0) {
+                selectorItem.setSelectedItem(this.selectedGig.getPerformances().get(selectValue-1).toString());
+            }
+            else {
+                this.selectedGig.removePerformance(this.selectedGig.getPerformances().get(selectValue-1));
+                refreshPanels(true);
+            }
+        }
+        else if (selectorItem.getSelectedIndex()!=0) {
+            String[] bandDetails = selectorItem.getSelectedItem().toString().split(" - ");
+            if (this.selectedGig.getHeadlineAct() == null) {
+                this.selectedGig.setHeadlineAct(new Band(bandDetails[0],
+                        bandDetails[2],
+                        bandDetails[1],
+                        this.headlineRating.getSelectedIndex()));
+            }
+            else if (selectValue == 1) {
+                this.selectedGig.setHeadlineAct(new Band(bandDetails[0],
+                        bandDetails[2],
+                        bandDetails[1],
+                        this.selectedGig.getHeadlineAct().getRating()));
+            }
+            else if (this.selectedGig.getPerformances().size() < selectValue) {
+                this.selectedGig.addPerformance(new Band(bandDetails[0], bandDetails[2], bandDetails[1], 0));
+            } else {
+                this.selectedGig.changePerformance(this.selectedGig.getPerformances().get(selectValue-1),
+                        new Band(bandDetails[0], bandDetails[2], bandDetails[1],
+                                this.selectedGig.getPerformances().get(selectValue-1).getRating()));
+            }
+            revalidateEditPanel(selectValue);
+            refreshPanels(false);
+        }
+        else if (this.selectedGig.getPerformances().size() < selectValue) {
+            selectorItem.setSelectedIndex(0);
+        }
+        else {
+            selectorItem.setSelectedItem(this.selectedGig.getPerformances().get(selectValue-1).toString());
+        }
+    }
+
+    public void setVenueSelect() {
+        if (this.venueSelect.getSelectedItem().equals("Add New Venue")) {
+            String addedVenue = JOptionVenue.addVenue(this.jdbcConnection);
+            this.venueSelect.removeItem("Add New Venue");
+            this.venueSelect.addItem(addedVenue);
+            this.venueSelect.addItem("Add New Venue");
+            this.venueSelect.setSelectedItem(addedVenue);
+            this.venueSelect.revalidate();
+            this.venueSelect.repaint();
+            setVenueSelect();
+        } else if (this.venueSelect.getSelectedIndex()!=0) {
+            String[] venueDetails = this.venueSelect.getSelectedItem().toString().split(" - ");
+            this.selectedGig.setLocation(new Venue(venueDetails[0], venueDetails[1], false));
+        }
+        refreshPanels(false);
+    }
+
+    public void bandRatingSettings(JComboBox<String> selectorItem, int selectValue) {
+        int intRating = Integer.parseInt(selectorItem.getSelectedItem().toString());
+        if (selectValue >= this.selectedGig.getPerformances().size()) {
+            selectorItem.setSelectedIndex(0);
+            return;
+        }
+        this.selectedGig.getPerformances().get(selectValue).setRating(intRating);
+        refreshPanels(false);
+    }
+
     @Override
     public void actionPerformed(ActionEvent e) {
-        if (e.getSource() == this.chooseVenue) {
-            if (this.chooseVenue.getSelectedItem() =="Add New Venue") {
-                String venue = JOptionVenue.addVenue(this.jdbcConnection);
-                String[] venueData = ReadFromDatabase.selectVenues(this.jdbcConnection);
-                this.chooseVenue.removeAllItems();
-                for (String venueItem : venueData) {
-                    this.chooseVenue.addItem(venueItem);
-                }
-                this.chooseVenue.setSelectedItem(venue);
-                this.chooseVenue.revalidate();
-                this.chooseVenue.repaint();
+        if (e.getSource() == this.saveButton) {
+            if (!this.selectedGig.checkIfNull()){
+                JOptionPane.showMessageDialog(null,
+                        "Please ensure all required fields have been filled",
+                        "Gig details missing!",JOptionPane.WARNING_MESSAGE);
+                return;
             }
-            else if (this.chooseVenue.getSelectedIndex()!=0) {
-                String[] venueDetails = this.chooseVenue.getSelectedItem().toString().split(" - ");
-                this.gigVenue = new Venue(venueDetails[0], venueDetails[1], false);
-                this.submitCheckArray[0] = 1;
-            }
-            else {
-                this.submitCheckArray[0] = 0;
-            }
-        }
-        if (e.getSource() == this.chooseHeadline) {
-            if (this.chooseHeadline.getSelectedItem()=="Add New Band") {
-                String band = JOptionBand.addBand(this.jdbcConnection);
-                String[] bandData = ReadFromDatabase.selectBands(this.jdbcConnection);
-                this.chooseHeadline.removeAllItems();
-                for (String artist : bandData) {
-                    this.chooseHeadline.addItem(artist);
-                }
-                this.chooseHeadline.setSelectedItem(band);
-                this.chooseHeadline.revalidate();
-                this.chooseHeadline.repaint();
-            }
-            else if (this.chooseHeadline.getSelectedIndex()!=0) {
-                String[] bandDetails = this.chooseHeadline.getSelectedItem().toString().split(" - ");
-                this.gigHeadline = new Band(bandDetails[0], bandDetails[2], bandDetails[1], 5);
-                this.headlineRating.setEnabled(true);
-                this.setSupport1Panel.setVisible(true);
-                this.support1RatingPanel.setVisible(true);
-                this.submitCheckArray[1] = 1;
-            }
-            else {
-                //If no band is selected then support band panels are hidden
-                this.headlineRating.setEnabled(false);
-                this.setSupport1Panel.setVisible(false);
-                this.support1RatingPanel.setVisible(false);
-                this.setSupport2Panel.setVisible(false);
-                this.support2RatingPanel.setVisible(false);
-                this.setSupport3Panel.setVisible(false);
-                this.support3RatingPanel.setVisible(false);
-                this.setSupport4Panel.setVisible(false);
-                this.support4RatingPanel.setVisible(false);
-                this.submitCheckArray[1] = 0;
-                this.submitCheckArray[2] = 0;
-            }
-        }
-        if (e.getSource() == this.headlineRating){
-            int intRating = Integer.parseInt(this.headlineRating.getSelectedItem().toString());
-            this.gigHeadline.setRating(intRating);
-            this.submitCheckArray[2] = 1;
-        }
-        if (e.getSource() == this.chooseSupport1) {
-            if (this.chooseSupport1.getSelectedItem() == "Add New Band") {
-                String band = JOptionBand.addBand(this.jdbcConnection);
-                String[] bandData = ReadFromDatabase.selectBands(this.jdbcConnection);
-                this.chooseSupport1.removeAllItems();
-                for (String artist : bandData) {
-                    this.chooseSupport1.addItem(artist);
-                }
-                this.chooseSupport1.setSelectedItem(band);
-                this.setSupport1Panel.revalidate();
-                this.setSupport1Panel.repaint();
-            } else if (this.chooseSupport1.getSelectedIndex() != 0) {
-                String[] bandDetails = this.chooseSupport1.getSelectedItem().toString().split(" - ");
-                this.gigSupport1 = new Band(bandDetails[0], bandDetails[2], bandDetails[1], 5);
-                this.support1Rating.setEnabled(true);
-                this.setSupport2Panel.setVisible(true);
-                this.support2RatingPanel.setVisible(true);
-            } else {
-                this.support1Rating.setEnabled(false);
-                this.setSupport2Panel.setVisible(false);
-                this.support2RatingPanel.setVisible(false);
-                this.setSupport3Panel.setVisible(false);
-                this.support3RatingPanel.setVisible(false);
-                this.setSupport4Panel.setVisible(false);
-                this.support4RatingPanel.setVisible(false);
-            }
-        }
-        if (e.getSource() == this.support1Rating){
-            int intRating = Integer.parseInt(this.support1Rating.getSelectedItem().toString());
-            this.gigSupport1.setRating(intRating);
-        }
-        if (e.getSource() == this.chooseSupport2) {
-            if (this.chooseSupport2.getSelectedItem() == "Add New Band") {
-                JOptionBand.addBand(this.jdbcConnection);
-                String[] bandData = ReadFromDatabase.selectBands(this.jdbcConnection);
-                this.chooseSupport2.removeAllItems();
-                for (String artist : bandData) {
-                    this.chooseSupport2.addItem(artist);
-                }
-                this.setSupport2Panel.revalidate();
-                this.setSupport2Panel.repaint();
-            } else if (this.chooseSupport2.getSelectedIndex() != 0) {
-                String[] bandDetails = this.chooseSupport2.getSelectedItem().toString().split(" - ");
-                this.gigSupport2 = new Band(bandDetails[0], bandDetails[2], bandDetails[1], 5);
-                this.support2Rating.setEnabled(true);
-                this.setSupport3Panel.setVisible(true);
-                this.support3RatingPanel.setVisible(true);
-            } else {
-                this.support2Rating.setEnabled(false);
-                this.setSupport3Panel.setVisible(false);
-                this.support3RatingPanel.setVisible(false);
-                this.setSupport4Panel.setVisible(false);
-                this.support4RatingPanel.setVisible(false);
-            }
-        }
-        if (e.getSource() == this.support2Rating){
-            int intRating = Integer.parseInt(this.support2Rating.getSelectedItem().toString());
-            this.gigSupport2.setRating(intRating);
-        }
-        if (e.getSource() == this.chooseSupport3) {
-            if (this.chooseSupport3.getSelectedItem() == "Add New Band") {
-                JOptionBand.addBand(this.jdbcConnection);
-                String[] bandData = ReadFromDatabase.selectBands(this.jdbcConnection);
-                this.chooseSupport3.removeAllItems();
-                for (String artist : bandData) {
-                    this.chooseSupport3.addItem(artist);
-                }
-                this.setSupport2Panel.revalidate();
-                this.setSupport2Panel.repaint();
-            } else if (this.chooseSupport3.getSelectedIndex() != 0) {
-                String[] bandDetails = this.chooseSupport3.getSelectedItem().toString().split(" - ");
-                this.gigSupport3 = new Band(bandDetails[0], bandDetails[2], bandDetails[1], 5);
-                this.support3Rating.setEnabled(true);
-                this.setSupport4Panel.setVisible(true);
-                this.support4RatingPanel.setVisible(true);
-            } else {
-                this.support3Rating.setEnabled(false);
-                this.setSupport4Panel.setVisible(false);
-                this.support4RatingPanel.setVisible(false);
-            }
-        }
-        if (e.getSource() == this.support3Rating){
-            int intRating = Integer.parseInt(this.support3Rating.getSelectedItem().toString());
-            this.gigSupport3.setRating(intRating);
-        }
-        if (e.getSource() == this.chooseSupport4) {
-            if (this.chooseSupport4.getSelectedItem() == "Add New Band") {
-                JOptionBand.addBand(this.jdbcConnection);
-                String[] bandData = ReadFromDatabase.selectBands(this.jdbcConnection);
-                this.chooseSupport4.removeAllItems();
-                for (String artist : bandData) {
-                    this.chooseSupport4.addItem(artist);
-                }
-                this.setSupport4Panel.revalidate();
-                this.setSupport4Panel.repaint();
-            } else if (this.chooseSupport4.getSelectedIndex() != 0) {
-                String[] bandDetails = this.chooseSupport4.getSelectedItem().toString().split(" - ");
-                this.gigSupport4 = new Band(bandDetails[0], bandDetails[2], bandDetails[1], 5);
-                this.support4Rating.setEnabled(true);
-            } else {
-                this.support4Rating.setEnabled(false);
-            }
-        }
-        if (e.getSource() == this.support4Rating){
-            int intRating = Integer.parseInt(this.support4Rating.getSelectedItem().toString());
-            this.gigSupport4.setRating(intRating);
-        }
-        if (e.getSource() == this.addFriend){
-            if (this.addFriend.getSelectedItem() == "Add New Friend") {
-                String friendName = JOptionFriend.addFriend(this.jdbcConnection);
-                if (!friendName.equals("")){
-                    addFriend.removeItem("Add New Friend");
-                    addFriend.addItem(friendName);
-                    addFriend.addItem("Add New Friend");
-                    addFriend.setSelectedItem(friendName);
-                }
-            }
-            else if (this.addFriend.getSelectedIndex()!=0) {
-                this.removeFriend.addItem(this.addFriend.getSelectedItem());
-                this.addFriend.removeItem(this.addFriend.getSelectedItem());
-                friendRevalidator();
-            }
-        }
-        if (e.getSource() == this.removeFriend){
-            if (this.removeFriend.getSelectedIndex()!=0) {
-                this.addFriend.removeItem("Add New Friend");
-                this.addFriend.addItem(this.removeFriend.getSelectedItem());
-                this.addFriend.addItem("Add New Friend");
-                this.removeFriend.removeItem(this.removeFriend.getSelectedItem());
-                friendRevalidator();
-            }
-        }
-        if (e.getSource() == this.submitButton) {
-            if(IntStream.of(submitCheckArray).anyMatch(x -> x == 0)){
-                JOptionPane.showMessageDialog(null, "Make sure a Headline and Venue have been selected!",
-                        "Input Error", JOptionPane.WARNING_MESSAGE);
-            }
-            else {
-                Gig addGig = new Gig(this.gigDate.toString(), this.gigVenue, this.gigHeadline);
-                Band[] supportBands = new Band[]{this.gigSupport1, this.gigSupport2, this.gigSupport3, this.gigSupport4};
-                for(Band support: supportBands){
-                    if (support!=null) {
-                        addGig.addPerformance(support);
-                    }
-                }
-                if (this.removeFriend.getItemCount() > 1){
-                    for(int i = 0; i < this.removeFriend.getItemCount(); i++){
-                        //Attempting to remove the "Remove Friend" item caused issues, this skip works instead
-                        if (this.removeFriend.getItemAt(i).equals("Remove Friend")){
-                            continue;
-                        }
-                        addGig.addWentWith(this.removeFriend.getItemAt(i).toString());
-                    }
-                }
+            int saveResponse = JOptionPane.showConfirmDialog(null,
+                    "Are you sure you want to save your changes to this gig?",
+                    "Confirm save gig", JOptionPane.YES_NO_OPTION);
+            if (saveResponse == 0) {
                 try {
-                    InsertToDatabase.insertGig(this.jdbcConnection, addGig);
+                    InsertToDatabase.insertGig(this.jdbcConnection, this.selectedGig);
                 } catch (SQLException ex) {
                     throw new RuntimeException(ex);
                 }
                 this.addWindow.dispose();
             }
+        } else if (e.getSource() == this.headlineSelect) {
+            bandSelectSettings(this.headlineSelect, 1);
+        } else if (e.getSource() == this.support1Select) {
+            bandSelectSettings(this.support1Select, 2);
+        } else if (e.getSource() == this.support2Select) {
+            bandSelectSettings(this.support2Select, 3);
+        } else if (e.getSource() == this.support3Select) {
+            bandSelectSettings(this.support3Select, 4);
+        } else if (e.getSource() == this.support4Select) {
+            bandSelectSettings(this.support4Select, 5);
+        } else if (e.getSource() == this.headlineRating) {
+            bandRatingSettings(this.headlineRating, 0);
+        } else if (e.getSource() == this.support1Rating) {
+            bandRatingSettings(this.support1Rating, 1);
+        } else if (e.getSource() == this.support2Rating) {
+            bandRatingSettings(this.support2Rating, 2);
+        } else if (e.getSource() == this.support3Rating) {
+            bandRatingSettings(this.support3Rating, 3);
+        } else if (e.getSource() == this.support4Rating) {
+            bandRatingSettings(this.support4Rating, 4);
+        } else if (e.getSource() == this.addFriend) {
+            friendSelectSettings(this.addFriend);
+        } else if (e.getSource() == this.removeFriend) {
+            friendSelectSettings(this.removeFriend);
+        } else if (e.getSource() == this.venueSelect) {
+            setVenueSelect();
         }
+    }
+
+    @Override
+    public void dateChanged(DateChangeEvent dateChangeEvent) {
+        this.selectedGig.setEventDay(this.gigDate.toString());
+        System.out.println("change");
+        refreshPanels(false);
     }
 }

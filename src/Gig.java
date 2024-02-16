@@ -58,7 +58,8 @@ public class Gig extends Event {
         this.wentWith.remove(name);
     }
 
-    public Band getHeadlineAct() { return this.headlineAct; }
+    public Band getHeadlineAct() {
+        return this.headlineAct; }
 
     public ArrayList<Band> getPerformances() {
         return this.performances;

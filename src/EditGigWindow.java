@@ -300,7 +300,7 @@ public class EditGigWindow implements ActionListener, DateChangeListener {
                 addFriend.addItem(friendName);
                 addFriend.addItem("Add New Friend");
                 this.addFriend.setSelectedItem(friendName);
-                return;
+                friendSelectSettings(this.addFriend);
             }
         }
         if (selectorItem.getSelectedIndex() != 0) {
@@ -343,6 +343,7 @@ public class EditGigWindow implements ActionListener, DateChangeListener {
                 bandSelector.repaint();
             }
             selectorItem.setSelectedItem(bandName);
+            bandSelectSettings(selectorItem, selectValue);
         }
         else if (selectorItem.getSelectedItem().equals("Remove Band")) {
             if (this.selectedGig.getPerformances().size() < selectValue){
@@ -368,7 +369,7 @@ public class EditGigWindow implements ActionListener, DateChangeListener {
                         this.selectedGig.getHeadlineAct().getRating()));
             }
             else if (this.selectedGig.getPerformances().size() < selectValue) {
-                this.selectedGig.addPerformance(new Band(bandDetails[0], bandDetails[2], bandDetails[1], 5));
+                this.selectedGig.addPerformance(new Band(bandDetails[0], bandDetails[2], bandDetails[1], 0));
             } else {
                 this.selectedGig.changePerformance(this.selectedGig.getPerformances().get(selectValue-1),
                         new Band(bandDetails[0], bandDetails[2], bandDetails[1],
@@ -383,6 +384,23 @@ public class EditGigWindow implements ActionListener, DateChangeListener {
         else {
             selectorItem.setSelectedItem(this.selectedGig.getPerformances().get(selectValue-1).toString());
         }
+    }
+
+    public void setVenueSelect() {
+        if (this.venueSelect.getSelectedItem().equals("Add New Venue")) {
+            String addedVenue = JOptionVenue.addVenue(this.jdbcConnection);
+            this.venueSelect.removeItem("Add New Venue");
+            this.venueSelect.addItem(addedVenue);
+            this.venueSelect.addItem("Add New Venue");
+            this.venueSelect.setSelectedItem(addedVenue);
+            this.venueSelect.revalidate();
+            this.venueSelect.repaint();
+            setVenueSelect();
+        } else if (this.venueSelect.getSelectedIndex()!=0) {
+            String[] venueDetails = this.venueSelect.getSelectedItem().toString().split(" - ");
+            this.selectedGig.setLocation(new Venue(venueDetails[0], venueDetails[1], false));
+        }
+        refreshPanels(false);
     }
 
     public void bandRatingSettings(JComboBox<String> selectorItem, int selectValue) {
@@ -420,7 +438,7 @@ public class EditGigWindow implements ActionListener, DateChangeListener {
                 "Confirm save gig", JOptionPane.YES_NO_OPTION);
             if (saveResponse==0) {
                 System.out.println("Save changes");
-        }
+            }
         }
         else if (e.getSource() == this.headlineSelect) {
             bandSelectSettings(this.headlineSelect, 1);
@@ -459,19 +477,7 @@ public class EditGigWindow implements ActionListener, DateChangeListener {
             friendSelectSettings(this.removeFriend);
         }
         else if (e.getSource() == this.venueSelect){
-            if (this.venueSelect.getSelectedItem().equals("Add New Venue")) {
-                String addedVenue = JOptionVenue.addVenue(this.jdbcConnection);
-                this.venueSelect.removeItem("Add New Venue");
-                this.venueSelect.addItem(addedVenue);
-                this.venueSelect.addItem("Add New Venue");
-                this.venueSelect.setSelectedItem(addedVenue);
-                this.venueSelect.revalidate();
-                this.venueSelect.repaint();
-            } else if (this.venueSelect.getSelectedIndex()!=0) {
-                String[] venueDetails = this.venueSelect.getSelectedItem().toString().split(" - ");
-                this.selectedGig.setLocation(new Venue(venueDetails[0], venueDetails[1], false));
-            }
-            refreshPanels(false);
+            setVenueSelect();
         }
         else if (e.getSource() == this.gigList){
             if (this.gigList.getSelectedIndex()==0){
