@@ -74,7 +74,6 @@ public class EditGigWindow implements ActionListener, DateChangeListener {
         setSidePanel("", "", "", "", null);
         this.editPanel = new JPanel();
         setEditPanel();
-        setBottomPanel();
 
         this.addWindow = new GigWindow("Edit Gig");
         this.addWindow.add(searchPanel, BorderLayout.NORTH);
@@ -88,10 +87,6 @@ public class EditGigWindow implements ActionListener, DateChangeListener {
         panel.setLayout(new BorderLayout());
         panel.add(new JLabel(labelText), BorderLayout.NORTH);
         return panel;
-    }
-
-    public void setBottomPanel() {
-
     }
 
     public void setEditPanel() {
@@ -411,12 +406,12 @@ public class EditGigWindow implements ActionListener, DateChangeListener {
                 "Are you sure you want to delete this gig permanently?",
                 "Confirm delete gig", JOptionPane.YES_NO_OPTION);
             if (deleteResponse==0) {
-                /*try {
+                try {
                     EditDatabase.deleteGig(this.jdbcConnection, this.gigDatabaseId);
                     JOptionPane.showMessageDialog(null, "Gig has been deleted");
                 } catch (SQLException ex) {
                     throw new RuntimeException(ex);
-                }*/
+                }
             }
         }
         else if (e.getSource() == this.saveButton) {

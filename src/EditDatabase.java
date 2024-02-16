@@ -11,9 +11,7 @@ public class EditDatabase {
         ps.executeUpdate();
     }
     public static void deleteGig(Connection conn, int gigId) throws SQLException {
-        PreparedStatement ps = conn.prepareStatement ("DELETE Gig, Performance, Attended_with FROM Gig " +
-                "JOIN Performance ON (Gig.Id = Performance.Gig_Id) JOIN Attended_with ON (Gig.Id = Attended_with.Gig_Id)" +
-                " WHERE Gig.Id = ?");
+        PreparedStatement ps = conn.prepareStatement ("DELETE FROM Gig WHERE Gig.Id = ?");
         ps.setInt (1, gigId);
         ps.executeUpdate();
     }

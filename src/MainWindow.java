@@ -111,20 +111,52 @@ public class MainWindow implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        if (e.getSource()== selectGigOptions) {
-            switch (this.selectGigOptions.getSelectedIndex()) {
+        if (e.getSource() == selectVenueOptions) {
+            switch (this.selectVenueOptions.getSelectedIndex()) {
                 case 0 -> {
                 }
                 case 1 -> {
-                    new AddGigWindow(this.jdbcConnection).newWindow();
-                    this.selectGigOptions.setSelectedIndex(0);
+                    System.out.println("Add");
+                    this.selectVenueOptions.setSelectedIndex(0);
                 }
                 case 2 -> {
-                    new EditGigWindow(this.jdbcConnection).newWindow();
-                    this.selectGigOptions.setSelectedIndex(0);
+                    System.out.println("Edit/Remove");
+                    this.selectVenueOptions.setSelectedIndex(0);
                 }
             }
-        } else if (e.getSource()==this.refreshButton) {
+        }
+        else if (e.getSource() == selectBandOptions) {
+            switch (this.selectBandOptions.getSelectedIndex()) {
+                case 0 -> {
+                }
+                case 1 -> {
+                    System.out.println("Add");
+                    this.selectBandOptions.setSelectedIndex(0);
+                }
+                case 2 -> {
+                    System.out.println("Edit/Remove");
+                    this.selectBandOptions.setSelectedIndex(0);
+                }
+            }
+        }
+        else if (e.getSource() == selectGigOptions) {
+        switch (this.selectGigOptions.getSelectedIndex()) {
+            case 0 -> {
+            }
+            case 1 -> {
+                new AddGigWindow(this.jdbcConnection).newWindow();
+                this.selectGigOptions.setSelectedIndex(0);
+            }
+            case 2 -> {
+                new EditGigWindow(this.jdbcConnection).newWindow();
+                this.selectGigOptions.setSelectedIndex(0);
+            }
+        }
+        } else if (e.getSource() == this.selectFestivalOptions) {
+            System.out.println("Work in progress");
+            this.selectFestivalOptions.setSelectedIndex(0);
+        }
+        else if (e.getSource() == this.refreshButton) {
             updateTable();
         }
     }
