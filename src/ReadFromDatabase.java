@@ -51,12 +51,13 @@ public class ReadFromDatabase {
     public static String[][] selectPerformances(Connection conn) throws SQLException {
         int arrayLength = getLastId(conn, "Performance");
 
-        PreparedStatement ps = conn.prepareStatement("SELECT Gig.Id AS ID, Gig.Date AS Date, Band.BandName AS Artist, Venue.VenueName " +
-                "AS Venue, Performance.Rating AS Rating FROM Gig JOIN Performance ON Gig.Id = Performance.Gig_Id JOIN Band ON " +
-                "Band.Id = Performance.Band_Id JOIN Venue ON Venue.Id = Gig.Venue_Id ORDER BY Gig.Date, Performance.Id");
+        PreparedStatement ps = conn.prepareStatement("SELECT Gig.Id AS ID, Gig.Date AS Date, Band.BandName AS Artist, " +
+                "(Venue.VenueName || ' - ' || Venue.Location) AS Venue, Performance.Rating AS Rating FROM Gig " +
+                "JOIN Performance ON Gig.Id = Performance.Gig_Id JOIN Band ON Band.Id = Performance.Band_Id " +
+                "JOIN Venue ON Venue.Id = Gig.Venue_Id ORDER BY Gig.Id, Performance.Id");
         ResultSet rs = ps.executeQuery();
 
-        String[][] bandTable = new String[arrayLength][4];
+        String[][] bandTable = new String[arrayLength][5];
         int i = 0;
 
         while (rs.next()) {

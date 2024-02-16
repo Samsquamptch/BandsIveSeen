@@ -15,4 +15,11 @@ public class MyFrame extends JFrame {
         this.setLayout(new BorderLayout());
         this.setVisible(true);
     }
+
+    public static JPanel createPanel(String labelText) {
+        JPanel panel = new JPanel();
+        panel.setLayout(new BorderLayout());
+        panel.add(new JLabel(labelText), BorderLayout.NORTH);
+        return panel;
+    }
 }

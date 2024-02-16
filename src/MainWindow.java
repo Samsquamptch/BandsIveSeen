@@ -1,6 +1,7 @@
 package src;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -8,12 +9,12 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 public class MainWindow implements ActionListener {
-    JButton addGigButton;
-    JButton editGigButton;
-    JButton delGigButton;
+    JComboBox<String> selectGigOptions;
+    JComboBox<String> selectBandOptions;
+    JComboBox<String> selectVenueOptions;
+    JComboBox<String> selectFestivalOptions;
     JButton refreshButton;
     JTable bandTable;
-    JScrollPane tableScrollPane;
     JPanel mainPanel;
     private final Connection jdbcConnection;
 
@@ -21,53 +22,73 @@ public class MainWindow implements ActionListener {
         this.jdbcConnection = connection;
     }
 
+    public String[] makeJComboBoxArray(String subject) {
+        String[] subjectArray = new String[3];
+        subjectArray[0] = "Select";
+        subjectArray[1] = "Add a " + subject;
+        subjectArray[2] = "Edit/Delete a " + subject;
+        return subjectArray;
+    }
+
     public void newUI() throws SQLException {
 
-        this.addGigButton = new JButton();
-        this.addGigButton.setText("Add New Gig");
-        this.addGigButton.addActionListener(this);
+        //Select venue options
+        this.selectVenueOptions = new JComboBox<>(makeJComboBoxArray("Venue"));
+        this.selectVenueOptions.addActionListener(this);
+        JPanel venueOptionsPanel = MyFrame.createPanel("Venue Options");
+        venueOptionsPanel.add(selectVenueOptions, BorderLayout.CENTER);
 
-        this.editGigButton = new JButton();
-        this.editGigButton.setText("Edit a Gig");
-        this.editGigButton.addActionListener(this);
+        //Select band options
+        this.selectBandOptions = new JComboBox<>(makeJComboBoxArray("Band"));
+        this.selectBandOptions.addActionListener(this);
+        JPanel bandOptionsPanel = MyFrame.createPanel("Band Options");
+        bandOptionsPanel.add(selectBandOptions, BorderLayout.CENTER);
 
-        this.delGigButton = new JButton();
-        this.delGigButton.setText("Delete a Gig");
-        this.delGigButton.addActionListener(this);
+        //Select gig options
+        this.selectGigOptions = new JComboBox<>(makeJComboBoxArray("Gig"));
+        this.selectGigOptions.addActionListener(this);
+        JPanel gigOptionsPanel = MyFrame.createPanel("Gig Options");
+        gigOptionsPanel.add(selectGigOptions, BorderLayout.CENTER);
 
-        //The table
-        String[] columnNames = {"Band Name", "Date", "Venue", "Rating"};
-        String[][] tableData = ReadFromDatabase.selectPerformances(this.jdbcConnection);
-        this.bandTable = new JTable(tableData, columnNames);
-        this.tableScrollPane = new JScrollPane(bandTable);
+        //Select festival options
+        this.selectFestivalOptions = new JComboBox<>(makeJComboBoxArray("Festival"));
+        this.selectFestivalOptions.addActionListener(this);
+        JPanel festivalOptionsPanel = MyFrame.createPanel("Festival Options");
+        festivalOptionsPanel.add(selectFestivalOptions, BorderLayout.CENTER);
 
         //Refresh button
-        this.refreshButton = new JButton("Refresh");
+        this.refreshButton = new JButton("🔄");
         this.refreshButton.addActionListener(this);
-        JPanel buttonPanel = new JPanel();
-        buttonPanel.add(this.refreshButton);
+        JPanel refreshPanel = MyFrame.createPanel("Refresh Table");
+        refreshPanel.add(this.refreshButton);
+
+        //The table
+        String[] columnNames = {"Artist", "Date", "Venue", "Rating"};
+        String[][] tableData = ReadFromDatabase.selectPerformances(this.jdbcConnection);
+        this.bandTable = new JTable(tableData, columnNames);
+        this.bandTable.setAutoCreateRowSorter(true);
+        JScrollPane tableScrollPane = new JScrollPane(bandTable);
 
         JPanel backPanel = new JPanel();
         backPanel.setBackground(Color.darkGray);
         backPanel.setLayout(new BorderLayout(5,5));
 
         JPanel topPanel = new JPanel();
-        topPanel.setBackground(Color.lightGray);
         topPanel.setPreferredSize(new Dimension(100,75));
         topPanel.setLayout(new FlowLayout(FlowLayout.CENTER,10,10));
-        topPanel.add(addGigButton);
-        topPanel.add(editGigButton);
-        topPanel.add(delGigButton);
+        topPanel.add(venueOptionsPanel);
+        topPanel.add(bandOptionsPanel);
+        topPanel.add(gigOptionsPanel);
+        topPanel.add(festivalOptionsPanel);
+        topPanel.add(refreshPanel);
 
         JPanel leftPanel = new JPanel();
-        leftPanel.setBackground(Color.lightGray);
         leftPanel.setPreferredSize(new Dimension(250,100));
         leftPanel.setLayout(new BorderLayout());
 
         this.mainPanel = new JPanel();
         this.mainPanel.setBackground(Color.lightGray);
         this.mainPanel.setLayout(new BorderLayout());
-        this.mainPanel.add(buttonPanel, BorderLayout.NORTH);
         this.mainPanel.add(tableScrollPane, BorderLayout.CENTER);
 
         MyFrame frame = new MyFrame();
@@ -77,17 +98,34 @@ public class MainWindow implements ActionListener {
         frame.add(backPanel);
     }
 
+    public void updateTable() {
+        try {
+            String[] columnNames = {"Artist", "Date", "Venue", "Rating"};
+            String[][] tableData = ReadFromDatabase.selectPerformances(this.jdbcConnection);
+            DefaultTableModel model = new DefaultTableModel(tableData, columnNames);
+            this.bandTable.setModel(model);
+        } catch (SQLException ex) {
+            throw new RuntimeException(ex);
+        }
+    }
+
     @Override
     public void actionPerformed(ActionEvent e) {
-        if (e.getSource()==addGigButton) {
-            new AddGigWindow(this.jdbcConnection).newWindow();
-        }
-        else if (e.getSource()==editGigButton) {
-            new EditGigWindow(this.jdbcConnection).newWindow();
-        } else if (e.getSource()==delGigButton) {
-            new GigWindow("Delete Gig");
+        if (e.getSource()== selectGigOptions) {
+            switch (this.selectGigOptions.getSelectedIndex()) {
+                case 0 -> {
+                }
+                case 1 -> {
+                    new AddGigWindow(this.jdbcConnection).newWindow();
+                    this.selectGigOptions.setSelectedIndex(0);
+                }
+                case 2 -> {
+                    new EditGigWindow(this.jdbcConnection).newWindow();
+                    this.selectGigOptions.setSelectedIndex(0);
+                }
+            }
         } else if (e.getSource()==this.refreshButton) {
-            System.out.println("refresh");
+            updateTable();
         }
     }
 }
