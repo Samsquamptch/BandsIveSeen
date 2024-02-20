@@ -37,7 +37,7 @@ public class EditGigWindow implements ActionListener, DateChangeListener {
     JButton saveButton;
     JPanel sidePanel;
     JPanel editPanel;
-    GigWindow addWindow;
+    CreateWindow addWindow;
     int gigDatabaseId;
     Gig selectedGig;
     private final Connection jdbcConnection;
@@ -51,22 +51,23 @@ public class EditGigWindow implements ActionListener, DateChangeListener {
         //Gig select menu
         String[] gigData = ReadFromDatabase.selectGigs(this.jdbcConnection);
         this.gigList = new JComboBox<>(gigData);
+        this.gigList.setPreferredSize(new Dimension(400,30));
         this.gigList.addActionListener(this);
         JPanel searchPanel = new JPanel();
         searchPanel.add(this.gigList);
 
-        //Delete band button
+        //Delete gig button
         this.deleteButton = new JButton("Delete");
         this.deleteButton.setPreferredSize(new Dimension(200,30));
         this.deleteButton.addActionListener(this);
-        JPanel deleteButtonPanel = createPanel("Delete gig");
+        JPanel deleteButtonPanel = CreateWindow.createPanel("Delete gig");
         deleteButtonPanel.add(this.deleteButton, BorderLayout.CENTER);
 
         //Save changes button
         this.saveButton = new JButton("Save");
         this.saveButton.setPreferredSize(new Dimension(200,30));
         this.saveButton.addActionListener(this);
-        JPanel saveButtonPanel = createPanel("Save Changes");
+        JPanel saveButtonPanel = CreateWindow.createPanel("Save Changes");
         saveButtonPanel.add(this.saveButton, BorderLayout.CENTER);
 
         JPanel optionPanel = new JPanel();
@@ -79,22 +80,16 @@ public class EditGigWindow implements ActionListener, DateChangeListener {
         this.editPanel = new JPanel();
         setEditPanel();
 
-        this.addWindow = new GigWindow("Edit Gig");
+        this.addWindow = new CreateWindow("Edit Gig", 900, 500);
         this.addWindow.add(searchPanel, BorderLayout.NORTH);
         this.addWindow.add(this.sidePanel, BorderLayout.WEST);
         this.addWindow.add(this.editPanel, BorderLayout.CENTER);
         this.addWindow.add(optionPanel, BorderLayout.SOUTH);
     }
 
-    public JPanel createPanel(String labelText) {
-        JPanel panel = new JPanel();
-        panel.setLayout(new BorderLayout());
-        panel.add(new JLabel(labelText), BorderLayout.NORTH);
-        return panel;
-    }
 
     public void setEditPanel() {
-        String[] bandData = ReadFromDatabase.selectBands(this.jdbcConnection);
+        String[] bandData = ReadFromDatabase.selectBands(this.jdbcConnection, true);
         String[] rating = new String[]{"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"};
         this.editPanel.removeAll();
         this.editPanel.setLayout(new GridLayout(7,2, 5, 10));
@@ -106,7 +101,7 @@ public class EditGigWindow implements ActionListener, DateChangeListener {
             gigDate.setDate(this.selectedGig.getLocalDate());
         }
         this.gigDate.addDateChangeListener(this::dateChanged);
-        JPanel datePickerPanel = createPanel("Gig Date");
+        JPanel datePickerPanel = CreateWindow.createPanel("Gig Date");
         datePickerPanel.add(this.gigDate, BorderLayout.CENTER);
 
         //Venue select panel
@@ -118,14 +113,14 @@ public class EditGigWindow implements ActionListener, DateChangeListener {
             this.venueSelect.setEnabled(true);
             this.venueSelect.setSelectedItem(this.selectedGig.getLocation().toString());
         }
-        JPanel venuePickerPanel = createPanel("Gig Venue");
+        JPanel venuePickerPanel = CreateWindow.createPanel("Gig Venue");
         venuePickerPanel.add(this.venueSelect, BorderLayout.CENTER);
 
         //Add Friends panel
         String[] friendArray = ReadFromDatabase.selectFriends(this.jdbcConnection, this.selectedGig.getWentWith().toArray(new String[0]));
         this.addFriend = new JComboBox<>(friendArray);
         this.addFriend.addActionListener(this);
-        JPanel addFriendPanel = createPanel("Add Friend");
+        JPanel addFriendPanel = CreateWindow.createPanel("Add Friend");
         addFriendPanel.add(this.addFriend, BorderLayout.CENTER);
 
         //Remove Friends panel
@@ -136,7 +131,7 @@ public class EditGigWindow implements ActionListener, DateChangeListener {
         }
         this.removeFriend = new JComboBox<>(removeArray);
         this.removeFriend.addActionListener(this);
-        JPanel removeFriendPanel = createPanel("Remove Friend");
+        JPanel removeFriendPanel = CreateWindow.createPanel("Remove Friend");
         removeFriendPanel.add(this.removeFriend, BorderLayout.CENTER);
 
         if (this.selectedGig.getLocation()!=null){
@@ -151,61 +146,61 @@ public class EditGigWindow implements ActionListener, DateChangeListener {
         this.headlineSelect = new JComboBox<>(bandData);
         this.headlineSelect.removeItem("Remove Band");
         this.headlineSelect.addActionListener(this);
-        JPanel headlineSelectPanel = createPanel("Gig Headline");
+        JPanel headlineSelectPanel = CreateWindow.createPanel("Gig Headline");
         headlineSelectPanel.add(this.headlineSelect, BorderLayout.CENTER);
 
         //Headline rating select panel
         this.headlineRating = new JComboBox<>(rating);
         this.headlineRating.addActionListener(this);
-        JPanel headlineRatingPanel = createPanel("Set Rating");
+        JPanel headlineRatingPanel = CreateWindow.createPanel("Set Rating");
         headlineRatingPanel.add(this.headlineRating, BorderLayout.CENTER);
 
         //Support 1 select panel
         this.support1Select = new JComboBox<>(bandData);
         this.support1Select.addActionListener(this);
-        JPanel support1SelectPanel = createPanel("Supporting Band");
+        JPanel support1SelectPanel = CreateWindow.createPanel("Supporting Band");
         support1SelectPanel.add(this.support1Select, BorderLayout.CENTER);
 
         //Support 1 rating select panel
         this.support1Rating = new JComboBox<>(rating);
         this.support1Rating.addActionListener(this);
-        JPanel support1RatingPanel = createPanel("Set Rating");
+        JPanel support1RatingPanel = CreateWindow.createPanel("Set Rating");
         support1RatingPanel.add(this.support1Rating, BorderLayout.CENTER);
 
         //Support 2 select panel
         this.support2Select = new JComboBox<>(bandData);
         this.support2Select.addActionListener(this);
-        JPanel support2SelectPanel = createPanel("Supporting Band");
+        JPanel support2SelectPanel = CreateWindow.createPanel("Supporting Band");
         support2SelectPanel.add(this.support2Select, BorderLayout.CENTER);
 
         //Support 2 rating select panel
         this.support2Rating = new JComboBox<>(rating);
         this.support2Rating.addActionListener(this);
-        JPanel support2RatingPanel = createPanel("Set Rating");
+        JPanel support2RatingPanel = CreateWindow.createPanel("Set Rating");
         support2RatingPanel.add(this.support2Rating, BorderLayout.CENTER);
 
         //Support 3 select panel
         this.support3Select = new JComboBox<>(bandData);
         this.support3Select.addActionListener(this);
-        JPanel support3SelectPanel = createPanel("Supporting Band");
+        JPanel support3SelectPanel = CreateWindow.createPanel("Supporting Band");
         support3SelectPanel.add(this.support3Select, BorderLayout.CENTER);
 
         //Support 3 rating select panel
         this.support3Rating = new JComboBox<>(rating);
         this.support3Rating.addActionListener(this);
-        JPanel support3RatingPanel = createPanel("Set Rating");
+        JPanel support3RatingPanel = CreateWindow.createPanel("Set Rating");
         support3RatingPanel.add(this.support3Rating, BorderLayout.CENTER);
 
         //Support 4 select panel
         this.support4Select = new JComboBox<>(bandData);
         this.support4Select.addActionListener(this);
-        JPanel support4SelectPanel = createPanel("Supporting Band");
+        JPanel support4SelectPanel = CreateWindow.createPanel("Supporting Band");
         support4SelectPanel.add(this.support4Select, BorderLayout.CENTER);
 
         //Support 4 rating select panel
         this.support4Rating = new JComboBox<>(rating);
         this.support4Rating.addActionListener(this);
-        JPanel support4RatingPanel = createPanel("Set Rating");
+        JPanel support4RatingPanel = CreateWindow.createPanel("Set Rating");
         support4RatingPanel.add(this.support4Rating, BorderLayout.CENTER);
 
         //Initialise the selectors, populate them, and enable/disable them
@@ -445,6 +440,17 @@ public class EditGigWindow implements ActionListener, DateChangeListener {
             }
     }
 
+    public void deleteGig() throws SQLException {
+        int deleteResponse = JOptionPane.showConfirmDialog(null,
+                "Are you sure you want to delete this gig permanently?",
+                "Confirm delete gig", JOptionPane.YES_NO_OPTION);
+        if (deleteResponse==0) {
+            DeleteFromDatabase.deleteGig(this.jdbcConnection, this.gigDatabaseId);
+            JOptionPane.showMessageDialog(null, "Gig has been deleted");
+            this.addWindow.dispose();
+        }
+    }
+
     public void saveGigChanges() throws SQLException {
         Gig updatedGig = this.selectedGig;
         setSelectedGig();
@@ -493,6 +499,8 @@ public class EditGigWindow implements ActionListener, DateChangeListener {
         if (!updatedGig.getLocalDate().equals(this.selectedGig.getLocalDate())) {
             EditDatabase.changeGigDate(this.jdbcConnection, updatedGig.getEventDay(), this.gigDatabaseId);
         }
+        JOptionPane.showMessageDialog(null, "Changes have been saved");
+        this.addWindow.dispose();
     }
 
     @Override
@@ -502,24 +510,14 @@ public class EditGigWindow implements ActionListener, DateChangeListener {
                     "No Gig Selected!", JOptionPane.WARNING_MESSAGE);
         }
         else if (e.getSource() == this.deleteButton) {
-            int deleteResponse = JOptionPane.showConfirmDialog(null,
-                "Are you sure you want to delete this gig permanently?",
-                "Confirm delete gig", JOptionPane.YES_NO_OPTION);
-            if (deleteResponse==0) {
-                try {
-                    DeleteFromDatabase.deleteGig(this.jdbcConnection, this.gigDatabaseId);
-                    JOptionPane.showMessageDialog(null, "Gig has been deleted");
-                    this.addWindow.dispose();
-                } catch (SQLException ex) {
-                    throw new RuntimeException(ex);
-                }
+            try { deleteGig();
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
             }
         }
         else if (e.getSource() == this.saveButton) {
             try {
                 saveGigChanges();
-                JOptionPane.showMessageDialog(null, "Changes have been saved");
-                this.addWindow.dispose();
             } catch (SQLException ex) {
                 throw new RuntimeException(ex);
             }

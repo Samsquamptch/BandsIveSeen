@@ -22,6 +22,15 @@ public class EditDatabase {
         ps.executeUpdate();
     }
 
+    public static void editBand(Connection conn, String name, String genre, String country, int bandId) throws SQLException {
+        PreparedStatement ps = conn.prepareStatement ("UPDATE Band SET BandName = ?, Genre = ?, Country = ? WHERE Id = ?");
+        ps.setString(1, name);
+        ps.setString(2, genre);
+        ps.setString(3, country);
+        ps.setInt(4, bandId);
+        ps.executeUpdate();
+    }
+
     public static void changeGigDate(Connection conn, String newDate, int gigId) throws SQLException {
         PreparedStatement ps = conn.prepareStatement ("UPDATE Gig SET Date = ? WHERE Id = ?");
         ps.setString(1, newDate);

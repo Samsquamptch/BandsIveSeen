@@ -6,6 +6,13 @@ public class Band {
     final private String fromCountry;
     private int rating;
 
+    public Band() {
+        this.bandName = "";
+        this.bandGenre = "";
+        this.fromCountry = "";
+        this.rating = 5;
+    }
+
     public Band(String name, String genre, String country, int rating) {
         this.bandName = name;
         this.bandGenre = genre;

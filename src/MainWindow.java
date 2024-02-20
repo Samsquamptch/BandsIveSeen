@@ -36,26 +36,26 @@ public class MainWindow implements ActionListener {
         //Select gig options
         this.selectGigOptions = new JComboBox<>(makeJComboBoxArray("Gig"));
         this.selectGigOptions.addActionListener(this);
-        JPanel gigOptionsPanel = MyFrame.createPanel("Gig Settings");
+        JPanel gigOptionsPanel = CreateWindow.createPanel("Gig Settings");
         gigOptionsPanel.add(selectGigOptions, BorderLayout.CENTER);
 
         //Select festival options
         this.selectFestivalOptions = new JComboBox<>(makeJComboBoxArray("Festival"));
         this.selectFestivalOptions.addActionListener(this);
-        JPanel festivalOptionsPanel = MyFrame.createPanel("Festival Settings");
+        JPanel festivalOptionsPanel = CreateWindow.createPanel("Festival Settings");
         festivalOptionsPanel.add(selectFestivalOptions, BorderLayout.CENTER);
 
         //Select general options
         String[] otherOptionsArray = {"Select", "Friends", "Bands", "Venues"};
         this.selectOtherOptions = new JComboBox<>(otherOptionsArray);
         this.selectOtherOptions.addActionListener(this);
-        JPanel otherOptionsPanel = MyFrame.createPanel("Edit");
+        JPanel otherOptionsPanel = CreateWindow.createPanel("Edit");
         otherOptionsPanel.add(selectOtherOptions, BorderLayout.CENTER);
 
         //Refresh button
         this.refreshButton = new JButton("🔄");
         this.refreshButton.addActionListener(this);
-        JPanel refreshPanel = MyFrame.createPanel("Refresh Table");
+        JPanel refreshPanel = CreateWindow.createPanel("Refresh Table");
         refreshPanel.add(this.refreshButton);
 
         //The table
@@ -86,7 +86,7 @@ public class MainWindow implements ActionListener {
         this.mainPanel.setLayout(new BorderLayout());
         this.mainPanel.add(tableScrollPane, BorderLayout.CENTER);
 
-        MyFrame frame = new MyFrame();
+        CreateWindow frame = new CreateWindow();
         backPanel.add(topPanel,BorderLayout.NORTH);
         backPanel.add(leftPanel,BorderLayout.WEST);
         backPanel.add(this.mainPanel,BorderLayout.CENTER);
@@ -115,7 +115,7 @@ public class MainWindow implements ActionListener {
                     this.selectOtherOptions.setSelectedIndex(0);
                 }
                 case 2 -> {
-                    System.out.println("Band");
+                    new EditBandWindow(this.jdbcConnection).newWindow();
                     this.selectOtherOptions.setSelectedIndex(0);
                 }
                 case 3 -> {

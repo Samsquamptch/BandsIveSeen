@@ -78,7 +78,7 @@ public class ReadFromDatabase {
         return bandTable;
     }
 
-    public static String[] selectBands(Connection conn) {
+    public static String[] selectBands(Connection conn, boolean addOrRemove) {
         String sql = "SELECT BandName, Genre, Country FROM Band";
         ArrayList<String> bandData = new ArrayList<>();
         bandData.add("Select a Band");
@@ -94,8 +94,10 @@ public class ReadFromDatabase {
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
-        bandData.add("Add New Band");
-        bandData.add("Remove Band");
+        if (addOrRemove) {
+            bandData.add("Add New Band");
+            bandData.add("Remove Band");
+        }
         String[] bandArray = new String[bandData.size()];
         bandArray = bandData.toArray(bandArray);
         return bandArray;
@@ -130,6 +132,17 @@ public class ReadFromDatabase {
         ps.setString (2, identifier);
         ResultSet rs = ps.executeQuery();
         return !rs.next();
+    }
+
+    public static boolean checkIfUsed(Connection conn, String column, int checkId) throws SQLException {
+        PreparedStatement ps = conn.prepareStatement("SELECT Id FROM Gig WHERE "
+                + column + " = ?");
+        ps.setInt (1, checkId);
+        ResultSet rs = ps.executeQuery();
+        if (rs.getString("Id") == null) {
+            return false;
+        }
+        return true;
     }
 
     public static boolean checkFriend(Connection conn, String friendName) throws SQLException {

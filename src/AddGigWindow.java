@@ -32,7 +32,7 @@ public class AddGigWindow implements ActionListener, DateChangeListener {
     JButton saveButton;
     JPanel sidePanel;
     JPanel editPanel;
-    GigWindow addWindow;
+    CreateWindow addWindow;
     Gig selectedGig;
     private final Connection jdbcConnection;
 
@@ -57,7 +57,7 @@ public class AddGigWindow implements ActionListener, DateChangeListener {
         this.editPanel = new JPanel();
         setEditPanel();
 
-        this.addWindow = new GigWindow("Add Gig");
+        this.addWindow = new CreateWindow("Add Gig", 900, 500);
         this.addWindow.add(new JPanel(), BorderLayout.NORTH);
         this.addWindow.add(this.sidePanel, BorderLayout.WEST);
         this.addWindow.add(this.editPanel, BorderLayout.CENTER);
@@ -72,7 +72,7 @@ public class AddGigWindow implements ActionListener, DateChangeListener {
     }
 
     public void setEditPanel() {
-        String[] bandData = ReadFromDatabase.selectBands(this.jdbcConnection);
+        String[] bandData = ReadFromDatabase.selectBands(this.jdbcConnection, true);
         String[] rating = new String[]{"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"};
         this.editPanel.removeAll();
         this.editPanel.setLayout(new GridLayout(7,2, 5, 10));

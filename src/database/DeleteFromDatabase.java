@@ -13,6 +13,12 @@ public class DeleteFromDatabase {
         ps.executeUpdate();
     }
 
+    public static void deleteBand(Connection conn, int bandId) throws SQLException {
+        PreparedStatement ps = conn.prepareStatement ("DELETE FROM Band WHERE Id = ?");
+        ps.setInt(1, bandId);
+        ps.executeUpdate();
+    }
+
     public static void deletePerformance(Connection conn, Band performance, int gigId) throws SQLException {
         int bandId = ReadFromDatabase.getBandId(conn, performance.getBandName(), performance.getFromCountry());
         PreparedStatement ps = conn.prepareStatement ("DELETE FROM Performance WHERE Band_Id = ? AND Gig_Id = ?");
