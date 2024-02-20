@@ -55,7 +55,7 @@ public class AddGigWindow implements ActionListener, DateChangeListener {
         this.editPanel = new JPanel();
         setEditPanel();
 
-        this.addWindow = new GigWindow("Edit Gig");
+        this.addWindow = new GigWindow("Add Gig");
         this.addWindow.add(new JPanel(), BorderLayout.NORTH);
         this.addWindow.add(this.sidePanel, BorderLayout.WEST);
         this.addWindow.add(this.editPanel, BorderLayout.CENTER);
@@ -278,15 +278,17 @@ public class AddGigWindow implements ActionListener, DateChangeListener {
     public void friendSelectSettings(JComboBox<String> selectorItem) {
         if (selectorItem.getSelectedItem().equals("Add New Friend")) {
             String friendName = JOptionFriend.addFriend(this.jdbcConnection);
-            if (!friendName.isEmpty()) {
-                addFriend.removeItem("Add New Friend");
-                addFriend.addItem(friendName);
-                addFriend.addItem("Add New Friend");
-                this.addFriend.setSelectedItem(friendName);
-                friendSelectSettings(this.addFriend);
+            if (friendName.isEmpty()) {
+                selectorItem.setSelectedIndex(0);
+                return;
             }
+            addFriend.removeItem("Add New Friend");
+            addFriend.addItem(friendName);
+            addFriend.addItem("Add New Friend");
+            this.addFriend.setSelectedItem(friendName);
+            friendSelectSettings(this.addFriend);
         }
-        if (selectorItem.getSelectedIndex() != 0) {
+        else if (selectorItem.getSelectedIndex() != 0) {
             if (selectorItem == this.addFriend) {
                 this.selectedGig.addWentWith(this.addFriend.getSelectedItem().toString());
                 this.removeFriend.addItem(this.addFriend.getSelectedItem().toString());
@@ -378,6 +380,11 @@ public class AddGigWindow implements ActionListener, DateChangeListener {
     public void setVenueSelect() {
         if (this.venueSelect.getSelectedItem().equals("Add New Venue")) {
             String addedVenue = JOptionVenue.addVenue(this.jdbcConnection);
+            System.out.println(addedVenue);
+            if (addedVenue.isEmpty()) {
+                this.venueSelect.setSelectedIndex(0);
+                return;
+            }
             this.venueSelect.removeItem("Add New Venue");
             this.venueSelect.addItem(addedVenue);
             this.venueSelect.addItem("Add New Venue");

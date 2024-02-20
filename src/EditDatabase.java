@@ -15,4 +15,23 @@ public class EditDatabase {
         ps.setInt (1, gigId);
         ps.executeUpdate();
     }
+
+    public static void changeGigHeadline(Connection conn, int gigId, Band newHeadline) throws SQLException {
+        int newHeadlineId = ReadFromDatabase.getBandId(conn, newHeadline.getBandName(), newHeadline.getFromCountry());
+        PreparedStatement ps = conn.prepareStatement ("UPDATE Gig SET Headline = ? WHERE Id = ?");
+        ps.setInt(1, newHeadlineId);
+        ps.setInt(2, gigId);
+        ps.executeUpdate();
+    }
+
+    public static void changePerformanceBand(Connection conn, int gigId, Band newBand, Band oldBand) throws SQLException {
+        int newBandId = ReadFromDatabase.getBandId(conn, newBand.getBandName(), newBand.getFromCountry());
+        int oldBandId = ReadFromDatabase.getBandId(conn, oldBand.getBandName(), oldBand.getFromCountry());
+        PreparedStatement ps = conn.prepareStatement ("UPDATE Performance SET Band_Id = ?" +
+                "WHERE Gig_Id = ? AND Band_Id = ?");
+        ps.setInt(1, newBandId);
+        ps.setInt(2, gigId);
+        ps.setInt(3, oldBandId);
+        ps.executeUpdate();
+    }
 }

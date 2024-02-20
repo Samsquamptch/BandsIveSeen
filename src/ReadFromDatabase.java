@@ -17,8 +17,9 @@ public class ReadFromDatabase {
         {
             while (queryResult.next()) {
                 String friend = queryResult.getString("FriendName");
-                if (friendsList==null || !Arrays.asList(friendsList).contains(friend))
-                friendList.add(friend);
+                if (friendsList==null || !Arrays.asList(friendsList).contains(friend)) {
+                    friendList.add(friend);
+                }
             }
     } catch (SQLException e) {
         System.out.println(e.getMessage());
@@ -49,7 +50,7 @@ public class ReadFromDatabase {
     }
 
     public static String[][] selectPerformances(Connection conn) throws SQLException {
-        int arrayLength = getLastId(conn, "Performance");
+        int arrayLength = getTableCount(conn, "Performance");
 
         PreparedStatement ps = conn.prepareStatement("SELECT Gig.Id AS ID, Gig.Date AS Date, Band.BandName AS Artist, " +
                 "(Venue.VenueName || ' - ' || Venue.Location) AS Venue, Performance.Rating AS Rating, Gig.Headline Headline, " +
@@ -234,13 +235,26 @@ public class ReadFromDatabase {
         return rs.getInt("Id");
     }
 
-    public static int getVenueId(Connection conn, String venueName, String Location) throws SQLException {
+    public static int getVenueId(Connection conn, Venue selectedVenue) throws SQLException {
+        String name = selectedVenue.getVenueName();
+        String location = selectedVenue.getVenueLocation();
         PreparedStatement ps = conn.prepareStatement
                         ("SELECT Id FROM Venue WHERE VenueName = ? AND Location = ?");
-        ps.setString (1, venueName);
-        ps.setString (2, Location);
+        ps.setString (1, name);
+        ps.setString (2, location);
         ResultSet rs = ps.executeQuery();
         return rs.getInt("Id");
+    }
+    public static int getTableCount(Connection conn, String table) throws SQLException {
+        PreparedStatement ps = conn.prepareStatement("SELECT Id FROM " + table);
+        ResultSet rs = ps.executeQuery();
+        int columnCount = 0;
+        while (rs.next()) {
+            if (rs.getString("Id") != null){
+                columnCount++;
+            }
+        }
+        return columnCount;
     }
 
     public static int getLastId(Connection conn, String table) throws SQLException {

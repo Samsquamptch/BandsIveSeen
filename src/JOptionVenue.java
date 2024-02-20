@@ -20,19 +20,19 @@ public class JOptionVenue {
 
         int result = JOptionPane.showConfirmDialog(null, mainPanel,
                 "Please Enter New Venue", JOptionPane.OK_CANCEL_OPTION);
-        if (result == JOptionPane.OK_OPTION) {
-            if(venueName.getText().isEmpty() || venueLocation.getText().isEmpty()) {
-                System.out.println("field is empty");
-                JOptionPane.showMessageDialog(null, "Field was empty, Venue not added",
-                        "Input Error", JOptionPane.WARNING_MESSAGE);
-                return "";
-            }
-            else {
-                try {
-                    InsertToDatabase.insertVenue(conn, new Venue(venueName.getText(), venueLocation.getText(),false));
-                } catch (SQLException ex) {
-                    throw new RuntimeException(ex);
-                }
+        if (result != JOptionPane.OK_OPTION) {
+            return "";
+        }
+        else if(venueName.getText().isEmpty() || venueLocation.getText().isEmpty()) {
+            JOptionPane.showMessageDialog(null, "Field was empty, Venue not added",
+                    "Input Error", JOptionPane.WARNING_MESSAGE);
+            return "";
+        }
+        else {
+            try {
+                InsertToDatabase.insertVenue(conn, new Venue(venueName.getText(), venueLocation.getText(),false));
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
             }
         }
         return venueName.getText() + " - " + venueLocation.getText();

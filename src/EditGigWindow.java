@@ -295,15 +295,17 @@ public class EditGigWindow implements ActionListener, DateChangeListener {
     public void friendSelectSettings(JComboBox<String> selectorItem) {
         if (selectorItem.getSelectedItem().equals("Add New Friend")) {
             String friendName = JOptionFriend.addFriend(this.jdbcConnection);
-            if (!friendName.isEmpty()) {
-                addFriend.removeItem("Add New Friend");
-                addFriend.addItem(friendName);
-                addFriend.addItem("Add New Friend");
-                this.addFriend.setSelectedItem(friendName);
-                friendSelectSettings(this.addFriend);
+            if (friendName.isEmpty()) {
+                selectorItem.setSelectedIndex(0);
+                return;
             }
+            addFriend.removeItem("Add New Friend");
+            addFriend.addItem(friendName);
+            addFriend.addItem("Add New Friend");
+            this.addFriend.setSelectedItem(friendName);
+            friendSelectSettings(this.addFriend);
         }
-        if (selectorItem.getSelectedIndex() != 0) {
+        else if (selectorItem.getSelectedIndex() != 0) {
             if (selectorItem == this.addFriend) {
                 this.selectedGig.addWentWith(this.addFriend.getSelectedItem().toString());
                 this.removeFriend.addItem(this.addFriend.getSelectedItem().toString());
@@ -389,6 +391,11 @@ public class EditGigWindow implements ActionListener, DateChangeListener {
     public void setVenueSelect() {
         if (this.venueSelect.getSelectedItem().equals("Add New Venue")) {
             String addedVenue = JOptionVenue.addVenue(this.jdbcConnection);
+            System.out.println(addedVenue);
+            if (addedVenue.isEmpty()) {
+                this.venueSelect.setSelectedIndex(0);
+                return;
+            }
             this.venueSelect.removeItem("Add New Venue");
             this.venueSelect.addItem(addedVenue);
             this.venueSelect.addItem("Add New Venue");
@@ -411,6 +418,66 @@ public class EditGigWindow implements ActionListener, DateChangeListener {
         }
         this.selectedGig.getPerformances().get(selectValue).setRating(intRating);
         refreshPanels(false);
+    }
+
+    public void setSelectedGig() throws SQLException {
+            String[] gigDetails = this.gigList.getSelectedItem().toString().split(" - ");
+            String[] venueAndBandId = ReadFromDatabase.getGigDetails(this.jdbcConnection, gigDatabaseId);
+            Venue selectedVenue = new Venue(venueAndBandId[1], venueAndBandId[2], false);
+            String[] bandDetails = ReadFromDatabase.getGigHeadlineDetails(this.jdbcConnection,
+                    Integer.parseInt(venueAndBandId[3]), gigDatabaseId);
+            Band selectedHeadline = new Band(bandDetails[0], bandDetails[1], bandDetails[2],
+                    Integer.parseInt(bandDetails[3]));
+            ArrayList<Band> gigPerformances = ReadFromDatabase.getGigPerformances(this.jdbcConnection, gigDatabaseId);
+            this.selectedGig = new Gig(gigDetails[1], selectedVenue, selectedHeadline);
+            for (Band performance : gigPerformances) {
+                if (!Objects.equals(performance.getBandName(), this.selectedGig.getHeadlineAct().getBandName())) {
+                    this.selectedGig.addPerformance(performance);
+                }
+            }
+            String[] gigFriends = ReadFromDatabase.getGigFriends(this.jdbcConnection, gigDatabaseId);
+            for (String friend : gigFriends) {
+                this.selectedGig.addWentWith(friend);
+            }
+    }
+
+    public void saveGigChanges() {
+        Gig updatedGig = this.selectedGig;
+        try {
+            setSelectedGig();
+            if (!updatedGig.getHeadlineAct().equals(this.selectedGig.getHeadlineAct())) {
+                EditDatabase.changeGigHeadline(this.jdbcConnection, this.gigDatabaseId, updatedGig.getHeadlineAct());
+            }
+            //Checks to see whether the current or updated gig has more performances, then sets the value to the
+            //smaller value. This is so an out-of-bounds error doesn't occur when both lists are compared.
+            int maxIteration = Math.min(updatedGig.getPerformances().size(), this.selectedGig.getPerformances().size());
+            for (int i = 0; i < maxIteration; i++) {
+                if (!updatedGig.getPerformances().get(i).equals(this.selectedGig.getPerformances().get(i))) {
+                EditDatabase.changePerformanceBand(this.jdbcConnection, this.gigDatabaseId,
+                        updatedGig.getPerformances().get(i), this.selectedGig.getPerformances().get(i));
+                }
+            }
+            if (updatedGig.getPerformances().size() > this.selectedGig.getPerformances().size()) {
+
+            }
+            if (updatedGig.getWentWith().size() > this.selectedGig.getWentWith().size()) {
+
+            }
+            else if (updatedGig.getWentWith().size() < this.selectedGig.getWentWith().size()) {
+
+            }
+            else if (!updatedGig.getFriendsString().equals(this.selectedGig.getFriendsString())) {
+
+            }
+            if (!updatedGig.getLocation().equals(this.selectedGig.getLocation())) {
+
+            }
+            if (!updatedGig.getLocalDate().equals(this.selectedGig.getLocalDate())) {
+
+            }
+        } catch (SQLException ex) {
+            throw new RuntimeException(ex);
+        }
     }
 
     @Override
@@ -437,7 +504,7 @@ public class EditGigWindow implements ActionListener, DateChangeListener {
                 "Are you sure you want to save your changes to this gig?",
                 "Confirm save gig", JOptionPane.YES_NO_OPTION);
             if (saveResponse==0) {
-                System.out.println("Save changes");
+                saveGigChanges();
             }
         }
         else if (e.getSource() == this.headlineSelect) {
@@ -489,27 +556,11 @@ public class EditGigWindow implements ActionListener, DateChangeListener {
             String[] gigDetails = this.gigList.getSelectedItem().toString().split(" - ");
             try {
                 this.gigDatabaseId = ReadFromDatabase.getGigId(this.jdbcConnection, gigDetails[0], gigDetails[1]);
-                String[] venueAndBandId = ReadFromDatabase.getGigDetails(this.jdbcConnection, gigDatabaseId);
-                Venue selectedVenue = new Venue(venueAndBandId[1], venueAndBandId[2], false);
-                String[] bandDetails = ReadFromDatabase.getGigHeadlineDetails(this.jdbcConnection,
-                        Integer.parseInt(venueAndBandId[3]), gigDatabaseId);
-                Band selectedHeadline = new Band(bandDetails[0], bandDetails[1], bandDetails[2],
-                        Integer.parseInt(bandDetails[3]));
-                ArrayList<Band> gigPerformances = ReadFromDatabase.getGigPerformances(this.jdbcConnection, gigDatabaseId);
-                this.selectedGig = new Gig(gigDetails[1], selectedVenue, selectedHeadline);
-                for (Band performance : gigPerformances) {
-                    if (!Objects.equals(performance.getBandName(), this.selectedGig.getHeadlineAct().getBandName())) {
-                        this.selectedGig.addPerformance(performance);
-                    }
-                }
-                String[] gigFriends = ReadFromDatabase.getGigFriends(this.jdbcConnection, gigDatabaseId);
-                for (String friend : gigFriends) {
-                    this.selectedGig.addWentWith(friend);
-                }
-                refreshPanels(true);
+                setSelectedGig();
             } catch (SQLException ex) {
                 throw new RuntimeException(ex);
             }
+            refreshPanels(true);
         }
     }
 

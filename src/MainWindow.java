@@ -10,8 +10,7 @@ import java.sql.SQLException;
 
 public class MainWindow implements ActionListener {
     JComboBox<String> selectGigOptions;
-    JComboBox<String> selectBandOptions;
-    JComboBox<String> selectVenueOptions;
+    JComboBox<String> selectOtherOptions;
     JComboBox<String> selectFestivalOptions;
     JButton refreshButton;
     JTable bandTable;
@@ -32,29 +31,24 @@ public class MainWindow implements ActionListener {
 
     public void newUI() throws SQLException {
 
-        //Select venue options
-        this.selectVenueOptions = new JComboBox<>(makeJComboBoxArray("Venue"));
-        this.selectVenueOptions.addActionListener(this);
-        JPanel venueOptionsPanel = MyFrame.createPanel("Venue Options");
-        venueOptionsPanel.add(selectVenueOptions, BorderLayout.CENTER);
-
-        //Select band options
-        this.selectBandOptions = new JComboBox<>(makeJComboBoxArray("Band"));
-        this.selectBandOptions.addActionListener(this);
-        JPanel bandOptionsPanel = MyFrame.createPanel("Band Options");
-        bandOptionsPanel.add(selectBandOptions, BorderLayout.CENTER);
-
         //Select gig options
         this.selectGigOptions = new JComboBox<>(makeJComboBoxArray("Gig"));
         this.selectGigOptions.addActionListener(this);
-        JPanel gigOptionsPanel = MyFrame.createPanel("Gig Options");
+        JPanel gigOptionsPanel = MyFrame.createPanel("Gig Settings");
         gigOptionsPanel.add(selectGigOptions, BorderLayout.CENTER);
 
         //Select festival options
         this.selectFestivalOptions = new JComboBox<>(makeJComboBoxArray("Festival"));
         this.selectFestivalOptions.addActionListener(this);
-        JPanel festivalOptionsPanel = MyFrame.createPanel("Festival Options");
+        JPanel festivalOptionsPanel = MyFrame.createPanel("Festival Settings");
         festivalOptionsPanel.add(selectFestivalOptions, BorderLayout.CENTER);
+
+        //Select general options
+        String[] otherOptionsArray = {"Select", "Friends", "Bands", "Venues"};
+        this.selectOtherOptions = new JComboBox<>(otherOptionsArray);
+        this.selectOtherOptions.addActionListener(this);
+        JPanel otherOptionsPanel = MyFrame.createPanel("Edit");
+        otherOptionsPanel.add(selectOtherOptions, BorderLayout.CENTER);
 
         //Refresh button
         this.refreshButton = new JButton("🔄");
@@ -76,10 +70,9 @@ public class MainWindow implements ActionListener {
         JPanel topPanel = new JPanel();
         topPanel.setPreferredSize(new Dimension(100,75));
         topPanel.setLayout(new FlowLayout(FlowLayout.CENTER,10,10));
-        topPanel.add(venueOptionsPanel);
-        topPanel.add(bandOptionsPanel);
         topPanel.add(gigOptionsPanel);
         topPanel.add(festivalOptionsPanel);
+        topPanel.add(otherOptionsPanel);
         topPanel.add(refreshPanel);
 
         JPanel leftPanel = new JPanel();
@@ -111,31 +104,21 @@ public class MainWindow implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        if (e.getSource() == selectVenueOptions) {
-            switch (this.selectVenueOptions.getSelectedIndex()) {
+        if (e.getSource() == selectOtherOptions) {
+            switch (this.selectOtherOptions.getSelectedIndex()) {
                 case 0 -> {
                 }
                 case 1 -> {
-                    System.out.println("Add");
-                    this.selectVenueOptions.setSelectedIndex(0);
+                    System.out.println("Friends");
+                    this.selectOtherOptions.setSelectedIndex(0);
                 }
                 case 2 -> {
-                    System.out.println("Edit/Remove");
-                    this.selectVenueOptions.setSelectedIndex(0);
+                    System.out.println("Band");
+                    this.selectOtherOptions.setSelectedIndex(0);
                 }
-            }
-        }
-        else if (e.getSource() == selectBandOptions) {
-            switch (this.selectBandOptions.getSelectedIndex()) {
-                case 0 -> {
-                }
-                case 1 -> {
-                    System.out.println("Add");
-                    this.selectBandOptions.setSelectedIndex(0);
-                }
-                case 2 -> {
-                    System.out.println("Edit/Remove");
-                    this.selectBandOptions.setSelectedIndex(0);
+                case 3 -> {
+                    System.out.println("Venue");
+                    this.selectOtherOptions.setSelectedIndex(0);
                 }
             }
         }
