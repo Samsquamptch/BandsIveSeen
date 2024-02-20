@@ -1,5 +1,7 @@
 package src;
 
+import src.database.InsertToDatabase;
+
 import javax.swing.*;
 import java.sql.Connection;
 import java.sql.SQLException;

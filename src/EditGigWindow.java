@@ -3,6 +3,10 @@ package src;
 import com.github.lgooddatepicker.components.DatePicker;
 import com.github.lgooddatepicker.optionalusertools.DateChangeListener;
 import com.github.lgooddatepicker.zinternaltools.DateChangeEvent;
+import src.database.DeleteFromDatabase;
+import src.database.EditDatabase;
+import src.database.InsertToDatabase;
+import src.database.ReadFromDatabase;
 
 import javax.swing.*;
 import java.awt.*;
@@ -441,55 +445,53 @@ public class EditGigWindow implements ActionListener, DateChangeListener {
             }
     }
 
-    public void saveGigChanges() {
+    public void saveGigChanges() throws SQLException {
         Gig updatedGig = this.selectedGig;
-        try {
-            setSelectedGig();
-            if (!updatedGig.getHeadlineAct().equals(this.selectedGig.getHeadlineAct())) {
-                EditDatabase.changeGigHeadline(this.jdbcConnection, this.gigDatabaseId, updatedGig.getHeadlineAct());
+        setSelectedGig();
+        if (!updatedGig.getHeadlineAct().equals(this.selectedGig.getHeadlineAct())) {
+            EditDatabase.changeGigHeadline(this.jdbcConnection, updatedGig.getHeadlineAct(), this.gigDatabaseId);
+        }
+        //Checks to see whether the current or updated gig has more performances, then sets the value to the
+        //smaller value. This is so an out-of-bounds error doesn't occur when both lists are compared.
+        int maxIteration = Math.min(updatedGig.getPerformances().size(), this.selectedGig.getPerformances().size());
+        for (int i = 0; i < maxIteration; i++) {
+            if (!updatedGig.getPerformances().get(i).equals(this.selectedGig.getPerformances().get(i))) {
+            EditDatabase.changePerformanceBand(this.jdbcConnection,
+                    updatedGig.getPerformances().get(i), this.selectedGig.getPerformances().get(i), this.gigDatabaseId);
             }
-            //Checks to see whether the current or updated gig has more performances, then sets the value to the
-            //smaller value. This is so an out-of-bounds error doesn't occur when both lists are compared.
-            int maxIteration = Math.min(updatedGig.getPerformances().size(), this.selectedGig.getPerformances().size());
-            for (int i = 0; i < maxIteration; i++) {
-                if (!updatedGig.getPerformances().get(i).equals(this.selectedGig.getPerformances().get(i))) {
-                EditDatabase.changePerformanceBand(this.jdbcConnection, this.gigDatabaseId,
-                        updatedGig.getPerformances().get(i), this.selectedGig.getPerformances().get(i));
-                }
+        }
+        if (updatedGig.getPerformances().size() > this.selectedGig.getPerformances().size()) {
+            for (int i = maxIteration; i < updatedGig.getPerformances().size(); i++) {
+                InsertToDatabase.insertPerformance(this.jdbcConnection, updatedGig.getPerformances().get(i), this.gigDatabaseId);
             }
-            if (updatedGig.getPerformances().size() > this.selectedGig.getPerformances().size()) {
-                for (int i = maxIteration; i < updatedGig.getPerformances().size(); i++) {
-                    InsertToDatabase.insertPerformance(this.jdbcConnection, updatedGig.getPerformances().get(i), this.gigDatabaseId);
-                }
+        }
+        else if (updatedGig.getPerformances().size() < this.selectedGig.getPerformances().size()) {
+            for (int i = maxIteration; i < this.selectedGig.getPerformances().size(); i++) {
+                DeleteFromDatabase.deletePerformance(this.jdbcConnection, this.selectedGig.getPerformances().get(i), this.gigDatabaseId);
             }
-            else if (updatedGig.getPerformances().size() < this.selectedGig.getPerformances().size()) {
-                for (int i = maxIteration; i < this.selectedGig.getPerformances().size(); i++) {
-                    EditDatabase.deletePerformance(this.jdbcConnection, this.selectedGig.getPerformances().get(i), this.gigDatabaseId);
-                }
+        }
+        maxIteration = Math.min(updatedGig.getWentWith().size(), this.selectedGig.getWentWith().size());
+        for (int i = 0; i < maxIteration; i++) {
+            if (!updatedGig.getWentWith().get(i).equals(this.selectedGig.getWentWith().get(i))) {
+                EditDatabase.changeWentWith(this.jdbcConnection, updatedGig.getWentWith().get(i),
+                        this.selectedGig.getWentWith().get(i), this.gigDatabaseId);
             }
-            maxIteration = Math.min(updatedGig.getWentWith().size(), this.selectedGig.getWentWith().size());
-            for (int i = 0; i < maxIteration; i++) {
-                if (!updatedGig.getWentWith().get(i).equals(this.selectedGig.getWentWith().get(i))) {
-                    EditDatabase.changeWentWith(this.jdbcConnection, this.gigDatabaseId,
-                            updatedGig.getWentWith().get(i), this.selectedGig.getWentWith().get(i));
-                }
+        }
+        if (updatedGig.getWentWith().size() > this.selectedGig.getWentWith().size()) {
+            for (int i = maxIteration; i < updatedGig.getWentWith().size(); i++) {
+                InsertToDatabase.insertAttendedWith(this.jdbcConnection, updatedGig.getWentWith().get(i), this.gigDatabaseId);
             }
-            if (updatedGig.getWentWith().size() > this.selectedGig.getWentWith().size()) {
-                for (int i = maxIteration; i < updatedGig.getWentWith().size(); i++) {
-                    InsertToDatabase.insertAttendedWith(this.jdbcConnection, updatedGig.getWentWith().get(i), this.gigDatabaseId);
-                }
+        }
+        else if (updatedGig.getWentWith().size() < this.selectedGig.getWentWith().size()) {
+            for (int i = maxIteration; i < updatedGig.getWentWith().size(); i++) {
+                DeleteFromDatabase.deleteAttendedWith(this.jdbcConnection, updatedGig.getWentWith().get(i), this.gigDatabaseId);
             }
-            else if (updatedGig.getWentWith().size() < this.selectedGig.getWentWith().size()) {
-
-            }
-            if (!updatedGig.getLocation().equals(this.selectedGig.getLocation())) {
-
-            }
-            if (!updatedGig.getLocalDate().equals(this.selectedGig.getLocalDate())) {
-
-            }
-        } catch (SQLException ex) {
-            throw new RuntimeException(ex);
+        }
+        if (!updatedGig.getLocation().equals(this.selectedGig.getLocation())) {
+            EditDatabase.changeGigVenue(this.jdbcConnection, updatedGig.getLocation(), this.gigDatabaseId);
+        }
+        if (!updatedGig.getLocalDate().equals(this.selectedGig.getLocalDate())) {
+            EditDatabase.changeGigDate(this.jdbcConnection, updatedGig.getEventDay(), this.gigDatabaseId);
         }
     }
 
@@ -505,15 +507,22 @@ public class EditGigWindow implements ActionListener, DateChangeListener {
                 "Confirm delete gig", JOptionPane.YES_NO_OPTION);
             if (deleteResponse==0) {
                 try {
-                    EditDatabase.deleteGig(this.jdbcConnection, this.gigDatabaseId);
+                    DeleteFromDatabase.deleteGig(this.jdbcConnection, this.gigDatabaseId);
                     JOptionPane.showMessageDialog(null, "Gig has been deleted");
+                    this.addWindow.dispose();
                 } catch (SQLException ex) {
                     throw new RuntimeException(ex);
                 }
             }
         }
         else if (e.getSource() == this.saveButton) {
+            try {
                 saveGigChanges();
+                JOptionPane.showMessageDialog(null, "Changes have been saved");
+                this.addWindow.dispose();
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            }
         }
         else if (e.getSource() == this.headlineSelect) {
             bandSelectSettings(this.headlineSelect, 1);

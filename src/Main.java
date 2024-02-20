@@ -1,5 +1,8 @@
 package src;
 
+import src.database.DatabaseConnector;
+import src.database.EditDatabase;
+
 import java.io.File;
 import java.sql.Connection;
 import java.sql.SQLException;

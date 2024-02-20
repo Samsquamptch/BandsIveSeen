@@ -1,4 +1,7 @@
-package src;
+package src.database;
+
+import src.Band;
+import src.Venue;
 
 import java.sql.*;
 import java.sql.PreparedStatement;
@@ -121,9 +124,8 @@ public class ReadFromDatabase {
 
     public static boolean checkExists(Connection conn, String table, String column1, String column2,
                                           String name, String identifier) throws SQLException {
-        PreparedStatement ps =
-                conn.prepareStatement
-                        ("SELECT " + column1 + " FROM " + table + " WHERE " + column1 + " = ? AND " + column2 + " = ?");
+        PreparedStatement ps = conn.prepareStatement("SELECT " + column1 + " FROM " + table + " WHERE "
+                + column1 + " = ? AND " + column2 + " = ?");
         ps.setString (1, name);
         ps.setString (2, identifier);
         ResultSet rs = ps.executeQuery();
@@ -131,9 +133,7 @@ public class ReadFromDatabase {
     }
 
     public static boolean checkFriend(Connection conn, String friendName) throws SQLException {
-        PreparedStatement ps =
-                conn.prepareStatement
-                        ("SELECT * FROM Friend WHERE FriendName = ?");
+        PreparedStatement ps = conn.prepareStatement("SELECT * FROM Friend WHERE FriendName = ?");
         ps.setString (1, friendName);
         ResultSet rs = ps.executeQuery();
 

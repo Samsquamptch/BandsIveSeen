@@ -1,4 +1,8 @@
-package src;
+package src.database;
+
+import src.Band;
+import src.Gig;
+import src.Venue;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
