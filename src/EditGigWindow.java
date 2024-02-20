@@ -475,7 +475,9 @@ public class EditGigWindow implements ActionListener, DateChangeListener {
                 }
             }
             if (updatedGig.getWentWith().size() > this.selectedGig.getWentWith().size()) {
-
+                for (int i = maxIteration; i < updatedGig.getWentWith().size(); i++) {
+                    InsertToDatabase.insertAttendedWith(this.jdbcConnection, updatedGig.getWentWith().get(i), this.gigDatabaseId);
+                }
             }
             else if (updatedGig.getWentWith().size() < this.selectedGig.getWentWith().size()) {
 

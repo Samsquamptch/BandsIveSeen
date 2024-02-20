@@ -17,50 +17,38 @@ public class InsertToDatabase {
 
         int headlineId = ReadFromDatabase.getBandId(conn, headline, headlineCountry);
 
-        String sql = "INSERT INTO Gig(Date, Venue_Id, Headline) VALUES(?,?,?)";
+        PreparedStatement ps = conn.prepareStatement("INSERT INTO Gig(Date, Venue_Id, Headline) VALUES(?,?,?)");
+        ps.setString(1, gigDate);
+        ps.setInt(2, venueId);
+        ps.setInt(3, headlineId);
+        ps.executeUpdate();
 
-        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, gigDate);
-            pstmt.setInt(2, venueId);
-            pstmt.setInt(3, headlineId);
-            pstmt.executeUpdate();
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
-        }
         int gigID = ReadFromDatabase.getLastId(conn, "Gig");
         for (Band performance : addGig.getPerformances()) {
             insertPerformance(conn, performance, gigID);
         }
         if (!addGig.getWentWith().isEmpty()) {
             for (String friend : addGig.getWentWith()) {
-                InsertToDatabase.matchGigFriends(conn, gigID, friend);
+                InsertToDatabase.insertAttendedWith(conn, friend, gigID);
             }
         }
     }
 
     public static void insertFriend(Connection conn, String friendName) throws SQLException {
         if (!ReadFromDatabase.checkFriend(conn, friendName)) {
-            String sql = "INSERT INTO Friend(FriendName) VALUES(?)";
-            try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-                pstmt.setString(1, friendName);
-                pstmt.executeUpdate();
-            } catch (SQLException e) {
-                System.out.println(e.getMessage());
-            }
+            PreparedStatement pstmt = conn.prepareStatement("INSERT INTO Friend(FriendName) VALUES(?)");
+            pstmt.setString(1, friendName);
+            pstmt.executeUpdate();
         }
     }
 
     public static void addBand(Connection conn, String name, String genre, String country) throws SQLException {
         if (ReadFromDatabase.checkExists(conn, "Band", "BandName", "Country", name, country)) {
-            String sql = "INSERT INTO Band(BandName,Genre, Country) VALUES(?,?,?)";
-            try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-                pstmt.setString(1, name);
-                pstmt.setString(2, genre);
-                pstmt.setString(3, country);
-                pstmt.executeUpdate();
-            } catch (SQLException e) {
-                System.out.println(e.getMessage());
-            }
+            PreparedStatement ps = conn.prepareStatement("INSERT INTO Band(BandName,Genre, Country) VALUES(?,?,?)");
+            ps.setString(1, name);
+            ps.setString(2, genre);
+            ps.setString(3, country);
+            ps.executeUpdate();
         }
     }
 
@@ -70,19 +58,15 @@ public class InsertToDatabase {
         int rating = addBand.getRating();
         int bandId = ReadFromDatabase.getBandId(conn, name, country);
 
-        String sql = "INSERT INTO Performance(Gig_Id,Band_Id,Rating) VALUES(?,?,?)";
+        PreparedStatement ps = conn.prepareStatement("INSERT INTO Performance(Gig_Id,Band_Id,Rating) VALUES(?,?,?)");
+        ps.setInt(1, gigId);
+        ps.setInt(2, bandId);
+        ps.setInt(3, rating);
+        ps.executeUpdate();
 
-        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setInt(1, gigId);
-            pstmt.setInt(2, bandId);
-            pstmt.setInt(3, rating);
-            pstmt.executeUpdate();
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
-        }
     }
 
-    public static void matchGigFriends(Connection conn, int gigID, String friendName) throws SQLException {
+    public static void insertAttendedWith(Connection conn, String friendName, int gigID) throws SQLException {
         int friendId = ReadFromDatabase.getFriendId(conn, friendName);
         PreparedStatement ps = conn.prepareStatement ("INSERT INTO Attended_with(Gig_Id, Friend_Id) VALUES(?,?)");
                 ps.setInt(1, gigID);
@@ -95,16 +79,11 @@ public class InsertToDatabase {
         String location = addVenue.getVenueLocation();
         boolean isFestival = addVenue.getIsFestival();
         if (ReadFromDatabase.checkExists(conn, "Venue", "VenueName", "Location", name, location)) {
-            String sql = "INSERT INTO Venue(VenueName, Location, isFestival) VALUES(?,?,?)";
-
-            try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-                pstmt.setString(1, name);
-                pstmt.setString(2, location);
-                pstmt.setBoolean(3, isFestival);
-                pstmt.executeUpdate();
-            } catch (SQLException e) {
-                System.out.println(e.getMessage());
-            }
+            PreparedStatement pstmt = conn.prepareStatement("INSERT INTO Venue(VenueName, Location, isFestival) VALUES(?,?,?)");
+            pstmt.setString(1, name);
+            pstmt.setString(2, location);
+            pstmt.setBoolean(3, isFestival);
+            pstmt.executeUpdate();
         }
     }
 }
