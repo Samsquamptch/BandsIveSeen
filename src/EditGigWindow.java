@@ -458,15 +458,26 @@ public class EditGigWindow implements ActionListener, DateChangeListener {
                 }
             }
             if (updatedGig.getPerformances().size() > this.selectedGig.getPerformances().size()) {
-
+                for (int i = maxIteration; i < updatedGig.getPerformances().size(); i++) {
+                    InsertToDatabase.insertPerformance(this.jdbcConnection, updatedGig.getPerformances().get(i), this.gigDatabaseId);
+                }
+            }
+            else if (updatedGig.getPerformances().size() < this.selectedGig.getPerformances().size()) {
+                for (int i = maxIteration; i < this.selectedGig.getPerformances().size(); i++) {
+                    EditDatabase.deletePerformance(this.jdbcConnection, this.selectedGig.getPerformances().get(i), this.gigDatabaseId);
+                }
+            }
+            maxIteration = Math.min(updatedGig.getWentWith().size(), this.selectedGig.getWentWith().size());
+            for (int i = 0; i < maxIteration; i++) {
+                if (!updatedGig.getWentWith().get(i).equals(this.selectedGig.getWentWith().get(i))) {
+                    EditDatabase.changeWentWith(this.jdbcConnection, this.gigDatabaseId,
+                            updatedGig.getWentWith().get(i), this.selectedGig.getWentWith().get(i));
+                }
             }
             if (updatedGig.getWentWith().size() > this.selectedGig.getWentWith().size()) {
 
             }
             else if (updatedGig.getWentWith().size() < this.selectedGig.getWentWith().size()) {
-
-            }
-            else if (!updatedGig.getFriendsString().equals(this.selectedGig.getFriendsString())) {
 
             }
             if (!updatedGig.getLocation().equals(this.selectedGig.getLocation())) {
@@ -500,12 +511,7 @@ public class EditGigWindow implements ActionListener, DateChangeListener {
             }
         }
         else if (e.getSource() == this.saveButton) {
-            int saveResponse = JOptionPane.showConfirmDialog(null,
-                "Are you sure you want to save your changes to this gig?",
-                "Confirm save gig", JOptionPane.YES_NO_OPTION);
-            if (saveResponse==0) {
                 saveGigChanges();
-            }
         }
         else if (e.getSource() == this.headlineSelect) {
             bandSelectSettings(this.headlineSelect, 1);
