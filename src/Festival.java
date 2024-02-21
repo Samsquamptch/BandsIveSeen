@@ -5,20 +5,24 @@ import java.util.ArrayList;
 
 public class Festival extends Event {
     private String festivalName;
-    private int daysDuration;
     private ArrayList<DaysOfFestival> festivalDays;
+    private ArrayList<String> wentWith;
 
-    public Festival(String arrivalDate, Venue location, String festivalName, int numberOfDays){
+    public Festival(String arrivalDate, Venue location, String festivalName){
         super(arrivalDate, location);
-        this.festivalName = festivalName;
-        this.daysDuration = numberOfDays;
-        this.festivalDays = new ArrayList<DaysOfFestival>();
+        this.festivalName = festivalName + super.getEventYear();
+        this.festivalDays = new ArrayList<>();
     }
 
-/*    public void createFestivalDays(){
-        if (festivalDays.isEmpty()){
-            for(int i = 0; i<=this.daysDuration; i++) {
-            }
-        }
-    }*/
+    public void addDays() {
+        int dayCount = this.festivalDays.size();
+        this.festivalDays.add(new DaysOfFestival(super.getLocalDate(), dayCount));
+    }
+
+    public void removeDays() {
+        int dayCount = this.festivalDays.size();
+        this.festivalDays.remove(dayCount-1);
+    }
+
+
 }

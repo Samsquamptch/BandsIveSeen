@@ -33,6 +33,14 @@ public class Event {
         return this.eventDay.format(formatter);
     }
 
+    public String getEventYear() {
+        if (this.eventDay == null) {
+            return "";
+        }
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy");
+        return this.eventDay.format(formatter);
+    }
+
     public LocalDate getLocalDate() {
         return this.eventDay;
     }

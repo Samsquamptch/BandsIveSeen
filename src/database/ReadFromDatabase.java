@@ -110,7 +110,7 @@ public class ReadFromDatabase {
     }
 
     public static String[] selectVenues(Connection conn, boolean addOrRemove) {
-        String sql = "SELECT VenueName, Location FROM Venue ORDER BY VenueName";
+        String sql = "SELECT VenueName, Location FROM Venue WHERE isFestival = 0 ORDER BY VenueName";
         ArrayList<String> venueData = new ArrayList<>();
         venueData.add("Select a Venue");
 
