@@ -117,7 +117,8 @@ public class EditGigWindow implements ActionListener, DateChangeListener {
         venuePickerPanel.add(this.venueSelect, BorderLayout.CENTER);
 
         //Add Friends panel
-        String[] friendArray = ReadFromDatabase.selectFriends(this.jdbcConnection, this.selectedGig.getWentWith().toArray(new String[0]));
+        String[] friendArray = ReadFromDatabase.selectFriends(this.jdbcConnection,
+                this.selectedGig.getWentWith().toArray(new String[0]), true);
         this.addFriend = new JComboBox<>(friendArray);
         this.addFriend.addActionListener(this);
         JPanel addFriendPanel = CreateWindow.createPanel("Add Friend");
@@ -477,6 +478,7 @@ public class EditGigWindow implements ActionListener, DateChangeListener {
             }
         }
         maxIteration = Math.min(updatedGig.getWentWith().size(), this.selectedGig.getWentWith().size());
+        System.out.println(maxIteration);
         for (int i = 0; i < maxIteration; i++) {
             if (!updatedGig.getWentWith().get(i).equals(this.selectedGig.getWentWith().get(i))) {
                 EditDatabase.changeWentWith(this.jdbcConnection, updatedGig.getWentWith().get(i),
@@ -489,8 +491,8 @@ public class EditGigWindow implements ActionListener, DateChangeListener {
             }
         }
         else if (updatedGig.getWentWith().size() < this.selectedGig.getWentWith().size()) {
-            for (int i = maxIteration; i < updatedGig.getWentWith().size(); i++) {
-                DeleteFromDatabase.deleteAttendedWith(this.jdbcConnection, updatedGig.getWentWith().get(i), this.gigDatabaseId);
+            for (int i = maxIteration; i < this.selectedGig.getWentWith().size(); i++) {
+                DeleteFromDatabase.deleteAttendedWith(this.jdbcConnection, this.selectedGig.getWentWith().get(i), this.gigDatabaseId);
             }
         }
         if (!updatedGig.getLocation().equals(this.selectedGig.getLocation())) {

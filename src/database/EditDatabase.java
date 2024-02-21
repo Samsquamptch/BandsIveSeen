@@ -31,6 +31,13 @@ public class EditDatabase {
         ps.executeUpdate();
     }
 
+    public static void editFriend(Connection conn, String newName, int friendId) throws SQLException {
+        PreparedStatement ps = conn.prepareStatement ("UPDATE Friend SET FriendName = ? WHERE Id = ?");
+        ps.setString(1, newName);
+        ps.setInt(2, friendId);
+        ps.executeUpdate();
+    }
+
     public static void changeGigDate(Connection conn, String newDate, int gigId) throws SQLException {
         PreparedStatement ps = conn.prepareStatement ("UPDATE Gig SET Date = ? WHERE Id = ?");
         ps.setString(1, newDate);

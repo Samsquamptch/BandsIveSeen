@@ -86,7 +86,7 @@ public class AddGigWindow implements ActionListener, DateChangeListener {
         } else {
             gigDate.setDate(this.selectedGig.getLocalDate());
         }
-        this.gigDate.addDateChangeListener(this::dateChanged);
+        this.gigDate.addDateChangeListener(this);
         JPanel datePickerPanel = createPanel("Gig Date");
         datePickerPanel.add(this.gigDate, BorderLayout.CENTER);
 
@@ -101,7 +101,8 @@ public class AddGigWindow implements ActionListener, DateChangeListener {
         venuePickerPanel.add(this.venueSelect, BorderLayout.CENTER);
 
         //Add Friends panel
-        String[] friendArray = ReadFromDatabase.selectFriends(this.jdbcConnection, this.selectedGig.getWentWith().toArray(new String[0]));
+        String[] friendArray = ReadFromDatabase.selectFriends(this.jdbcConnection,
+                this.selectedGig.getWentWith().toArray(new String[0]), true);
         this.addFriend = new JComboBox<>(friendArray);
         this.addFriend.addActionListener(this);
         JPanel addFriendPanel = createPanel("Add Friend");
@@ -463,7 +464,6 @@ public class AddGigWindow implements ActionListener, DateChangeListener {
     @Override
     public void dateChanged(DateChangeEvent dateChangeEvent) {
         this.selectedGig.setEventDay(this.gigDate.toString());
-        System.out.println("change");
         refreshPanels(false);
     }
 }

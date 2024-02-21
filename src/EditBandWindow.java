@@ -125,7 +125,7 @@ public class EditBandWindow implements ActionListener {
     }
 
     public void saveBandChanges() throws SQLException {
-        if (this.bandNameBox.getText().isEmpty() || this.bandNameBox.getText().isEmpty() || this.bandGenreBox.getText().isEmpty()) {
+        if (this.bandNameBox.getText().isEmpty() || this.bandCountryBox.getText().isEmpty() || this.bandGenreBox.getText().isEmpty()) {
             JOptionPane.showMessageDialog(null,"Please ensure no fields are empty",
                     "Fields are empty!", JOptionPane.WARNING_MESSAGE);
             return;

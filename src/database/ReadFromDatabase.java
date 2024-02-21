@@ -10,7 +10,7 @@ import java.util.Arrays;
 
 public class ReadFromDatabase {
 
-    public static String[] selectFriends(Connection conn, String[] friendsList) {
+    public static String[] selectFriends(Connection conn, String[] friendsList, boolean addOrRemove) {
         String sql = "SELECT FriendName FROM Friend";
         ArrayList<String> friendList = new ArrayList<>();
         friendList.add("Add Friend");
@@ -24,10 +24,12 @@ public class ReadFromDatabase {
                     friendList.add(friend);
                 }
             }
-    } catch (SQLException e) {
-        System.out.println(e.getMessage());
-    }
-        friendList.add("Add New Friend");
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+        if (addOrRemove) {
+            friendList.add("Add New Friend");
+        }
         String[] friendArray = new String[friendList.size()];
         friendArray = friendList.toArray(friendArray);
         return friendArray;
@@ -139,10 +141,7 @@ public class ReadFromDatabase {
                 + column + " = ?");
         ps.setInt (1, checkId);
         ResultSet rs = ps.executeQuery();
-        if (rs.getString("Id") == null) {
-            return false;
-        }
-        return true;
+        return rs.getString("Id") != null;
     }
 
     public static boolean checkFriend(Connection conn, String friendName) throws SQLException {

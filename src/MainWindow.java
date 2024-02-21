@@ -111,7 +111,7 @@ public class MainWindow implements ActionListener {
                 case 0 -> {
                 }
                 case 1 -> {
-                    System.out.println("Friends");
+                    new EditFriendWindow(this.jdbcConnection).newWindow();
                     this.selectOtherOptions.setSelectedIndex(0);
                 }
                 case 2 -> {

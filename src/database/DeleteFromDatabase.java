@@ -34,4 +34,10 @@ public class DeleteFromDatabase {
         ps.setInt(2, gigID);
         ps.executeUpdate();
     }
+
+    public static void deleteFriend(Connection conn, int friendId) throws SQLException {
+        PreparedStatement ps = conn.prepareStatement ("DELETE FROM Friend WHERE Id = ?");
+        ps.setInt(1, friendId);
+        ps.executeUpdate();
+    }
 }
