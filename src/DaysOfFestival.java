@@ -20,5 +20,11 @@ public class DaysOfFestival {
         this.dayPerformances.add(performance);
     }
 
+    private void removePerformance(Band performance) {
+        this.dayPerformances.remove(performance);
+    }
 
+    private String getDay() {
+        return "Day " + this.dayNumber;
+    }
 }

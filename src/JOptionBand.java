@@ -29,7 +29,6 @@ public class JOptionBand {
         if (result == JOptionPane.OK_OPTION) {
             if(bandName.getText().isEmpty() || bandGenre.getText().isEmpty() ||
                     bandCountry.getText().isEmpty()) {
-                System.out.println("field is empty");
                 JOptionPane.showMessageDialog(null, "Field was empty, band not added",
                         "Input Error", JOptionPane.WARNING_MESSAGE);
             }

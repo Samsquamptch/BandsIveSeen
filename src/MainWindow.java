@@ -125,20 +125,31 @@ public class MainWindow implements ActionListener {
             }
         }
         else if (e.getSource() == selectGigOptions) {
-        switch (this.selectGigOptions.getSelectedIndex()) {
-            case 0 -> {
-            }
-            case 1 -> {
-                new AddGigWindow(this.jdbcConnection).newWindow();
-                this.selectGigOptions.setSelectedIndex(0);
-            }
-            case 2 -> {
-                new EditGigWindow(this.jdbcConnection).newWindow();
-                this.selectGigOptions.setSelectedIndex(0);
-            }
+            switch (this.selectGigOptions.getSelectedIndex()) {
+                case 0 -> {
+                }
+                case 1 -> {
+                    new AddGigWindow(this.jdbcConnection).newWindow();
+                    this.selectGigOptions.setSelectedIndex(0);
+                }
+                case 2 -> {
+                    new EditGigWindow(this.jdbcConnection).newWindow();
+                    this.selectGigOptions.setSelectedIndex(0);
+                }
         }
         } else if (e.getSource() == this.selectFestivalOptions) {
-            System.out.println("Work in progress");
+            switch (this.selectFestivalOptions.getSelectedIndex()) {
+                case 0 -> {
+                }
+                case 1 -> {
+                    new AddFestivalWindow(this.jdbcConnection).newWindow();
+                    this.selectGigOptions.setSelectedIndex(0);
+                }
+                case 2 -> {
+                    new EditFestivalWindow(this.jdbcConnection).newWindow();
+                    this.selectGigOptions.setSelectedIndex(0);
+                }
+            }
             this.selectFestivalOptions.setSelectedIndex(0);
         }
         else if (e.getSource() == this.refreshButton) {

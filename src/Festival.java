@@ -6,9 +6,14 @@ import java.util.ArrayList;
 public class Festival extends Event {
     private String festivalName;
     private ArrayList<DaysOfFestival> festivalDays;
-    private ArrayList<String> wentWith;
 
-    public Festival(String arrivalDate, Venue location, String festivalName){
+    public Festival() {
+        super();
+        this.festivalName = "";
+        this.festivalDays = new ArrayList<>();
+    }
+
+    public Festival(String arrivalDate, Venue location, String festivalName) {
         super(arrivalDate, location);
         this.festivalName = festivalName + super.getEventYear();
         this.festivalDays = new ArrayList<>();

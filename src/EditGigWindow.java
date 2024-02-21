@@ -391,7 +391,6 @@ public class EditGigWindow implements ActionListener, DateChangeListener {
     public void setVenueSelect() {
         if (this.venueSelect.getSelectedItem().equals("Add New Venue")) {
             String addedVenue = JOptionVenue.addVenue(this.jdbcConnection);
-            System.out.println(addedVenue);
             if (addedVenue.isEmpty()) {
                 this.venueSelect.setSelectedIndex(0);
                 return;
@@ -478,7 +477,6 @@ public class EditGigWindow implements ActionListener, DateChangeListener {
             }
         }
         maxIteration = Math.min(updatedGig.getWentWith().size(), this.selectedGig.getWentWith().size());
-        System.out.println(maxIteration);
         for (int i = 0; i < maxIteration; i++) {
             if (!updatedGig.getWentWith().get(i).equals(this.selectedGig.getWentWith().get(i))) {
                 EditDatabase.changeWentWith(this.jdbcConnection, updatedGig.getWentWith().get(i),

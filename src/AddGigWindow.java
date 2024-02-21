@@ -46,7 +46,7 @@ public class AddGigWindow implements ActionListener, DateChangeListener {
         this.saveButton = new JButton("Save");
         this.saveButton.setPreferredSize(new Dimension(200,30));
         this.saveButton.addActionListener(this);
-        JPanel saveButtonPanel = createPanel("Save Changes");
+        JPanel saveButtonPanel = CreateWindow.createPanel("Save Changes");
         saveButtonPanel.add(this.saveButton, BorderLayout.CENTER);
 
         JPanel optionPanel = new JPanel();
@@ -62,13 +62,6 @@ public class AddGigWindow implements ActionListener, DateChangeListener {
         this.addWindow.add(this.sidePanel, BorderLayout.WEST);
         this.addWindow.add(this.editPanel, BorderLayout.CENTER);
         this.addWindow.add(optionPanel, BorderLayout.SOUTH);
-    }
-
-    public JPanel createPanel(String labelText) {
-        JPanel panel = new JPanel();
-        panel.setLayout(new BorderLayout());
-        panel.add(new JLabel(labelText), BorderLayout.NORTH);
-        return panel;
     }
 
     public void setEditPanel() {
@@ -87,7 +80,7 @@ public class AddGigWindow implements ActionListener, DateChangeListener {
             gigDate.setDate(this.selectedGig.getLocalDate());
         }
         this.gigDate.addDateChangeListener(this);
-        JPanel datePickerPanel = createPanel("Gig Date");
+        JPanel datePickerPanel = CreateWindow.createPanel("Gig Date");
         datePickerPanel.add(this.gigDate, BorderLayout.CENTER);
 
         //Venue select panel
@@ -97,7 +90,7 @@ public class AddGigWindow implements ActionListener, DateChangeListener {
         if (this.selectedGig.getLocation()!=null){
             this.venueSelect.setSelectedItem(this.selectedGig.getLocation().toString());
         }
-        JPanel venuePickerPanel = createPanel("Gig Venue");
+        JPanel venuePickerPanel = CreateWindow.createPanel("Gig Venue");
         venuePickerPanel.add(this.venueSelect, BorderLayout.CENTER);
 
         //Add Friends panel
@@ -105,7 +98,7 @@ public class AddGigWindow implements ActionListener, DateChangeListener {
                 this.selectedGig.getWentWith().toArray(new String[0]), true);
         this.addFriend = new JComboBox<>(friendArray);
         this.addFriend.addActionListener(this);
-        JPanel addFriendPanel = createPanel("Add Friend");
+        JPanel addFriendPanel = CreateWindow.createPanel("Add Friend");
         addFriendPanel.add(this.addFriend, BorderLayout.CENTER);
 
         //Remove Friends panel
@@ -116,68 +109,68 @@ public class AddGigWindow implements ActionListener, DateChangeListener {
         }
         this.removeFriend = new JComboBox<>(removeArray);
         this.removeFriend.addActionListener(this);
-        JPanel removeFriendPanel = createPanel("Remove Friend");
+        JPanel removeFriendPanel = CreateWindow.createPanel("Remove Friend");
         removeFriendPanel.add(this.removeFriend, BorderLayout.CENTER);
 
         //Headline select panel
         this.headlineSelect = new JComboBox<>(bandData);
         this.headlineSelect.removeItem("Remove Band");
         this.headlineSelect.addActionListener(this);
-        JPanel headlineSelectPanel = createPanel("Gig Headline");
+        JPanel headlineSelectPanel = CreateWindow.createPanel("Gig Headline");
         headlineSelectPanel.add(this.headlineSelect, BorderLayout.CENTER);
 
         //Headline rating select panel
         this.headlineRating = new JComboBox<>(rating);
         this.headlineRating.addActionListener(this);
-        JPanel headlineRatingPanel = createPanel("Set Rating");
+        JPanel headlineRatingPanel = CreateWindow.createPanel("Set Rating");
         headlineRatingPanel.add(this.headlineRating, BorderLayout.CENTER);
 
         //Support 1 select panel
         this.support1Select = new JComboBox<>(bandData);
         this.support1Select.addActionListener(this);
-        JPanel support1SelectPanel = createPanel("Supporting Band");
+        JPanel support1SelectPanel = CreateWindow.createPanel("Supporting Band");
         support1SelectPanel.add(this.support1Select, BorderLayout.CENTER);
 
         //Support 1 rating select panel
         this.support1Rating = new JComboBox<>(rating);
         this.support1Rating.addActionListener(this);
-        JPanel support1RatingPanel = createPanel("Set Rating");
+        JPanel support1RatingPanel = CreateWindow.createPanel("Set Rating");
         support1RatingPanel.add(this.support1Rating, BorderLayout.CENTER);
 
         //Support 2 select panel
         this.support2Select = new JComboBox<>(bandData);
         this.support2Select.addActionListener(this);
-        JPanel support2SelectPanel = createPanel("Supporting Band");
+        JPanel support2SelectPanel = CreateWindow.createPanel("Supporting Band");
         support2SelectPanel.add(this.support2Select, BorderLayout.CENTER);
 
         //Support 2 rating select panel
         this.support2Rating = new JComboBox<>(rating);
         this.support2Rating.addActionListener(this);
-        JPanel support2RatingPanel = createPanel("Set Rating");
+        JPanel support2RatingPanel = CreateWindow.createPanel("Set Rating");
         support2RatingPanel.add(this.support2Rating, BorderLayout.CENTER);
 
         //Support 3 select panel
         this.support3Select = new JComboBox<>(bandData);
         this.support3Select.addActionListener(this);
-        JPanel support3SelectPanel = createPanel("Supporting Band");
+        JPanel support3SelectPanel = CreateWindow.createPanel("Supporting Band");
         support3SelectPanel.add(this.support3Select, BorderLayout.CENTER);
 
         //Support 3 rating select panel
         this.support3Rating = new JComboBox<>(rating);
         this.support3Rating.addActionListener(this);
-        JPanel support3RatingPanel = createPanel("Set Rating");
+        JPanel support3RatingPanel = CreateWindow.createPanel("Set Rating");
         support3RatingPanel.add(this.support3Rating, BorderLayout.CENTER);
 
         //Support 4 select panel
         this.support4Select = new JComboBox<>(bandData);
         this.support4Select.addActionListener(this);
-        JPanel support4SelectPanel = createPanel("Supporting Band");
+        JPanel support4SelectPanel = CreateWindow.createPanel("Supporting Band");
         support4SelectPanel.add(this.support4Select, BorderLayout.CENTER);
 
         //Support 4 rating select panel
         this.support4Rating = new JComboBox<>(rating);
         this.support4Rating.addActionListener(this);
-        JPanel support4RatingPanel = createPanel("Set Rating");
+        JPanel support4RatingPanel = CreateWindow.createPanel("Set Rating");
         support4RatingPanel.add(this.support4Rating, BorderLayout.CENTER);
 
         //Initialise the selectors, populate them, and enable/disable them
