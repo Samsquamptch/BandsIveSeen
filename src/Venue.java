@@ -5,6 +5,12 @@ public class Venue {
     private String venueLocation;
     private boolean isFestival;
 
+    public Venue() {
+        this.venueName = "";
+        this.venueLocation = "";
+        this.isFestival = false;
+    }
+
     public Venue(String name, String location, boolean festival){
         this.venueName = name;
         this.venueLocation = location;

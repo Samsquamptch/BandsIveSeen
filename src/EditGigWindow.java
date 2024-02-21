@@ -105,7 +105,7 @@ public class EditGigWindow implements ActionListener, DateChangeListener {
         datePickerPanel.add(this.gigDate, BorderLayout.CENTER);
 
         //Venue select panel
-        String[] venueData = ReadFromDatabase.selectVenues(this.jdbcConnection);
+        String[] venueData = ReadFromDatabase.selectVenues(this.jdbcConnection, true);
         this.venueSelect = new JComboBox<>(venueData);
         this.venueSelect.addActionListener(this);
         this.venueSelect.setEnabled(false);

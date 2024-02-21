@@ -58,7 +58,7 @@ public class EditFriendWindow implements ActionListener {
         this.editPanel = new JPanel();
         setEditPanel();
 
-        this.addWindow = new CreateWindow("Edit Band", 500, 350);
+        this.addWindow = new CreateWindow("Edit Friend", 500, 250);
         this.addWindow.add(searchPanel, BorderLayout.NORTH);
         this.addWindow.add(this.editPanel, BorderLayout.CENTER);
         this.addWindow.add(optionPanel, BorderLayout.SOUTH);

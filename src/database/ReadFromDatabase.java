@@ -13,7 +13,11 @@ public class ReadFromDatabase {
     public static String[] selectFriends(Connection conn, String[] friendsList, boolean addOrRemove) {
         String sql = "SELECT FriendName FROM Friend";
         ArrayList<String> friendList = new ArrayList<>();
-        friendList.add("Add Friend");
+        if (addOrRemove) {
+            friendList.add("Add Friend");
+        } else {
+            friendList.add("Select Friend");
+        }
 
         try (Statement queryStatement = conn.createStatement();
              ResultSet queryResult = queryStatement.executeQuery(sql))
@@ -105,7 +109,7 @@ public class ReadFromDatabase {
         return bandArray;
     }
 
-    public static String[] selectVenues(Connection conn) {
+    public static String[] selectVenues(Connection conn, boolean addOrRemove) {
         String sql = "SELECT VenueName, Location FROM Venue ORDER BY VenueName";
         ArrayList<String> venueData = new ArrayList<>();
         venueData.add("Select a Venue");
@@ -120,7 +124,9 @@ public class ReadFromDatabase {
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
-        venueData.add("Add New Venue");
+        if (addOrRemove) {
+            venueData.add("Add New Venue");
+        }
         String[] venueArray = new String[venueData.size()];
         venueArray = venueData.toArray(venueArray);
         return venueArray;

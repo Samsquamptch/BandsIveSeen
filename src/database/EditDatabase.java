@@ -31,6 +31,14 @@ public class EditDatabase {
         ps.executeUpdate();
     }
 
+    public static void editVenue(Connection conn, Venue newVenue, int venueId) throws SQLException {
+        PreparedStatement ps = conn.prepareStatement ("UPDATE Venue SET VenueName = ?, Location = ? WHERE Id = ?");
+        ps.setString(1, newVenue.getVenueName());
+        ps.setString(2, newVenue.getVenueLocation());
+        ps.setInt(3, venueId);
+        ps.executeUpdate();
+    }
+
     public static void editFriend(Connection conn, String newName, int friendId) throws SQLException {
         PreparedStatement ps = conn.prepareStatement ("UPDATE Friend SET FriendName = ? WHERE Id = ?");
         ps.setString(1, newName);

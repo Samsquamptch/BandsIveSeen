@@ -109,8 +109,8 @@ public class EditBandWindow implements ActionListener {
 
     public void deleteBand() throws SQLException {
         int deleteResponse = JOptionPane.showConfirmDialog(null,
-                "Are you sure you want to delete this gig permanently?",
-                "Confirm delete gig", JOptionPane.YES_NO_OPTION);
+                "Are you sure you want to delete this band permanently?",
+                "Confirm delete band", JOptionPane.YES_NO_OPTION);
         if (deleteResponse!=0) {
             return;
         }

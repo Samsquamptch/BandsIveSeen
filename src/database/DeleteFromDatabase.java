@@ -35,6 +35,12 @@ public class DeleteFromDatabase {
         ps.executeUpdate();
     }
 
+    public static void deleteVenue(Connection conn, int venueId) throws SQLException {
+        PreparedStatement ps = conn.prepareStatement ("DELETE FROM Venue WHERE Id = ?");
+        ps.setInt(1, venueId);
+        ps.executeUpdate();
+    }
+
     public static void deleteFriend(Connection conn, int friendId) throws SQLException {
         PreparedStatement ps = conn.prepareStatement ("DELETE FROM Friend WHERE Id = ?");
         ps.setInt(1, friendId);

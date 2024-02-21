@@ -67,7 +67,7 @@ public class MainWindow implements ActionListener {
 
         JPanel backPanel = new JPanel();
         backPanel.setBackground(Color.darkGray);
-        backPanel.setLayout(new BorderLayout(5,5));
+        backPanel.setLayout(new BorderLayout(2,2));
 
         JPanel topPanel = new JPanel();
         topPanel.setPreferredSize(new Dimension(100,75));
@@ -119,7 +119,7 @@ public class MainWindow implements ActionListener {
                     this.selectOtherOptions.setSelectedIndex(0);
                 }
                 case 3 -> {
-                    System.out.println("Venue");
+                    new EditVenueWindow(this.jdbcConnection).newWindow();
                     this.selectOtherOptions.setSelectedIndex(0);
                 }
             }
