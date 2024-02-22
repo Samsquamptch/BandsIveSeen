@@ -24,6 +24,10 @@ public class DaysOfFestival {
         this.dayPerformances.remove(performance);
     }
 
+    public ArrayList<Band> getPerformances() {
+        return this.dayPerformances;
+    }
+
     public void setDayDate(LocalDate newDate) {
         this.dayDate = newDate.plusDays(dayNumber-1);
     }

@@ -6,10 +6,12 @@ import com.github.lgooddatepicker.zinternaltools.DateChangeEvent;
 import src.database.ReadFromDatabase;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.Connection;
+import java.sql.SQLException;
 
 public class AddFestivalWindow implements ActionListener, DateChangeListener {
     DatePicker festivalDate;
@@ -27,6 +29,7 @@ public class AddFestivalWindow implements ActionListener, DateChangeListener {
     JComboBox<String> selectFestivalDay;
     JComboBox<String> removeFriend;
     JComboBox<String> addFriend;
+    JTable festivalDayTable;
     JButton addDayButton;
     JButton removeDayButton;
     JButton addBandButton;
@@ -56,23 +59,13 @@ public class AddFestivalWindow implements ActionListener, DateChangeListener {
         this.sidePanel = new JPanel();
         setSidePanel();
         this.editPanel = new JPanel();
-        setEditPanel();
+        this.editPanel.add(new JLabel("Add a day for more options"));
 
         this.addWindow = new CreateWindow("Add Festival", 1000, 650);
         this.addWindow.add(new JPanel(), BorderLayout.NORTH);
         this.addWindow.add(this.sidePanel, BorderLayout.WEST);
         this.addWindow.add(this.editPanel, BorderLayout.CENTER);
         this.addWindow.add(optionPanel, BorderLayout.SOUTH);
-    }
-
-    public String setFestivalName() {
-        if (this.selectedFestival.getFestivalDays().isEmpty()) {
-            return "";
-        } else {
-            int selectedIndex = this.selectFestivalDay.getSelectedIndex();
-            return this.selectedFestival.getFestivalName() + " " + this.selectedFestival.getEventYear() +
-                    ": " + this.selectedFestival.getFestivalDays().get(selectedIndex).getDay();
-        }
     }
 
     public void setEditPanel() {
@@ -82,6 +75,7 @@ public class AddFestivalWindow implements ActionListener, DateChangeListener {
         JPanel topPanel = new JPanel();
         topPanel.setLayout(new GridLayout(4,3,10,0));
         JPanel bottomPanel = new JPanel();
+        bottomPanel.setLayout(new BorderLayout());
 
         this.editPanel.setLayout(new GridLayout(2,1));
         this.editPanel.add(topPanel);
@@ -149,8 +143,38 @@ public class AddFestivalWindow implements ActionListener, DateChangeListener {
         topPanel.add(new JPanel());
         topPanel.add(new JPanel());
         topPanel.add(new JPanel());
-        topPanel.revalidate();
-        topPanel.repaint();
+
+        //Table
+        String[] columnNames = {"Artist", "Country", "Genre", "Rating"};
+        String[][] tableData = getTableData(this.selectFestivalDay.getSelectedIndex());
+        this.festivalDayTable = new JTable(tableData, columnNames);
+        this.festivalDayTable.setAutoCreateRowSorter(true);
+        JScrollPane tableScrollPane = new JScrollPane(festivalDayTable);
+
+        bottomPanel.add(tableScrollPane, BorderLayout.CENTER);
+
+        this.sidePanel.revalidate();
+        this.sidePanel.repaint();
+    }
+
+    public String[][] getTableData(int dayNumber) {
+        DaysOfFestival tableDay = this.selectedFestival.getFestivalDays().get(dayNumber);
+        int arrayLength = tableDay.getPerformances().size();
+        String[][] bandTable = new String[arrayLength][4];
+        for (int i = 0; i < arrayLength; i++) {
+            bandTable[i][0] = tableDay.getPerformances().get(i).getBandName();
+            bandTable[i][1] = tableDay.getPerformances().get(i).getFromCountry();
+            bandTable[i][2] = tableDay.getPerformances().get(i).getBandGenre();
+            bandTable[i][3] = Integer.toString(tableDay.getPerformances().get(i).getRating());
+        }
+        return bandTable;
+    }
+
+    public void updateTable() {
+            String[] columnNames = {"Artist", "Country", "Genre", "Rating"};
+            String[][] tableData = getTableData(this.selectFestivalDay.getSelectedIndex());
+            DefaultTableModel model = new DefaultTableModel(tableData, columnNames);
+            this.festivalDayTable.setModel(model);
     }
 
     public void setSidePanel() {
@@ -287,6 +311,12 @@ public class AddFestivalWindow implements ActionListener, DateChangeListener {
         this.removeFriend.revalidate();
         this.removeFriend.repaint();
         refreshFriendPanel();
+    }
+
+    public String setFestivalName() {
+        int selectedIndex = this.selectFestivalDay.getSelectedIndex();
+        return this.selectedFestival.getFestivalName() + " " + this.selectedFestival.getEventYear() +
+                ": " + this.selectedFestival.getFestivalDays().get(selectedIndex).getDay();
     }
 
     public void saveChanges() {

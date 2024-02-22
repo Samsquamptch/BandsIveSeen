@@ -36,4 +36,5 @@ public class Band {
     public String getFromCountry() { return this.fromCountry; }
 
     public int getRating() { return this.rating; }
+
 }
