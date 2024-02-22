@@ -17,13 +17,19 @@ public class AddFestivalWindow implements ActionListener, DateChangeListener {
     JTextField festivalLocationBox;
     JPanel sidePanel;
     JPanel editPanel;
+    JPanel wentWithPanel;
     JComboBox<String> headlineSelect;
     JComboBox<String> headlineRating;
+    JComboBox<String> bandSelect;
+    JComboBox<String> bandRating;
     JComboBox<String> selectFestivalDay;
     JComboBox<String> removeFriend;
     JComboBox<String> addFriend;
     JButton addDayButton;
     JButton removeDayButton;
+    JButton addBandButton;
+    JButton editBandButton;
+    JButton deleteBandButton;
     JButton saveButton;
     CreateWindow addWindow;
     Festival selectedFestival;
@@ -50,7 +56,7 @@ public class AddFestivalWindow implements ActionListener, DateChangeListener {
         this.editPanel = new JPanel();
         setEditPanel();
 
-        this.addWindow = new CreateWindow("Add Festival", 1000, 600);
+        this.addWindow = new CreateWindow("Add Festival", 1000, 650);
         this.addWindow.add(new JPanel(), BorderLayout.NORTH);
         this.addWindow.add(this.sidePanel, BorderLayout.WEST);
         this.addWindow.add(this.editPanel, BorderLayout.CENTER);
@@ -71,18 +77,13 @@ public class AddFestivalWindow implements ActionListener, DateChangeListener {
         String[] bandData = ReadFromDatabase.selectBands(this.jdbcConnection, true);
         String[] rating = new String[]{"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"};
         this.editPanel.removeAll();
-        this.editPanel.setLayout(new GridLayout(2,3));
-
-        //Festival name label
-        JLabel festivalDayName = new JLabel(setFestivalName());
-        JPanel dayNamePanel = new JPanel();
-        dayNamePanel.add(festivalDayName);
+        this.editPanel.setLayout(new GridLayout(4,3));
 
         //Headline select panel
         this.headlineSelect = new JComboBox<>(bandData);
         this.headlineSelect.removeItem("Remove Band");
         this.headlineSelect.addActionListener(this);
-        JPanel headlineSelectPanel = CreateWindow.createPanel("Gig Headline");
+        JPanel headlineSelectPanel = CreateWindow.createPanel("Festival Headline");
         headlineSelectPanel.add(this.headlineSelect, BorderLayout.CENTER);
 
         //Headline rating select panel
@@ -91,8 +92,25 @@ public class AddFestivalWindow implements ActionListener, DateChangeListener {
         JPanel headlineRatingPanel = CreateWindow.createPanel("Set Rating");
         headlineRatingPanel.add(this.headlineRating, BorderLayout.CENTER);
 
+        //Band select panel
+        this.bandSelect = new JComboBox<>(bandData);
+        this.bandSelect.addActionListener(this);
+        JPanel support1SelectPanel = CreateWindow.createPanel("Add Band");
+        support1SelectPanel.add(this.bandSelect, BorderLayout.CENTER);
 
-        this.editPanel.add(dayNamePanel);
+        //Band rating select panel
+        this.bandRating = new JComboBox<>(rating);
+        this.bandRating.addActionListener(this);
+        JPanel support1RatingPanel = CreateWindow.createPanel("Set Rating");
+        support1RatingPanel.add(this.bandRating, BorderLayout.CENTER);
+
+        this.editPanel.add(headlineSelectPanel);
+        this.editPanel.add(headlineRatingPanel);
+        this.editPanel.add(new JPanel());
+        this.editPanel.add(new JPanel());
+        this.editPanel.add(new JPanel());
+        this.editPanel.add(new JPanel());
+        this.editPanel.add(new JPanel());
         this.editPanel.add(new JPanel());
         this.editPanel.add(new JPanel());
         this.editPanel.revalidate();
@@ -102,7 +120,7 @@ public class AddFestivalWindow implements ActionListener, DateChangeListener {
     public void setSidePanel() {
         sidePanel.removeAll();
         sidePanel.setPreferredSize(new Dimension(220,150));
-        sidePanel.setLayout(new GridLayout(8,1));
+        sidePanel.setLayout(new GridLayout(9,1));
 
         //Name field
         this.festivalNameBox = new JTextField();
@@ -157,8 +175,9 @@ public class AddFestivalWindow implements ActionListener, DateChangeListener {
                 this.selectedFestival.getWentWith().toArray(new String[0]), true);
         this.addFriend = new JComboBox<>(friendArray);
         this.addFriend.addActionListener(this);
-        JPanel addFriendPanel = CreateWindow.createPanel("Add Friend");
+        JPanel addFriendPanel = CreateWindow.createPanel("   Add Friend");
         addFriendPanel.add(this.addFriend, BorderLayout.CENTER);
+        addFriendPanel.add(new JPanel(), BorderLayout.WEST);
 
         //Remove Friends panel
         String[] removeArray = new String[this.selectedFestival.getWentWith().size()+1];
@@ -168,8 +187,16 @@ public class AddFestivalWindow implements ActionListener, DateChangeListener {
         }
         this.removeFriend = new JComboBox<>(removeArray);
         this.removeFriend.addActionListener(this);
-        JPanel removeFriendPanel = CreateWindow.createPanel("Remove Friend");
+        JPanel removeFriendPanel = CreateWindow.createPanel("   Remove Friend");
         removeFriendPanel.add(this.removeFriend, BorderLayout.CENTER);
+        removeFriendPanel.add(new JPanel(), BorderLayout.WEST);
+
+        //Went with panel
+        JPanel friendPanel = CreateWindow.createPanel("   Went with:");
+        this.wentWithPanel = new JPanel();
+        friendPanel.add(wentWithPanel, BorderLayout.CENTER);
+        this.wentWithPanel.add(new JPanel(), BorderLayout.WEST);
+        refreshFriendPanel();
 
         this.sidePanel.add(namePanel);
         this.sidePanel.add(locationPanel);
@@ -177,8 +204,53 @@ public class AddFestivalWindow implements ActionListener, DateChangeListener {
         this.sidePanel.add(setDaysPanel);
         this.sidePanel.add(selectDayPanel);
         this.sidePanel.add(new JPanel());
-        this.sidePanel.add(new JPanel());
-        this.sidePanel.add(new JPanel());
+        this.sidePanel.add(addFriendPanel);
+        this.sidePanel.add(removeFriendPanel);
+        this.sidePanel.add(friendPanel);
+    }
+
+    public void refreshFriendPanel() {
+        this.wentWithPanel.removeAll();
+        this.wentWithPanel.setLayout(new FlowLayout(FlowLayout.LEADING));
+        JLabel friendLabel = new JLabel(this.selectedFestival.getFriendsString());
+        this.wentWithPanel.add(friendLabel);
+        this.wentWithPanel.revalidate();
+        this.wentWithPanel.repaint();
+    }
+
+    public void friendSelectSettings(JComboBox<String> selectorItem) {
+        if (selectorItem.getSelectedItem().equals("Add New Friend")) {
+            String friendName = JOptionFriend.addFriend(this.jdbcConnection);
+            if (friendName.isEmpty()) {
+                selectorItem.setSelectedIndex(0);
+                return;
+            }
+            addFriend.removeItem("Add New Friend");
+            addFriend.addItem(friendName);
+            addFriend.addItem("Add New Friend");
+            this.addFriend.setSelectedItem(friendName);
+            friendSelectSettings(this.addFriend);
+        }
+        else if (selectorItem.getSelectedIndex() != 0) {
+            if (selectorItem == this.addFriend) {
+                this.selectedFestival.addWentWith(this.addFriend.getSelectedItem().toString());
+                this.removeFriend.addItem(this.addFriend.getSelectedItem().toString());
+                this.addFriend.removeItem(this.addFriend.getSelectedItem());
+                this.addFriend.setSelectedIndex(0);
+            } else {
+                this.selectedFestival.removeWentWith(this.removeFriend.getSelectedItem().toString());
+                this.addFriend.removeItem("Add New Friend");
+                this.addFriend.addItem(this.removeFriend.getSelectedItem().toString());
+                this.addFriend.addItem("Add New Friend");
+                this.removeFriend.removeItem(this.removeFriend.getSelectedItem());
+                this.removeFriend.setSelectedIndex(0);
+            }
+        }
+        this.addFriend.revalidate();
+        this.addFriend.repaint();
+        this.removeFriend.revalidate();
+        this.removeFriend.repaint();
+        refreshFriendPanel();
     }
 
     public void saveChanges() {
@@ -198,7 +270,10 @@ public class AddFestivalWindow implements ActionListener, DateChangeListener {
             this.selectFestivalDay.repaint();
         }
         else if (e.getSource() == this.removeDayButton) {
-            if (this.selectedFestival.getNumberOfDays() <= 0) {
+            if (this.selectedFestival.getNumberOfDays() <= 1) {
+                JOptionPane.showMessageDialog(null,
+                        "You can't remove the only day of a festival!",
+                        "Can't remove day!",JOptionPane.WARNING_MESSAGE);
                 return;
             }
             this.selectFestivalDay.removeItem("Day " + this.selectedFestival.getNumberOfDays());
@@ -208,7 +283,12 @@ public class AddFestivalWindow implements ActionListener, DateChangeListener {
         }
         else if (e.getSource() == this.selectFestivalDay) {
             this.selectedFestival.setFestivalName(this.festivalNameBox.getText());
+            this.addWindow.setTitle("Add Festival | " + setFestivalName());
             setEditPanel();
+        } else if (e.getSource() == this.addFriend) {
+            friendSelectSettings(this.addFriend);
+        } else if (e.getSource() == this.removeFriend) {
+            friendSelectSettings(this.removeFriend);
         }
     }
 
