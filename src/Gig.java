@@ -30,6 +30,9 @@ public class Gig extends Event {
         }
     }
 
+    public Band getHeadlineAct() {
+        return this.headlineAct; }
+
     public void changePerformance(Band oldPerformance, Band newPerformance) {
         int index = this.performances.indexOf(oldPerformance);
         this.performances.set(index, newPerformance);
@@ -47,9 +50,6 @@ public class Gig extends Event {
             this.performances.remove(performance);
         }
     }
-
-    public Band getHeadlineAct() {
-        return this.headlineAct; }
 
     public ArrayList<Band> getPerformances() {
         return this.performances;

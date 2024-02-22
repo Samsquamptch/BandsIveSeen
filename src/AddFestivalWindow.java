@@ -11,7 +11,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.Connection;
-import java.sql.SQLException;
+import java.util.ArrayList;
 
 public class AddFestivalWindow implements ActionListener, DateChangeListener {
     DatePicker festivalDate;
@@ -19,6 +19,7 @@ public class AddFestivalWindow implements ActionListener, DateChangeListener {
     JTextField festivalLocationBox;
     JPanel sidePanel;
     JPanel editPanel;
+    JPanel selectedDayDatePanel;
     JPanel wentWithPanel;
     JComboBox<String> headlineSelect;
     JComboBox<String> headlineRating;
@@ -110,7 +111,8 @@ public class AddFestivalWindow implements ActionListener, DateChangeListener {
         addBandPanel.add(this.addBandButton, BorderLayout.CENTER);
 
         //Band select panel
-        this.editSelect = new JComboBox<>(bandData);
+        String[] addedBands = getAddedBands();
+        this.editSelect = new JComboBox<>(addedBands);
         JPanel editSelectPanel = CreateWindow.createPanel("Edit/Remove Band");
         editSelectPanel.add(this.editSelect, BorderLayout.CENTER);
 
@@ -153,28 +155,8 @@ public class AddFestivalWindow implements ActionListener, DateChangeListener {
 
         bottomPanel.add(tableScrollPane, BorderLayout.CENTER);
 
-        this.sidePanel.revalidate();
-        this.sidePanel.repaint();
-    }
-
-    public String[][] getTableData(int dayNumber) {
-        DaysOfFestival tableDay = this.selectedFestival.getFestivalDays().get(dayNumber);
-        int arrayLength = tableDay.getPerformances().size();
-        String[][] bandTable = new String[arrayLength][4];
-        for (int i = 0; i < arrayLength; i++) {
-            bandTable[i][0] = tableDay.getPerformances().get(i).getBandName();
-            bandTable[i][1] = tableDay.getPerformances().get(i).getFromCountry();
-            bandTable[i][2] = tableDay.getPerformances().get(i).getBandGenre();
-            bandTable[i][3] = Integer.toString(tableDay.getPerformances().get(i).getRating());
-        }
-        return bandTable;
-    }
-
-    public void updateTable() {
-            String[] columnNames = {"Artist", "Country", "Genre", "Rating"};
-            String[][] tableData = getTableData(this.selectFestivalDay.getSelectedIndex());
-            DefaultTableModel model = new DefaultTableModel(tableData, columnNames);
-            this.festivalDayTable.setModel(model);
+        this.editPanel.revalidate();
+        this.editPanel.repaint();
     }
 
     public void setSidePanel() {
@@ -230,6 +212,13 @@ public class AddFestivalWindow implements ActionListener, DateChangeListener {
         selectDayPanel.add(this.selectFestivalDay);
         selectDayPanel.add(new JPanel(), BorderLayout.WEST);
 
+        //Festival day date Label
+        JPanel dayDatePanel = CreateWindow.createPanel("   Selected day date:");
+        this.selectedDayDatePanel = new JPanel();
+        dayDatePanel.add(selectedDayDatePanel, BorderLayout.CENTER);
+        this.selectedDayDatePanel.add(new JPanel(), BorderLayout.WEST);
+        refreshSelectedDayDatePanel();
+
         //Add Friends panel
         String[] friendArray = ReadFromDatabase.selectFriends(this.jdbcConnection,
                 this.selectedFestival.getWentWith().toArray(new String[0]), true);
@@ -267,6 +256,55 @@ public class AddFestivalWindow implements ActionListener, DateChangeListener {
         this.sidePanel.add(addFriendPanel);
         this.sidePanel.add(removeFriendPanel);
         this.sidePanel.add(friendPanel);
+    }
+
+    public String[] getAddedBands() {
+        ArrayList<Band> performanceList =
+                this.selectedFestival.getFestivalDays().get(this.selectFestivalDay.getSelectedIndex()).getPerformances();
+        ArrayList<String> addedBandsList = new ArrayList<>();
+        addedBandsList.add("Select a Band");
+        for (Band performance : performanceList) {
+            addedBandsList.add(performance.toString());
+        }
+        if (!performanceList.isEmpty()) {
+            addedBandsList.add("Remove Band");
+        }
+        String[] bandArray = new String[addedBandsList.size()];
+        bandArray = addedBandsList.toArray(bandArray);
+        return bandArray;
+    }
+
+    public String[][] getTableData(int dayNumber) {
+        DaysOfFestival tableDay = this.selectedFestival.getFestivalDays().get(dayNumber);
+        int arrayLength = tableDay.getPerformances().size();
+        String[][] bandTable = new String[arrayLength][4];
+        for (int i = 0; i < arrayLength; i++) {
+            bandTable[i][0] = tableDay.getPerformances().get(i).getBandName();
+            bandTable[i][1] = tableDay.getPerformances().get(i).getFromCountry();
+            bandTable[i][2] = tableDay.getPerformances().get(i).getBandGenre();
+            bandTable[i][3] = Integer.toString(tableDay.getPerformances().get(i).getRating());
+        }
+        return bandTable;
+    }
+
+    public void updateTable() {
+        String[] columnNames = {"Artist", "Country", "Genre", "Rating"};
+        String[][] tableData = getTableData(this.selectFestivalDay.getSelectedIndex());
+        DefaultTableModel model = new DefaultTableModel(tableData, columnNames);
+        this.festivalDayTable.setModel(model);
+    }
+
+    public void refreshSelectedDayDatePanel() {
+        if (this.selectedFestival.getFestivalDays().isEmpty()) {
+            return;
+        }
+        this.selectedDayDatePanel.removeAll();
+        this.selectedDayDatePanel.setLayout(new FlowLayout(FlowLayout.LEADING));
+        JLabel dayDateLabel = new JLabel(
+                this.selectedFestival.getFestivalDays().get(this.selectFestivalDay.getSelectedIndex()).getDayDate());
+        this.selectedDayDatePanel.add(dayDateLabel);
+        this.selectedDayDatePanel.revalidate();
+        this.selectedDayDatePanel.repaint();
     }
 
     public void refreshFriendPanel() {
@@ -346,11 +384,13 @@ public class AddFestivalWindow implements ActionListener, DateChangeListener {
             this.selectedFestival.removeDays();
             this.selectFestivalDay.revalidate();
             this.selectFestivalDay.repaint();
-        }
-        else if (e.getSource() == this.selectFestivalDay) {
+        } else if (e.getSource() == this.addBandButton && this.bandSelect.getSelectedIndex()!=0) {
+
+        } else if (e.getSource() == this.selectFestivalDay) {
             this.selectedFestival.setFestivalName(this.festivalNameBox.getText());
             this.addWindow.setTitle("Add Festival | " + setFestivalName());
             setEditPanel();
+            updateTable();
         } else if (e.getSource() == this.addFriend) {
             friendSelectSettings(this.addFriend);
         } else if (e.getSource() == this.removeFriend) {
