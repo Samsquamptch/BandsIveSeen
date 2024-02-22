@@ -22,6 +22,8 @@ public class AddFestivalWindow implements ActionListener, DateChangeListener {
     JComboBox<String> headlineRating;
     JComboBox<String> bandSelect;
     JComboBox<String> bandRating;
+    JComboBox<String> editSelect;
+    JComboBox<String> editRating;
     JComboBox<String> selectFestivalDay;
     JComboBox<String> removeFriend;
     JComboBox<String> addFriend;
@@ -29,7 +31,7 @@ public class AddFestivalWindow implements ActionListener, DateChangeListener {
     JButton removeDayButton;
     JButton addBandButton;
     JButton editBandButton;
-    JButton deleteBandButton;
+    JButton removeBandButton;
     JButton saveButton;
     CreateWindow addWindow;
     Festival selectedFestival;
@@ -77,7 +79,13 @@ public class AddFestivalWindow implements ActionListener, DateChangeListener {
         String[] bandData = ReadFromDatabase.selectBands(this.jdbcConnection, true);
         String[] rating = new String[]{"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"};
         this.editPanel.removeAll();
-        this.editPanel.setLayout(new GridLayout(4,3));
+        JPanel topPanel = new JPanel();
+        topPanel.setLayout(new GridLayout(4,3,10,0));
+        JPanel bottomPanel = new JPanel();
+
+        this.editPanel.setLayout(new GridLayout(2,1));
+        this.editPanel.add(topPanel);
+        this.editPanel.add(bottomPanel);
 
         //Headline select panel
         this.headlineSelect = new JComboBox<>(bandData);
@@ -94,27 +102,55 @@ public class AddFestivalWindow implements ActionListener, DateChangeListener {
 
         //Band select panel
         this.bandSelect = new JComboBox<>(bandData);
-        this.bandSelect.addActionListener(this);
-        JPanel support1SelectPanel = CreateWindow.createPanel("Add Band");
-        support1SelectPanel.add(this.bandSelect, BorderLayout.CENTER);
+        JPanel bandSelectPanel = CreateWindow.createPanel("Add Band");
+        bandSelectPanel.add(this.bandSelect, BorderLayout.CENTER);
 
         //Band rating select panel
         this.bandRating = new JComboBox<>(rating);
-        this.bandRating.addActionListener(this);
-        JPanel support1RatingPanel = CreateWindow.createPanel("Set Rating");
-        support1RatingPanel.add(this.bandRating, BorderLayout.CENTER);
+        JPanel bandRatingPanel = CreateWindow.createPanel("Set Rating");
+        bandRatingPanel.add(this.bandRating, BorderLayout.CENTER);
 
-        this.editPanel.add(headlineSelectPanel);
-        this.editPanel.add(headlineRatingPanel);
-        this.editPanel.add(new JPanel());
-        this.editPanel.add(new JPanel());
-        this.editPanel.add(new JPanel());
-        this.editPanel.add(new JPanel());
-        this.editPanel.add(new JPanel());
-        this.editPanel.add(new JPanel());
-        this.editPanel.add(new JPanel());
-        this.editPanel.revalidate();
-        this.editPanel.repaint();
+        //Add band button
+        this.addBandButton = new JButton("Add");
+        JPanel addBandPanel = CreateWindow.createPanel("Add Band");
+        addBandPanel.add(this.addBandButton, BorderLayout.CENTER);
+
+        //Band select panel
+        this.editSelect = new JComboBox<>(bandData);
+        JPanel editSelectPanel = CreateWindow.createPanel("Edit/Remove Band");
+        editSelectPanel.add(this.editSelect, BorderLayout.CENTER);
+
+        //Band rating select panel
+        this.editRating = new JComboBox<>(rating);
+        JPanel editRatingPanel = CreateWindow.createPanel("Edit Rating");
+        editRatingPanel.add(this.editRating, BorderLayout.CENTER);
+
+        //Edit or delete panel
+        this.editBandButton = new JButton("Edit");
+        this.removeBandButton = new JButton("Remove");
+        this.editBandButton.addActionListener(this);
+        this.removeBandButton.addActionListener(this);
+        JPanel setDaysPanel = CreateWindow.createPanel("Edit/Remove Band");
+        JPanel buttonSectionPanel = new JPanel();
+        buttonSectionPanel.setLayout(new GridLayout(1,2));
+        buttonSectionPanel.add(this.editBandButton);
+        buttonSectionPanel.add(this.removeBandButton);
+        setDaysPanel.add(buttonSectionPanel, BorderLayout.CENTER);
+
+        topPanel.add(headlineSelectPanel);
+        topPanel.add(headlineRatingPanel);
+        topPanel.add(new JPanel());
+        topPanel.add(bandSelectPanel);
+        topPanel.add(bandRatingPanel);
+        topPanel.add(addBandPanel);
+        topPanel.add(editSelectPanel);
+        topPanel.add(editRatingPanel);
+        topPanel.add(setDaysPanel);
+        topPanel.add(new JPanel());
+        topPanel.add(new JPanel());
+        topPanel.add(new JPanel());
+        topPanel.revalidate();
+        topPanel.repaint();
     }
 
     public void setSidePanel() {
