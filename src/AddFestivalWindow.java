@@ -34,7 +34,6 @@ public class AddFestivalWindow implements ActionListener, DateChangeListener {
     JButton addDayButton;
     JButton removeDayButton;
     JButton addBandButton;
-    JButton editBandButton;
     JButton removeBandButton;
     JButton saveButton;
     CreateWindow addWindow;
@@ -97,41 +96,43 @@ public class AddFestivalWindow implements ActionListener, DateChangeListener {
 
         //Band select panel
         this.bandSelect = new JComboBox<>(bandData);
+        this.bandSelect.removeItem("Remove Band");
+        this.bandSelect.addActionListener(this);
         JPanel bandSelectPanel = CreateWindow.createPanel("Add Band");
         bandSelectPanel.add(this.bandSelect, BorderLayout.CENTER);
 
         //Band rating select panel
         this.bandRating = new JComboBox<>(rating);
+//        this.bandRating.addActionListener(this);
         JPanel bandRatingPanel = CreateWindow.createPanel("Set Rating");
         bandRatingPanel.add(this.bandRating, BorderLayout.CENTER);
 
         //Add band button
         this.addBandButton = new JButton("Add");
+        this.addBandButton.addActionListener(this);
         JPanel addBandPanel = CreateWindow.createPanel("Add Band");
         addBandPanel.add(this.addBandButton, BorderLayout.CENTER);
 
-        //Band select panel
+        //Edit select panel
         String[] addedBands = getAddedBands();
         this.editSelect = new JComboBox<>(addedBands);
+        this.editSelect.addActionListener(this);
         JPanel editSelectPanel = CreateWindow.createPanel("Edit/Remove Band");
         editSelectPanel.add(this.editSelect, BorderLayout.CENTER);
 
         //Band rating select panel
         this.editRating = new JComboBox<>(rating);
+        this.editRating.addActionListener(this);
         JPanel editRatingPanel = CreateWindow.createPanel("Edit Rating");
         editRatingPanel.add(this.editRating, BorderLayout.CENTER);
 
         //Edit or delete panel
-        this.editBandButton = new JButton("Edit");
         this.removeBandButton = new JButton("Remove");
-        this.editBandButton.addActionListener(this);
         this.removeBandButton.addActionListener(this);
         JPanel setDaysPanel = CreateWindow.createPanel("Edit/Remove Band");
-        JPanel buttonSectionPanel = new JPanel();
-        buttonSectionPanel.setLayout(new GridLayout(1,2));
-        buttonSectionPanel.add(this.editBandButton);
-        buttonSectionPanel.add(this.removeBandButton);
-        setDaysPanel.add(buttonSectionPanel, BorderLayout.CENTER);
+        setDaysPanel.add(this.removeBandButton, BorderLayout.CENTER);
+
+        revalidateOtherFields();
 
         topPanel.add(headlineSelectPanel);
         topPanel.add(headlineRatingPanel);
@@ -266,9 +267,6 @@ public class AddFestivalWindow implements ActionListener, DateChangeListener {
         for (Band performance : performanceList) {
             addedBandsList.add(performance.toString());
         }
-        if (!performanceList.isEmpty()) {
-            addedBandsList.add("Remove Band");
-        }
         String[] bandArray = new String[addedBandsList.size()];
         bandArray = addedBandsList.toArray(bandArray);
         return bandArray;
@@ -357,6 +355,78 @@ public class AddFestivalWindow implements ActionListener, DateChangeListener {
                 ": " + this.selectedFestival.getFestivalDays().get(selectedIndex).getDay();
     }
 
+    public void revalidateOtherFields() {
+        if (this.selectedFestival.getFestivalDays().get(this.selectFestivalDay.getSelectedIndex()).getHeadlineAct() != null) {
+            this.headlineRating.setSelectedIndex(this.selectedFestival.getFestivalDays().get(
+                    this.selectFestivalDay.getSelectedIndex()).getHeadlineAct().getRating());
+            this.headlineSelect.setSelectedItem(this.selectedFestival.getFestivalDays().get(
+                    this.selectFestivalDay.getSelectedIndex()).getHeadlineAct().toString());
+            this.headlineRating.setEnabled(true);
+            this.bandSelect.setEnabled(true);
+            this.bandRating.setEnabled(true);
+            this.editSelect.setEnabled(true);
+            this.editRating.setEnabled(true);
+        } else {
+            this.headlineRating.setEnabled(false);
+            this.bandSelect.setEnabled(false);
+            this.bandRating.setEnabled(false);
+            this.editSelect.setEnabled(false);
+            this.editRating.setEnabled(false);
+        }
+    }
+
+    public void bandSelectSettings(JComboBox<String> selectorItem, int checkState) {
+        DaysOfFestival selectedFestivalDay = this.selectedFestival.getFestivalDays().get(this.selectFestivalDay.getSelectedIndex());
+        JComboBox[] bandSelectArray = new JComboBox[]{this.headlineSelect, this.bandSelect};
+        if (selectorItem.getSelectedItem().equals("Add New Band")) {
+            String bandName = JOptionBand.addBand(this.jdbcConnection);
+            if (bandName.isEmpty()) {
+                return;
+            }
+            for (JComboBox<String> bandSelector : bandSelectArray) {
+                bandSelector.removeItem("Add New Band");
+                bandSelector.addItem(bandName);
+                bandSelector.addItem("Add New Band");
+                bandSelector.revalidate();
+                bandSelector.repaint();
+            }
+            selectorItem.setSelectedItem(bandName);
+            bandSelectSettings(selectorItem, 0);
+        } else if (selectorItem.getSelectedIndex()==0) {
+            if (selectorItem == this.headlineSelect && !selectedFestivalDay.getPerformances().isEmpty()) {
+                this.headlineSelect.setSelectedItem(selectedFestivalDay.getPerformances().get(0).toString());
+            }
+            return;
+        }
+        String[] bandDetails = selectorItem.getSelectedItem().toString().split(" - ");
+        if (selectorItem.getSelectedIndex() != 0 & checkState == 2) {
+            selectedFestivalDay.removePerformance(this.editSelect.getSelectedIndex());
+            this.editSelect.removeItem(this.editSelect.getSelectedItem());
+            this.editSelect.setSelectedIndex(0);
+            this.editRating.setSelectedIndex(0);
+        } else if (selectorItem == this.headlineSelect) {
+            selectedFestivalDay.setHeadlineAct(new Band(bandDetails[0],
+                    bandDetails[2],
+                    bandDetails[1],
+                    this.headlineRating.getSelectedIndex()));
+            revalidateOtherFields();
+        } else if (selectorItem == this.bandSelect && checkState == 1) {
+            selectedFestivalDay.addPerformance(new Band(bandDetails[0],
+                    bandDetails[2],
+                    bandDetails[1],
+                    this.bandRating.getSelectedIndex()));
+            this.editSelect.addItem(selectorItem.getSelectedItem().toString());
+            this.bandSelect.setSelectedIndex(0);
+            this.bandRating.setSelectedIndex(0);
+        } else if (selectorItem == this.editSelect) {
+            this.editRating.setSelectedIndex(
+                    selectedFestivalDay.getPerformances().get(this.editSelect.getSelectedIndex()).getRating());
+        }
+        this.editSelect.revalidate();
+        this.editSelect.repaint();
+        updateTable();
+    }
+
     public void saveChanges() {
         this.selectedFestival.setLocation(new Venue(this.selectedFestival.getFestivalName(),
                 this.festivalLocationBox.getText(), true));
@@ -372,20 +442,36 @@ public class AddFestivalWindow implements ActionListener, DateChangeListener {
             this.selectFestivalDay.addItem("Day " + this.selectedFestival.getNumberOfDays());
             this.selectFestivalDay.revalidate();
             this.selectFestivalDay.repaint();
-        }
-        else if (e.getSource() == this.removeDayButton) {
+        } else if (e.getSource() == this.removeDayButton) {
             if (this.selectedFestival.getNumberOfDays() <= 1) {
                 JOptionPane.showMessageDialog(null,
                         "You can't remove the only day of a festival!",
-                        "Can't remove day!",JOptionPane.WARNING_MESSAGE);
+                        "Can't remove day!", JOptionPane.WARNING_MESSAGE);
                 return;
             }
             this.selectFestivalDay.removeItem("Day " + this.selectedFestival.getNumberOfDays());
             this.selectedFestival.removeDays();
             this.selectFestivalDay.revalidate();
             this.selectFestivalDay.repaint();
-        } else if (e.getSource() == this.addBandButton && this.bandSelect.getSelectedIndex()!=0) {
-
+        } else if (e.getSource() == this.headlineSelect) {
+            bandSelectSettings(this.headlineSelect, 0);
+        } else if (e.getSource() == this.headlineRating) {
+            this.selectedFestival.getFestivalDays().get(
+                    this.selectFestivalDay.getSelectedIndex()).getHeadlineAct().setRating(this.headlineRating.getSelectedIndex());
+            updateTable();
+        } else if (e.getSource() == this.addBandButton) {
+            bandSelectSettings(this.bandSelect, 1);
+        } else if (e.getSource() == this.bandSelect) {
+            bandSelectSettings(this.bandSelect, 0);
+        } else if (e.getSource() == this.editSelect) {
+            bandSelectSettings(this.editSelect, 0);
+        } else if (e.getSource() == this.editRating && this.editSelect.getSelectedIndex()!=0) {
+            this.selectedFestival.getFestivalDays().get(
+                    this.selectFestivalDay.getSelectedIndex()).getPerformances().get(
+                            this.editSelect.getSelectedIndex()).setRating(this.editRating.getSelectedIndex());
+            updateTable();
+        } else if (e.getSource() == this.removeBandButton) {
+            bandSelectSettings(this.editSelect, 2);
         } else if (e.getSource() == this.selectFestivalDay) {
             this.selectedFestival.setFestivalName(this.festivalNameBox.getText());
             this.addWindow.setTitle("Add Festival | " + setFestivalName());

@@ -41,10 +41,8 @@ public class DaysOfFestival {
         }
     }
 
-    public void removePerformance(Band performance) {
-        if (this.headlineAct != performance) {
-            this.dayPerformances.remove(performance);
-        }
+    public void removePerformance(int index) {
+            this.dayPerformances.remove(index);
     }
 
     public ArrayList<Band> getPerformances() {
