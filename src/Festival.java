@@ -19,6 +19,12 @@ public class Festival extends Event {
         this.festivalDays = new ArrayList<>();
     }
 
+
+
+    public void setFestivalName(String newName) { this.festivalName = newName; }
+
+    public String getFestivalName() { return this.festivalName; }
+
     public void addDays() {
         int dayCount = this.festivalDays.size();
         this.festivalDays.add(new DaysOfFestival(super.getLocalDate(), dayCount));
@@ -29,5 +35,19 @@ public class Festival extends Event {
         this.festivalDays.remove(dayCount-1);
     }
 
+    public int getNumberOfDays() {
+        return this.festivalDays.size();
+    }
+
+    public ArrayList<DaysOfFestival> getFestivalDays() {
+        return this.festivalDays;
+    }
+
+    public void updateDaysDate() {
+        LocalDate festivalDate = super.getLocalDate();
+        for (DaysOfFestival day : festivalDays) {
+            day.setDayDate(festivalDate);
+        }
+    }
 
 }

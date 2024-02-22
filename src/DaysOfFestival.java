@@ -16,15 +16,19 @@ public class DaysOfFestival {
         this.dayPerformances = new ArrayList<>();
     }
 
-    private void addPerformance(Band performance) {
+    public void addPerformance(Band performance) {
         this.dayPerformances.add(performance);
     }
 
-    private void removePerformance(Band performance) {
+    public void removePerformance(Band performance) {
         this.dayPerformances.remove(performance);
     }
 
-    private String getDay() {
+    public void setDayDate(LocalDate newDate) {
+        this.dayDate = newDate.plusDays(dayNumber-1);
+    }
+
+    public String getDay() {
         return "Day " + this.dayNumber;
     }
 }
