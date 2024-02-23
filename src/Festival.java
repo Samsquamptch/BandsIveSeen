@@ -5,7 +5,7 @@ import java.util.ArrayList;
 
 public class Festival extends Event {
     private String festivalName;
-    private ArrayList<DaysOfFestival> festivalDays;
+    private ArrayList<FestivalDay> festivalDays;
 
     public Festival() {
         super();
@@ -27,7 +27,7 @@ public class Festival extends Event {
 
     public void addDays() {
         int dayCount = this.festivalDays.size();
-        this.festivalDays.add(new DaysOfFestival(super.getLocalDate(), dayCount));
+        this.festivalDays.add(new FestivalDay(super.getLocalDate(), dayCount));
     }
 
     public void removeDays() {
@@ -39,14 +39,14 @@ public class Festival extends Event {
         return this.festivalDays.size();
     }
 
-    public ArrayList<DaysOfFestival> getFestivalDays() {
+    public ArrayList<FestivalDay> getFestivalDays() {
         return this.festivalDays;
     }
 
     public void updateDaysDate() {
         LocalDate festivalDate = super.getLocalDate();
-        for (DaysOfFestival day : festivalDays) {
-            day.setDayDate(festivalDate);
+        for (FestivalDay day : festivalDays) {
+            day.setEventDay(festivalDate);
         }
     }
 

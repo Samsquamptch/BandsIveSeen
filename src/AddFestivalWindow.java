@@ -3,6 +3,7 @@ package src;
 import com.github.lgooddatepicker.components.DatePicker;
 import com.github.lgooddatepicker.optionalusertools.DateChangeListener;
 import com.github.lgooddatepicker.zinternaltools.DateChangeEvent;
+import src.database.InsertToDatabase;
 import src.database.ReadFromDatabase;
 
 import javax.swing.*;
@@ -11,6 +12,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.ArrayList;
 
 public class AddFestivalWindow implements ActionListener, DateChangeListener {
@@ -273,7 +275,7 @@ public class AddFestivalWindow implements ActionListener, DateChangeListener {
     }
 
     public String[][] getTableData(int dayNumber) {
-        DaysOfFestival tableDay = this.selectedFestival.getFestivalDays().get(dayNumber);
+        FestivalDay tableDay = this.selectedFestival.getFestivalDays().get(dayNumber);
         int arrayLength = tableDay.getPerformances().size();
         String[][] bandTable = new String[arrayLength][4];
         for (int i = 0; i < arrayLength; i++) {
@@ -299,7 +301,7 @@ public class AddFestivalWindow implements ActionListener, DateChangeListener {
         this.selectedDayDatePanel.removeAll();
         this.selectedDayDatePanel.setLayout(new FlowLayout(FlowLayout.LEADING));
         JLabel dayDateLabel = new JLabel(
-                this.selectedFestival.getFestivalDays().get(this.selectFestivalDay.getSelectedIndex()).getDayDate());
+                this.selectedFestival.getFestivalDays().get(this.selectFestivalDay.getSelectedIndex()).getEventDay());
         this.selectedDayDatePanel.add(dayDateLabel);
         this.selectedDayDatePanel.revalidate();
         this.selectedDayDatePanel.repaint();
@@ -351,8 +353,8 @@ public class AddFestivalWindow implements ActionListener, DateChangeListener {
 
     public String setFestivalName() {
         int selectedIndex = this.selectFestivalDay.getSelectedIndex();
-        return this.selectedFestival.getFestivalName() + " " + this.selectedFestival.getEventYear() +
-                ": " + this.selectedFestival.getFestivalDays().get(selectedIndex).getDay();
+        return this.selectedFestival.getFestivalName() + ": " +
+                this.selectedFestival.getFestivalDays().get(selectedIndex).getDay();
     }
 
     public void revalidateOtherFields() {
@@ -376,7 +378,7 @@ public class AddFestivalWindow implements ActionListener, DateChangeListener {
     }
 
     public void bandSelectSettings(JComboBox<String> selectorItem, int checkState) {
-        DaysOfFestival selectedFestivalDay = this.selectedFestival.getFestivalDays().get(this.selectFestivalDay.getSelectedIndex());
+        FestivalDay selectedFestivalDay = this.selectedFestival.getFestivalDays().get(this.selectFestivalDay.getSelectedIndex());
         JComboBox[] bandSelectArray = new JComboBox[]{this.headlineSelect, this.bandSelect};
         if (selectorItem.getSelectedItem().equals("Add New Band")) {
             String bandName = JOptionBand.addBand(this.jdbcConnection);
@@ -427,14 +429,76 @@ public class AddFestivalWindow implements ActionListener, DateChangeListener {
         updateTable();
     }
 
+    public void removeBand() {
+        if (this.selectedFestival.getNumberOfDays() <= 1) {
+            JOptionPane.showMessageDialog(null,
+                    "You can't remove the only day of a festival!",
+                    "Can't remove day!", JOptionPane.WARNING_MESSAGE);
+            return;
+        } else if (!this.selectedFestival.getFestivalDays().get(
+                this.selectedFestival.getNumberOfDays()-1).getPerformances().isEmpty()) {
+            int removeResponse = JOptionPane.showConfirmDialog(null,
+                    "Festival day has performances added, do you wish to remove it?",
+                    "Confirm remove day", JOptionPane.YES_NO_OPTION);
+            if (removeResponse != 0) {
+                return;
+            }
+        }
+        this.selectFestivalDay.removeItem("Day " + this.selectedFestival.getNumberOfDays());
+        this.selectedFestival.removeDays();
+        this.selectFestivalDay.revalidate();
+        this.selectFestivalDay.repaint();
+    }
+
     public void saveChanges() {
+        if (this.festivalNameBox.getText().isEmpty() || this.festivalLocationBox.getText().isEmpty()) {
+            JOptionPane.showMessageDialog(null,
+                    "Please ensure the name and location boxes aren't empty",
+                    "Field is Empty!", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        else if (this.selectedFestival.getFestivalDays().isEmpty()) {
+            JOptionPane.showMessageDialog(null,
+                    "Please ensure at least one day has been added!",
+                    "Festival has no days!", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        for (FestivalDay festivalDay : this.selectedFestival.getFestivalDays()) {
+            if (festivalDay.getHeadlineAct() == null) {
+                JOptionPane.showMessageDialog(null,
+                        "Please ensure all festival days have set headlines",
+                        "Headline is empty!", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+        }
+        //Set location for festival and add it to each sub day
         this.selectedFestival.setLocation(new Venue(this.selectedFestival.getFestivalName(),
                 this.festivalLocationBox.getText(), true));
+        for (Gig festivalDay : this.selectedFestival.getFestivalDays()) {
+            festivalDay.setLocation(this.selectedFestival.getLocation());
+        }
+        //Adds friends to the first day
+        for (String friend : this.selectedFestival.getWentWith()) {
+            this.selectedFestival.getFestivalDays().get(0).addWentWith(friend);
+        }
+        try {
+            InsertToDatabase.insertVenue(this.jdbcConnection, this.selectedFestival.getLocation());
+            for (FestivalDay currentDay : this.selectedFestival.getFestivalDays()) {
+                InsertToDatabase.insertGig(this.jdbcConnection, currentDay);
+            }
+        } catch (SQLException ex) {
+            throw new RuntimeException(ex);
+        }
+        JOptionPane.showMessageDialog(null, "Festival has been added！");
+        this.addWindow.dispose();
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        if (e.getSource() == this.addDayButton) {
+        if (e.getSource() == this.saveButton) {
+            saveChanges();
+        }
+        else if (e.getSource() == this.addDayButton) {
             if (this.selectedFestival.getNumberOfDays() >= 7) {
                 return;
             }
@@ -443,16 +507,7 @@ public class AddFestivalWindow implements ActionListener, DateChangeListener {
             this.selectFestivalDay.revalidate();
             this.selectFestivalDay.repaint();
         } else if (e.getSource() == this.removeDayButton) {
-            if (this.selectedFestival.getNumberOfDays() <= 1) {
-                JOptionPane.showMessageDialog(null,
-                        "You can't remove the only day of a festival!",
-                        "Can't remove day!", JOptionPane.WARNING_MESSAGE);
-                return;
-            }
-            this.selectFestivalDay.removeItem("Day " + this.selectedFestival.getNumberOfDays());
-            this.selectedFestival.removeDays();
-            this.selectFestivalDay.revalidate();
-            this.selectFestivalDay.repaint();
+            removeBand();
         } else if (e.getSource() == this.headlineSelect) {
             bandSelectSettings(this.headlineSelect, 0);
         } else if (e.getSource() == this.headlineRating) {
@@ -473,7 +528,7 @@ public class AddFestivalWindow implements ActionListener, DateChangeListener {
         } else if (e.getSource() == this.removeBandButton) {
             bandSelectSettings(this.editSelect, 2);
         } else if (e.getSource() == this.selectFestivalDay) {
-            this.selectedFestival.setFestivalName(this.festivalNameBox.getText());
+            this.selectedFestival.setFestivalName(this.festivalNameBox.getText() + " " + this.selectedFestival.getEventYear());
             this.addWindow.setTitle("Add Festival | " + setFestivalName());
             setEditPanel();
             updateTable();

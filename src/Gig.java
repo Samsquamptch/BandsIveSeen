@@ -10,7 +10,7 @@ public class Gig extends Event {
     public Gig(String dayDate, Venue location, Band headline){
         super(dayDate, location);
         this.headlineAct = headline;
-        this.performances = new ArrayList<Band>();
+        this.performances = new ArrayList<>();
         this.performances.add(headline);
     }
 

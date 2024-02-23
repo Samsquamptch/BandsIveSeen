@@ -40,8 +40,9 @@ public class ReadFromDatabase {
     }
 
     public static String[] selectGigs(Connection conn) {
-        String sql = "SELECT Gig.Date AS Date, Band.BandName AS Band FROM Gig JOIN " +
-                "Band on Gig.Headline = Band.Id ORDER BY Band.BandName, Gig.Date";
+        String sql = "SELECT Gig.Date AS Date, Band.BandName AS Band, Venue.Id FROM Gig JOIN " +
+                "Band on Gig.Headline = Band.Id JOIN Venue on Gig.Venue_Id = Venue.Id " +
+                "WHERE Venue.isFestival = 0 ORDER BY Band.BandName, Gig.Date";
         ArrayList<String> gigList = new ArrayList<>();
         gigList.add("Select Gig");
         try (Statement queryStatement = conn.createStatement();

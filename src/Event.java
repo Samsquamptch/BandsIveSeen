@@ -21,12 +21,20 @@ public class Event {
         this.wentWith = new ArrayList<String>();
     }
 
+    public void setLocation(Venue location) {
+        this.location = location;
+    }
+
+    public Venue getLocation() {
+        return this.location;
+    }
+
     public void setEventDay(String dayDate) {
         this.eventDay = LocalDate.parse(dayDate);
     }
 
-    public void setLocation(Venue location) {
-        this.location = location;
+    public void setEventDay(LocalDate dayDate) {
+        this.eventDay = dayDate;
     }
 
     public String getEventDay() {
@@ -71,9 +79,5 @@ public class Event {
 
     public LocalDate getLocalDate() {
         return this.eventDay;
-    }
-
-    public Venue getLocation() {
-        return this.location;
     }
 }
