@@ -13,9 +13,9 @@ public class Festival extends Event {
         this.festivalDays = new ArrayList<>();
     }
 
-    public Festival(String arrivalDate, Venue location, String festivalName) {
-        super(arrivalDate, location);
-        this.festivalName = festivalName + super.getEventYear();
+    public Festival(String festivalName) {
+        super();
+        this.festivalName = festivalName;
         this.festivalDays = new ArrayList<>();
     }
 

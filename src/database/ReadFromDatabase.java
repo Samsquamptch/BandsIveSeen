@@ -5,6 +5,7 @@ import src.Venue;
 
 import java.sql.*;
 import java.sql.PreparedStatement;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -37,6 +38,24 @@ public class ReadFromDatabase {
         String[] friendArray = new String[friendList.size()];
         friendArray = friendList.toArray(friendArray);
         return friendArray;
+    }
+
+    public static String[] selectFestival(Connection conn) {
+        String sql = "SELECT VenueName, Location FROM Venue WHERE isFestival = 1";
+        ArrayList<String> festivalList = new ArrayList<>();
+        festivalList.add("Select Festival");
+        try (Statement queryStatement = conn.createStatement();
+             ResultSet queryResult = queryStatement.executeQuery(sql))
+        {
+            while (queryResult.next()) {
+                festivalList.add(queryResult.getString("VenueName") + " - " + queryResult.getString("Location"));
+            }
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+        String[] festivalArray = new String[festivalList.size()];
+        festivalArray = festivalList.toArray(festivalArray);
+        return festivalArray;
     }
 
     public static String[] selectGigs(Connection conn) {
@@ -224,16 +243,50 @@ public class ReadFromDatabase {
     }
 
     public static String[] getGigDetails(Connection conn, int gigId) throws SQLException {
-        String[] gigDetails = new String[4];
-        PreparedStatement ps = conn.prepareStatement("SELECT Venue.Id, Venue.VenueName, Venue.Location, Gig.Headline" +
-                " FROM Venue JOIN Gig ON Venue.Id = Gig.Venue_ID WHERE Gig.Id = ?");
+        String[] gigDetails = new String[5];
+        PreparedStatement ps = conn.prepareStatement("SELECT Venue.Id, Venue.VenueName, Venue.Location, Gig.Date, " +
+                "Gig.Headline FROM Venue JOIN Gig ON Venue.Id = Gig.Venue_Id WHERE Gig.Id = ?");
         ps.setInt(1, gigId);
         ResultSet rs = ps.executeQuery();
         gigDetails[0] = rs.getString("Id");
         gigDetails[1] = rs.getString("VenueName");
         gigDetails[2] = rs.getString("Location");
         gigDetails[3] = rs.getString("Headline");
+        gigDetails[4] = rs.getString("Date");
         return gigDetails;
+    }
+
+    public static String[] getFestivalDayDetails(Connection conn, int gigId) throws SQLException {
+        String[] gigDetails = new String[3];
+        PreparedStatement ps = conn.prepareStatement("SELECT Gig.Id, Gig.Date, Gig.Headline FROM Venue " +
+                "JOIN Gig ON Venue.Id = Gig.Venue_Id WHERE Gig.Id = ?");
+        ps.setInt(1, gigId);
+        ResultSet rs = ps.executeQuery();
+        gigDetails[0] = rs.getString("Id");
+        gigDetails[1] = rs.getString("Headline");
+        gigDetails[2] = rs.getString("Date");
+        return gigDetails;
+    }
+
+    public static String[] getFestivalDayIds(Connection conn, int festivalId) throws SQLException {
+        PreparedStatement ps = conn.prepareStatement("SELECT Gig.Id AS Id FROM Venue " +
+                "JOIN Gig ON Gig.Venue_Id = Venue.Id WHERE Venue.Id = ? ORDER BY Gig.Date ASC");
+        ps.setInt(1, festivalId);
+        ResultSet rs = ps.executeQuery();
+        ArrayList<String> idList = new ArrayList<>();
+        while (rs.next()) {
+            idList.add(rs.getString("Id"));
+        }
+        String[] festivalIds = new String[idList.size()];
+        festivalIds = idList.toArray(festivalIds);
+        return festivalIds;
+    }
+
+    public static String getGigDate(Connection conn, int gigId) throws SQLException {
+        PreparedStatement ps = conn.prepareStatement("SELECT Date FROM Gig WHERE Id = ?");
+        ps.setInt(1, gigId);
+        ResultSet rs = ps.executeQuery();
+        return rs.getString("Date");
     }
 
     public static int getGigId(Connection conn, String bandName, String gigDate) throws SQLException {

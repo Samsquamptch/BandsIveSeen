@@ -14,6 +14,7 @@ import java.awt.event.ActionListener;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class AddFestivalWindow implements ActionListener, DateChangeListener {
     DatePicker festivalDate;
@@ -267,7 +268,10 @@ public class AddFestivalWindow implements ActionListener, DateChangeListener {
         ArrayList<String> addedBandsList = new ArrayList<>();
         addedBandsList.add("Select a Band");
         for (Band performance : performanceList) {
-            addedBandsList.add(performance.toString());
+            if (!Objects.equals(performance.getBandName(), this.selectedFestival.getFestivalDays().get(
+                    this.selectFestivalDay.getSelectedIndex()).getHeadlineAct().getBandName())) {
+                addedBandsList.add(performance.toString());
+            }
         }
         String[] bandArray = new String[addedBandsList.size()];
         bandArray = addedBandsList.toArray(bandArray);
