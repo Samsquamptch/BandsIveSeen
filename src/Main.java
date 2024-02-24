@@ -9,12 +9,10 @@ import java.sql.SQLException;
 
 public class Main {
     public static void main(String[] args) throws SQLException {
-        File database = new File("/src/bisDatabase.db");
+        File database = new File("src/bisDatabase.db");
         if(!database.exists()) {
-            System.out.println("error");
-            /*Connection conn = DatabaseConnector.connect();
-            DatabaseConnector.buildDb(conn);*/
-            return;
+            Connection conn = DatabaseConnector.connect();
+            DatabaseConnector.buildDb(conn);
         }
         Connection conn = DatabaseConnector.connect();
         EditDatabase.setPragma(conn);
