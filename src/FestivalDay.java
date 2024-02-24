@@ -18,4 +18,6 @@ public class FestivalDay extends Gig {
     public String getDay() {
         return "Day " + this.dayNumber;
     }
+
+    public int getDayNumber() { return this.dayNumber; }
 }

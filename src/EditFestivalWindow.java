@@ -4,6 +4,7 @@ import com.github.lgooddatepicker.components.DatePicker;
 import com.github.lgooddatepicker.optionalusertools.DateChangeListener;
 import com.github.lgooddatepicker.zinternaltools.DateChangeEvent;
 import src.database.DeleteFromDatabase;
+import src.database.EditDatabase;
 import src.database.InsertToDatabase;
 import src.database.ReadFromDatabase;
 
@@ -493,21 +494,60 @@ public class EditFestivalWindow implements ActionListener, DateChangeListener {
         }
     }
 
-    public void saveChanges() {
-        Festival updatedFestival = this.selectedFestival;
+    public void saveDayChanges(FestivalDay updatedDay, FestivalDay currentDay, int dayId) throws SQLException {
+        if (!updatedDay.getHeadlineAct().equals(currentDay.getHeadlineAct())) {
+            EditDatabase.changeGigHeadline(this.jdbcConnection, updatedDay.getHeadlineAct(), dayId);
+        }
+        //Checks to see whether the current or updated gig has more performances, then sets the value to the
+        //smaller value. This is so an out-of-bounds error doesn't occur when both lists are compared.
+        int maxIteration = Math.min(updatedDay.getPerformances().size(), currentDay.getPerformances().size());
+        for (int i = 0; i < maxIteration; i++) {
+            if (!updatedDay.getPerformances().get(i).equals(currentDay.getPerformances().get(i))) {
+                EditDatabase.changePerformanceBand(this.jdbcConnection,
+                        updatedDay.getPerformances().get(i), currentDay.getPerformances().get(i), dayId);
+            }
+        }
+        if (updatedDay.getPerformances().size() > currentDay.getPerformances().size()) {
+            for (int i = maxIteration; i < updatedDay.getPerformances().size(); i++) {
+                InsertToDatabase.insertPerformance(this.jdbcConnection, updatedDay.getPerformances().get(i), dayId);
+            }
+        }
+        else if (updatedDay.getPerformances().size() < currentDay.getPerformances().size()) {
+            for (int i = maxIteration; i < currentDay.getPerformances().size(); i++) {
+                DeleteFromDatabase.deletePerformance(this.jdbcConnection, currentDay.getPerformances().get(i), dayId);
+            }
+        }
+        if (!updatedDay.getLocalDate().equals(currentDay.getLocalDate())) {
+            EditDatabase.changeGigDate(this.jdbcConnection, updatedDay.getEventDay(), dayId);
+        }
+        if (updatedDay.getDayNumber() != 1) {
+            return;
+        }
+        maxIteration = Math.min(updatedDay.getWentWith().size(), currentDay.getWentWith().size());
+        for (int i = 0; i < maxIteration; i++) {
+            if (!updatedDay.getWentWith().get(i).equals(currentDay.getWentWith().get(i))) {
+                EditDatabase.changeWentWith(this.jdbcConnection, updatedDay.getWentWith().get(i),
+                        currentDay.getWentWith().get(i), dayId);
+            }
+        }
+        if (updatedDay.getWentWith().size() > currentDay.getWentWith().size()) {
+            for (int i = maxIteration; i < updatedDay.getWentWith().size(); i++) {
+                InsertToDatabase.insertAttendedWith(this.jdbcConnection, updatedDay.getWentWith().get(i), dayId);
+            }
+        }
+        else if (updatedDay.getWentWith().size() < currentDay.getWentWith().size()) {
+            for (int i = maxIteration; i < currentDay.getWentWith().size(); i++) {
+                DeleteFromDatabase.deleteAttendedWith(this.jdbcConnection, currentDay.getWentWith().get(i), dayId);
+            }
+        }
+    }
+
+    public void saveFestivalChanges() throws SQLException {
         if (this.festivalNameBox.getText().isEmpty() || this.festivalLocationBox.getText().isEmpty()) {
             JOptionPane.showMessageDialog(null,
                     "Please ensure the name and location boxes aren't empty",
                     "Field is Empty!", JOptionPane.WARNING_MESSAGE);
             return;
-        }
-        for (FestivalDay festivalDay : this.selectedFestival.getFestivalDays()) {
-            if (festivalDay.getHeadlineAct() == null) {
-                JOptionPane.showMessageDialog(null,
-                        "Please ensure all festival days have set headlines",
-                        "Headline is empty!", JOptionPane.WARNING_MESSAGE);
-                return;
-            }
         }
         //Set location for festival and add it to each sub day
         this.selectedFestival.setLocation(new Venue(this.selectedFestival.getFestivalName(),
@@ -515,19 +555,37 @@ public class EditFestivalWindow implements ActionListener, DateChangeListener {
         for (Gig festivalDay : this.selectedFestival.getFestivalDays()) {
             festivalDay.setLocation(this.selectedFestival.getLocation());
         }
-        //Adds friends to the first day
+        Festival updatedFestival = this.selectedFestival;
+        setSelectedFestival();
+        //Adds friends to the first day for both festivals
+        for (String friend : updatedFestival.getWentWith()) {
+            updatedFestival.getFestivalDays().get(0).addWentWith(friend);
+        }
         for (String friend : this.selectedFestival.getWentWith()) {
             this.selectedFestival.getFestivalDays().get(0).addWentWith(friend);
         }
-        try {
-            InsertToDatabase.insertVenue(this.jdbcConnection, this.selectedFestival.getLocation());
-            for (FestivalDay currentDay : this.selectedFestival.getFestivalDays()) {
-                InsertToDatabase.insertGig(this.jdbcConnection, currentDay);
-            }
-        } catch (SQLException ex) {
-            throw new RuntimeException(ex);
+        EditDatabase.editVenue(this.jdbcConnection, updatedFestival.getLocation(), this.festivalDatabaseId);
+        int maxIteration = Math.min(updatedFestival.getNumberOfDays(), this.selectedFestival.getNumberOfDays());
+        for (int i = 0; i < maxIteration; i++) {
+            int dayId = ReadFromDatabase.getGigId(this.jdbcConnection,
+                    this.selectedFestival.getFestivalDays().get(i).getHeadlineAct().getBandName(),
+                    this.selectedFestival.getFestivalDays().get(i).getEventDay());
+            saveDayChanges(updatedFestival.getFestivalDays().get(i),
+                    this.selectedFestival.getFestivalDays().get(i), dayId);
         }
-        JOptionPane.showMessageDialog(null, "Festival has been added！");
+        if (updatedFestival.getNumberOfDays() > this.selectedFestival.getNumberOfDays()) {
+            for (int i = maxIteration; i < updatedFestival.getNumberOfDays(); i++) {
+                InsertToDatabase.insertGig(this.jdbcConnection, updatedFestival.getFestivalDays().get(i));
+            }
+        } else if (updatedFestival.getNumberOfDays() < this.selectedFestival.getNumberOfDays()) {
+            for (int i = maxIteration; i < this.selectedFestival.getNumberOfDays(); i++) {
+                int dayId = ReadFromDatabase.getGigId(this.jdbcConnection,
+                        this.selectedFestival.getFestivalDays().get(i).getHeadlineAct().getBandName(),
+                        this.selectedFestival.getFestivalDays().get(i).getEventDay());
+                DeleteFromDatabase.deleteGig(this.jdbcConnection, dayId);
+            }
+        }
+        JOptionPane.showMessageDialog(null, "Festival has been updated!");
         this.addWindow.dispose();
     }
 
@@ -575,8 +633,10 @@ public class EditFestivalWindow implements ActionListener, DateChangeListener {
                 throw new RuntimeException(ex);
             }
         } else if (e.getSource() == this.saveButton) {
-//            saveChanges();
-            assert true;
+            try { saveFestivalChanges();
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            }
         }
         else if (e.getSource() == this.addDayButton) {
             if (this.selectedFestival.getNumberOfDays() >= 7) {

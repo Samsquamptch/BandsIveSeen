@@ -493,7 +493,7 @@ public class AddFestivalWindow implements ActionListener, DateChangeListener {
         } catch (SQLException ex) {
             throw new RuntimeException(ex);
         }
-        JOptionPane.showMessageDialog(null, "Festival has been added！");
+        JOptionPane.showMessageDialog(null, "Festival has been added!");
         this.addWindow.dispose();
     }
 
