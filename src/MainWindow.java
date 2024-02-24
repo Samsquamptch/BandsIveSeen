@@ -1,5 +1,7 @@
 package src;
 
+import com.github.lgooddatepicker.components.DatePicker;
+import com.github.lgooddatepicker.optionalusertools.DateChangeListener;
 import src.database.ReadFromDatabase;
 
 import javax.swing.*;
@@ -14,7 +16,14 @@ public class MainWindow implements ActionListener {
     JComboBox<String> selectGigOptions;
     JComboBox<String> selectOtherOptions;
     JComboBox<String> selectFestivalOptions;
+    DatePicker startDate;
+    DatePicker endDate;
+    JRadioButton allButton;
+    JRadioButton gigButton;
+    JRadioButton festivalButton;
+    ButtonGroup filterButtons;
     JButton refreshButton;
+    JButton dateButton;
     JTable bandTable;
     JPanel mainPanel;
     private final Connection jdbcConnection;
@@ -58,12 +67,38 @@ public class MainWindow implements ActionListener {
         JPanel refreshPanel = CreateWindow.createPanel("Refresh Table");
         refreshPanel.add(this.refreshButton);
 
+        //Start date
+        this.startDate = new DatePicker();
+
+
+        //End date
+        this.endDate = new DatePicker();
+
+
+        //Filter Date
+
         //The table
         String[] columnNames = {"Artist", "Date", "Venue", "Rating"};
-        String[][] tableData = ReadFromDatabase.selectPerformances(this.jdbcConnection);
+        String[][] tableData = ReadFromDatabase.selectPerformances(this.jdbcConnection, "");
         this.bandTable = new JTable(tableData, columnNames);
         this.bandTable.setAutoCreateRowSorter(true);
         JScrollPane tableScrollPane = new JScrollPane(bandTable);
+
+        //Table filters
+        this.allButton = new JRadioButton("All");
+        this.gigButton = new JRadioButton("Gigs Only");
+        this.festivalButton = new JRadioButton("Festivals Only");
+        this.allButton.addActionListener(this);
+        this.gigButton.addActionListener(this);
+        this.festivalButton.addActionListener(this);
+
+        this.filterButtons = new ButtonGroup();
+        this.filterButtons.add(this.allButton);
+        this.filterButtons.add(this.gigButton);
+        this.filterButtons.add(this.festivalButton);
+
+        JLabel filterLabel = new JLabel("Filter Table Settings", SwingConstants.CENTER);
+        JPanel optionsPanel = new JPanel();
 
         JPanel backPanel = new JPanel();
         backPanel.setBackground(Color.darkGray);
@@ -80,6 +115,12 @@ public class MainWindow implements ActionListener {
         JPanel leftPanel = new JPanel();
         leftPanel.setPreferredSize(new Dimension(250,100));
         leftPanel.setLayout(new BorderLayout());
+        leftPanel.add(filterLabel, BorderLayout.NORTH);
+        leftPanel.add(optionsPanel, BorderLayout.CENTER);
+
+        optionsPanel.add(allButton);
+        optionsPanel.add(gigButton);
+        optionsPanel.add(festivalButton);
 
         this.mainPanel = new JPanel();
         this.mainPanel.setBackground(Color.lightGray);
@@ -93,12 +134,14 @@ public class MainWindow implements ActionListener {
         frame.add(backPanel);
     }
 
-    public void updateTable() {
+    public void updateTable(String filterString) {
         try {
             String[] columnNames = {"Artist", "Date", "Venue", "Rating"};
-            String[][] tableData = ReadFromDatabase.selectPerformances(this.jdbcConnection);
+            String[][] tableData = ReadFromDatabase.selectPerformances(this.jdbcConnection, filterString);
             DefaultTableModel model = new DefaultTableModel(tableData, columnNames);
             this.bandTable.setModel(model);
+            this.bandTable.revalidate();
+            this.bandTable.repaint();
         } catch (SQLException ex) {
             throw new RuntimeException(ex);
         }
@@ -151,9 +194,15 @@ public class MainWindow implements ActionListener {
                 }
             }
             this.selectFestivalOptions.setSelectedIndex(0);
-        }
-        else if (e.getSource() == this.refreshButton) {
-            updateTable();
+        } else if (e.getSource() == this.refreshButton) {
+            updateTable("");
+            this.filterButtons.clearSelection();
+        } else if (e.getSource() == this.allButton) {
+            updateTable("");
+        } else if (e.getSource() == this.gigButton) {
+            updateTable(" WHERE Venue.isFestival = 0");
+        } else if (e.getSource() == this.festivalButton) {
+            updateTable(" WHERE Venue.isFestival = 1");
         }
     }
 }

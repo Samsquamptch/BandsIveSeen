@@ -78,13 +78,13 @@ public class ReadFromDatabase {
         return gigArray;
     }
 
-    public static String[][] selectPerformances(Connection conn) throws SQLException {
+    public static String[][] selectPerformances(Connection conn, String filterBy) throws SQLException {
         int arrayLength = getTableCount(conn, "Performance");
 
         PreparedStatement ps = conn.prepareStatement("SELECT Gig.Id AS ID, Gig.Date AS Date, Band.BandName AS Artist, " +
                 "(Venue.VenueName || ' - ' || Venue.Location) AS Venue, Performance.Rating AS Rating, Gig.Headline Headline, " +
                 "Band.Id AS BandId FROM Gig JOIN Performance ON Gig.Id = Performance.Gig_Id JOIN Band " +
-                "ON Band.Id = Performance.Band_Id JOIN Venue ON Venue.Id = Gig.Venue_Id ORDER BY Gig.Id, Performance.Id");
+                "ON Band.Id = Performance.Band_Id JOIN Venue ON Venue.Id = Gig.Venue_Id" + filterBy + " ORDER BY Gig.Id, Performance.Id");
         ResultSet rs = ps.executeQuery();
 
         String[][] bandTable = new String[arrayLength][5];

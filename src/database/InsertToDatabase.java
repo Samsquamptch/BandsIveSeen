@@ -40,9 +40,9 @@ public class InsertToDatabase {
 
     public static void insertFriend(Connection conn, String friendName) throws SQLException {
         if (!ReadFromDatabase.checkFriend(conn, friendName)) {
-            PreparedStatement pstmt = conn.prepareStatement("INSERT INTO Friend(FriendName) VALUES(?)");
-            pstmt.setString(1, friendName);
-            pstmt.executeUpdate();
+            PreparedStatement ps = conn.prepareStatement("INSERT INTO Friend(FriendName) VALUES(?)");
+            ps.setString(1, friendName);
+            ps.executeUpdate();
         }
     }
 
