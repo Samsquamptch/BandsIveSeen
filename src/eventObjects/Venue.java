@@ -1,9 +1,15 @@
-package src;
+package src.eventObjects;
 
 public class Venue {
-    private String venueName;
-    private String venueLocation;
-    private boolean isFestival;
+    private final String venueName;
+    private final String venueLocation;
+    private final boolean isFestival;
+
+    public Venue() {
+        this.venueName = "";
+        this.venueLocation = "";
+        this.isFestival = false;
+    }
 
     public Venue(String name, String location, boolean festival){
         this.venueName = name;
@@ -13,7 +19,7 @@ public class Venue {
 
     @Override
     public String toString(){
-        return this.venueName + ", " + this.venueLocation;
+        return this.venueName + " - " + this.venueLocation;
     }
 
     public String getVenueName() {
@@ -28,12 +34,4 @@ public class Venue {
         return this.isFestival;
     }
 
-    public String checkIfFestival() {
-        if(this.isFestival == true){
-            return "This is a festival location";
-        }
-        else {
-            return "This is not a festival location";
-        }
-    }
 }
