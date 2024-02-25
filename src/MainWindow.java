@@ -12,7 +12,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Objects;
 
 public class MainWindow implements ActionListener {
     JComboBox<String> selectGigOptions;
@@ -175,20 +175,19 @@ public class MainWindow implements ActionListener {
     }
 
     public void updateTable(String inputString) {
-        this.filterString = inputString;
         try {
             String[] columnNames = {"Artist", "Date", "Venue", "Rating"};
             String[][] tableData = ReadFromDatabase.selectPerformances(this.jdbcConnection, inputString);
             if (this.bandSelect.getSelectedIndex()!=0) {
-                String[] bandDetails = this.bandSelect.getSelectedItem().toString().split(" - ");
+                String[] bandDetails = Objects.requireNonNull(this.bandSelect.getSelectedItem()).toString().split(" - ");
                 tableData = filterDetails(tableData, 0, bandDetails[0]);
             }
             if (this.venueSelect.getSelectedIndex()!=0 && tableData.length >= 1) {
-                String[] venueDetails = this.venueSelect.getSelectedItem().toString().split(" - ");
+                String[] venueDetails = Objects.requireNonNull(this.venueSelect.getSelectedItem()).toString().split(" - ");
                 tableData = filterDetails(tableData, 2, venueDetails[0] + " - " + venueDetails[1]);
             }
             if (this.friendSelect.getSelectedIndex()!=0) {
-                tableData = filterFriends(tableData, this.friendSelect.getSelectedItem().toString());
+                tableData = filterFriends(tableData, Objects.requireNonNull(this.friendSelect.getSelectedItem()).toString());
             }
             if (!this.startDate.getText().isEmpty() || !this.endDate.getText().isEmpty()) {
                 tableData = filterDates(tableData);
@@ -236,7 +235,7 @@ public class MainWindow implements ActionListener {
 
     public String[][] filterDates(String[][] tableData) {
         if (this.startDate.getText().isEmpty()) {
-            this.startDate.setDate(LocalDate.ofEpochDay(1900-01-01));
+            this.startDate.setDate(LocalDate.parse("1900-01-01"));
         }
         if (this.endDate.getText().isEmpty()) {
             this.endDate.setDateToToday();
@@ -328,13 +327,13 @@ public class MainWindow implements ActionListener {
             updateTable("");
             this.filterButtons.clearSelection();
         } else if (e.getSource() == this.allButton) {
-            updateTable("");
+            this.filterString = "";
             revalidateVenueSelect();
         } else if (e.getSource() == this.gigButton) {
-            updateTable("WHERE Venue.isFestival = 0 ");
+            this.filterString = "WHERE Venue.isFestival = 0 ";
             revalidateVenueSelect();
         } else if (e.getSource() == this.festivalButton) {
-            updateTable("WHERE Venue.isFestival = 1 ");
+            this.filterString = "WHERE Venue.isFestival = 1 ";
             revalidateVenueSelect();
         } else if (e.getSource() == this.filterButton) {
             updateTable(this.filterString);
