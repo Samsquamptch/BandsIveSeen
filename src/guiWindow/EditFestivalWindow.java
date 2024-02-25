@@ -88,7 +88,7 @@ public class EditFestivalWindow implements ActionListener, DateChangeListener {
         this.editPanel = new JPanel();
         this.editPanel.add(new JLabel("Select a festival for more options"));
 
-        this.addWindow = new CreateWindow("Add Festival", 1000, 650);
+        this.addWindow = new CreateWindow("Edit Festival", 1000, 650);
         this.addWindow.add(searchPanel, BorderLayout.NORTH);
         this.addWindow.add(this.sidePanel, BorderLayout.WEST);
         this.addWindow.add(this.editPanel, BorderLayout.CENTER);
@@ -250,11 +250,8 @@ public class EditFestivalWindow implements ActionListener, DateChangeListener {
         addFriendPanel.add(new JPanel(), BorderLayout.WEST);
 
         //Remove Friends panel
-        String[] removeArray = new String[this.selectedFestival.getWentWith().size()+1];
+        String[] removeArray = new String[1];
         removeArray[0] = "Remove a Friend";
-        for (int i = 1; i <= this.selectedFestival.getWentWith().size(); i++) {
-            removeArray[i] = this.selectedFestival.getWentWith().get(i-1);
-        }
         this.removeFriend = new JComboBox<>(removeArray);
         this.removeFriend.addActionListener(this);
         JPanel removeFriendPanel = CreateWindow.createPanel("   Remove Friend");
@@ -522,9 +519,7 @@ public class EditFestivalWindow implements ActionListener, DateChangeListener {
         if (!updatedDay.getLocalDate().equals(currentDay.getLocalDate())) {
             EditDatabase.changeGigDate(this.jdbcConnection, updatedDay.getEventDay(), dayId);
         }
-        if (updatedDay.getDayNumber() != 1) {
-            return;
-        }
+        //Checks new day with the first old current days for friends
         maxIteration = Math.min(updatedDay.getWentWith().size(), currentDay.getWentWith().size());
         for (int i = 0; i < maxIteration; i++) {
             if (!updatedDay.getWentWith().get(i).equals(currentDay.getWentWith().get(i))) {
@@ -559,12 +554,16 @@ public class EditFestivalWindow implements ActionListener, DateChangeListener {
         }
         Festival updatedFestival = this.selectedFestival;
         setSelectedFestival();
-        //Adds friends to the first day for both festivals
-        for (String friend : updatedFestival.getWentWith()) {
-            updatedFestival.getFestivalDays().get(0).addWentWith(friend);
+        //Adds friends to all days for both festivals
+        for (FestivalDay day : updatedFestival.getFestivalDays()) {
+            for (String friend : updatedFestival.getWentWith()) {
+                day.addWentWith(friend);
+            }
         }
-        for (String friend : this.selectedFestival.getWentWith()) {
-            this.selectedFestival.getFestivalDays().get(0).addWentWith(friend);
+        for (FestivalDay day : this.selectedFestival.getFestivalDays()) {
+            for (String friend : this.selectedFestival.getWentWith()) {
+                day.addWentWith(friend);
+            }
         }
         EditDatabase.editVenue(this.jdbcConnection, updatedFestival.getLocation(), this.festivalDatabaseId);
         int maxIteration = Math.min(updatedFestival.getNumberOfDays(), this.selectedFestival.getNumberOfDays());
@@ -587,6 +586,7 @@ public class EditFestivalWindow implements ActionListener, DateChangeListener {
                 DeleteFromDatabase.deleteGig(this.jdbcConnection, dayId);
             }
         }
+
         JOptionPane.showMessageDialog(null, "Festival has been updated!");
         this.addWindow.dispose();
     }

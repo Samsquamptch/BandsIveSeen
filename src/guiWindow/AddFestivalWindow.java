@@ -484,9 +484,11 @@ public class AddFestivalWindow implements ActionListener, DateChangeListener {
         for (Gig festivalDay : this.selectedFestival.getFestivalDays()) {
             festivalDay.setLocation(this.selectedFestival.getLocation());
         }
-        //Adds friends to the first day
-        for (String friend : this.selectedFestival.getWentWith()) {
-            this.selectedFestival.getFestivalDays().get(0).addWentWith(friend);
+        //Adds friends to each gig day
+        for (FestivalDay day : this.selectedFestival.getFestivalDays()) {
+            for (String friend : this.selectedFestival.getWentWith()) {
+                day.addWentWith(friend);
+            }
         }
         try {
             InsertToDatabase.insertVenue(this.jdbcConnection, this.selectedFestival.getLocation());
