@@ -84,7 +84,7 @@ public class ReadFromDatabase {
         PreparedStatement ps = conn.prepareStatement("SELECT Gig.Id AS ID, Gig.Date AS Date, Band.BandName AS Artist, " +
                 "(Venue.VenueName || ' - ' || Venue.Location) AS Venue, Performance.Rating AS Rating, Gig.Headline Headline, " +
                 "Band.Id AS BandId FROM Gig JOIN Performance ON Gig.Id = Performance.Gig_Id JOIN Band " +
-                "ON Band.Id = Performance.Band_Id JOIN Venue ON Venue.Id = Gig.Venue_Id" + filterBy + " ORDER BY Gig.Id, Performance.Id");
+                "ON Band.Id = Performance.Band_Id JOIN Venue ON Venue.Id = Gig.Venue_Id " + filterBy + "ORDER BY Date, Gig.Id, Performance.Id");
         ResultSet rs = ps.executeQuery();
 
         String[][] bandTable = new String[arrayLength][5];
@@ -99,6 +99,7 @@ public class ReadFromDatabase {
             bandTable[i][1] = rs.getString("Date");
             bandTable[i][2] = rs.getString("Venue");
             bandTable[i][3] = rs.getString("Rating");
+            bandTable[i][4] = rs.getString("ID");
             i++;
         }
         return bandTable;
@@ -146,6 +147,26 @@ public class ReadFromDatabase {
         }
         if (addOrRemove) {
             venueData.add("Add New Venue");
+        }
+        String[] venueArray = new String[venueData.size()];
+        venueArray = venueData.toArray(venueArray);
+        return venueArray;
+    }
+
+    public static String[] selectAllVenues(Connection conn) {
+        String sql = "SELECT VenueName, Location FROM Venue ORDER BY VenueName";
+        ArrayList<String> venueData = new ArrayList<>();
+        venueData.add("Select a Venue");
+
+        try (Statement queryStatement = conn.createStatement();
+             ResultSet queryResult = queryStatement.executeQuery(sql)) {
+
+            while (queryResult.next()) {
+                venueData.add(queryResult.getString("VenueName") + " - " +
+                        queryResult.getString("Location"));
+            }
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
         }
         String[] venueArray = new String[venueData.size()];
         venueArray = venueData.toArray(venueArray);
@@ -240,6 +261,14 @@ public class ReadFromDatabase {
         String[] friendArray = new String[friendList.size()];
         friendArray = friendList.toArray(friendArray);
         return friendArray;
+    }
+
+    public static String getGigFriendString(Connection conn, int gigId) throws SQLException {
+        PreparedStatement ps = conn.prepareStatement("SELECT GROUP_CONCAT(FriendName) AS Name FROM Friend JOIN Attended_With " +
+                "ON Friend.Id = Attended_With.Friend_Id WHERE Attended_WIth.Gig_Id = ?");
+        ps.setInt(1, gigId);
+        ResultSet rs = ps.executeQuery();
+        return rs.getString("Name");
     }
 
     public static String[] getGigDetails(Connection conn, int gigId) throws SQLException {
