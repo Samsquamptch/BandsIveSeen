@@ -1,4 +1,4 @@
-package src;
+package src.guiWindow;
 
 import com.github.lgooddatepicker.components.DatePicker;
 import src.database.ReadFromDatabase;
@@ -174,6 +174,20 @@ public class MainWindow implements ActionListener {
         frame.add(backPanel);
     }
 
+    public void revalidateFilterLists() {
+        this.startDate.clear();
+        this.endDate.clear();
+        this.bandSelect.setSelectedIndex(0);
+        this.venueSelect.setSelectedIndex(0);
+        this.friendSelect.setSelectedIndex(0);
+        String[] bandData = ReadFromDatabase.selectBands(this.jdbcConnection, false);
+        this.bandSelect.setModel(new DefaultComboBoxModel<>(bandData));
+        String[] venueData = ReadFromDatabase.selectAllVenues(this.jdbcConnection);
+        this.venueSelect.setModel(new DefaultComboBoxModel<>(venueData));
+        String[] friendData = ReadFromDatabase.selectFriends(this.jdbcConnection, new String[0], false);
+        this.friendSelect.setModel(new DefaultComboBoxModel<>(friendData));
+    }
+
     public void updateTable(String inputString) {
         try {
             String[] columnNames = {"Artist", "Date", "Venue", "Rating"};
@@ -319,11 +333,7 @@ public class MainWindow implements ActionListener {
             }
             this.selectFestivalOptions.setSelectedIndex(0);
         } else if (e.getSource() == this.refreshButton) {
-            this.startDate.clear();
-            this.endDate.clear();
-            this.bandSelect.setSelectedIndex(0);
-            this.venueSelect.setSelectedIndex(0);
-            this.friendSelect.setSelectedIndex(0);
+            revalidateFilterLists();
             updateTable("");
             this.filterButtons.clearSelection();
         } else if (e.getSource() == this.allButton) {

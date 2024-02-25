@@ -2,12 +2,11 @@ package src.database;
 
 
 import java.sql.*;
-import java.util.Arrays;
 
 public class DatabaseConnector {
 
     public static Connection connect() {
-        String url = "jdbc:sqlite:src/bisDatabase.db";
+        String url = "jdbc:sqlite:bisDatabase.db";
         Connection conn = null;
         try {
             conn = DriverManager.getConnection(url);

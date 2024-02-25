@@ -1,4 +1,4 @@
-package src;
+package src.guiWindow;
 
 import src.database.DeleteFromDatabase;
 import src.database.EditDatabase;
@@ -10,6 +10,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Objects;
 
 public class EditFriendWindow implements ActionListener {
     JComboBox<String> friendList;
@@ -80,11 +81,7 @@ public class EditFriendWindow implements ActionListener {
     }
 
     public void revalidateEditPanel() {
-        if (this.selectedFriend.isEmpty()) {
-            this.friendNameBox.setEnabled(false);
-        } else {
-            this.friendNameBox.setEnabled(true);
-        }
+        this.friendNameBox.setEnabled(!this.selectedFriend.isEmpty());
     }
 
     public void deleteFriend() throws SQLException {
@@ -130,7 +127,7 @@ public class EditFriendWindow implements ActionListener {
         }
         else if (e.getSource() == this.friendList && this.friendList.getSelectedIndex()!=0) {
             try {
-                this.selectedFriend = this.friendList.getSelectedItem().toString();
+                this.selectedFriend = Objects.requireNonNull(this.friendList.getSelectedItem()).toString();
                 this.friendDatabaseId = ReadFromDatabase.getFriendId(this.jdbcConnection, this.selectedFriend);
             } catch (SQLException ex) {
                 throw new RuntimeException(ex);

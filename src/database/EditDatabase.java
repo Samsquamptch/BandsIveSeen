@@ -1,7 +1,7 @@
 package src.database;
 
-import src.Band;
-import src.Venue;
+import src.eventObjects.Band;
+import src.eventObjects.Venue;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

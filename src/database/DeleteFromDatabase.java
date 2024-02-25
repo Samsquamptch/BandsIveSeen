@@ -1,6 +1,6 @@
 package src.database;
 
-import src.Band;
+import src.eventObjects.Band;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

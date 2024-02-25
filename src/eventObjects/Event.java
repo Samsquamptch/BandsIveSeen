@@ -1,4 +1,4 @@
-package src;
+package src.eventObjects;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -7,18 +7,18 @@ import java.util.ArrayList;
 public class Event {
     private LocalDate eventDay;
     private Venue location;
-    private ArrayList<String> wentWith;
+    private final ArrayList<String> wentWith;
 
     public Event(String dayDate, Venue location) {
         this.eventDay = LocalDate.parse(dayDate);
         this.location = location;
-        this.wentWith = new ArrayList<String>();
+        this.wentWith = new ArrayList<>();
     }
 
     public Event() {
         this.eventDay = null;
         this.location = null;
-        this.wentWith = new ArrayList<String>();
+        this.wentWith = new ArrayList<>();
     }
 
     public void setLocation(Venue location) {
@@ -71,7 +71,7 @@ public class Event {
         }
         StringBuilder friendsString = new StringBuilder();
         for (String friend : this.wentWith) {
-            friendsString.append(friend + ", ");
+            friendsString.append(friend).append(", ");
         }
         friendsString.delete(friendsString.length() - 2, friendsString.length() - 1);
         return friendsString.toString();

@@ -1,6 +1,7 @@
-package src;
+package src.jOption;
 
 import src.database.InsertToDatabase;
+import src.eventObjects.Venue;
 
 import javax.swing.*;
 import java.sql.Connection;

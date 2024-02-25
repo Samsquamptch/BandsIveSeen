@@ -1,8 +1,9 @@
-package src;
+package src.guiWindow;
 
 import src.database.DeleteFromDatabase;
 import src.database.EditDatabase;
 import src.database.ReadFromDatabase;
+import src.eventObjects.Band;
 
 import javax.swing.*;
 import java.awt.*;
@@ -10,6 +11,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Objects;
 
 public class EditBandWindow implements ActionListener {
     JComboBox<String> bandList;
@@ -157,7 +159,7 @@ public class EditBandWindow implements ActionListener {
             }
         }
         else if (e.getSource() == this.bandList && this.bandList.getSelectedIndex()!=0) {
-            String[] bandDetails = this.bandList.getSelectedItem().toString().split(" - ");
+            String[] bandDetails = Objects.requireNonNull(this.bandList.getSelectedItem()).toString().split(" - ");
             this.selectedBand = new Band(bandDetails[0], bandDetails[2], bandDetails[1], 5);
             try {
                 this.bandDatabaseId = ReadFromDatabase.getBandId(this.jdbcConnection, bandDetails[0], bandDetails[1]);

@@ -1,4 +1,4 @@
-package src;
+package src.guiWindow;
 
 import javax.swing.*;
 import java.awt.*;

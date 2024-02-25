@@ -1,10 +1,10 @@
-package src;
+package src.eventObjects;
 
 import java.util.ArrayList;
 
 public class Gig extends Event {
     private Band headlineAct;
-    private ArrayList<Band> performances;
+    private final ArrayList<Band> performances;
 
 
     public Gig(String dayDate, Venue location, Band headline){
@@ -17,7 +17,7 @@ public class Gig extends Event {
     public Gig(){
         super();
         this.headlineAct = null;
-        this.performances = new ArrayList<Band>();
+        this.performances = new ArrayList<>();
     }
 
     public void setHeadlineAct(Band headlineBand) {
@@ -61,7 +61,7 @@ public class Gig extends Event {
 
     @Override
     public String toString(){
-            ArrayList<String> supportingString = new ArrayList<String>();
+            ArrayList<String> supportingString = new ArrayList<>();
             for (Band support : this.performances) {
                 supportingString.add(support.getBandName());
             }

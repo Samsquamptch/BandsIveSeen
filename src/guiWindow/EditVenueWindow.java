@@ -1,8 +1,9 @@
-package src;
+package src.guiWindow;
 
 import src.database.DeleteFromDatabase;
 import src.database.EditDatabase;
 import src.database.ReadFromDatabase;
+import src.eventObjects.Venue;
 
 import javax.swing.*;
 import java.awt.*;
@@ -10,6 +11,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Objects;
 
 public class EditVenueWindow implements ActionListener {
     JComboBox<String> venueList;
@@ -145,7 +147,7 @@ public class EditVenueWindow implements ActionListener {
             }
         }
         else if (e.getSource() == this.venueList && this.venueList.getSelectedIndex()!=0) {
-            String[] venueDetails = this.venueList.getSelectedItem().toString().split(" - ");
+            String[] venueDetails = Objects.requireNonNull(this.venueList.getSelectedItem()).toString().split(" - ");
             this.selectedVenue = new Venue(venueDetails[0], venueDetails[1], false);
             try {
                 this.venueDatabaseId = ReadFromDatabase.getVenueId(this.jdbcConnection, this.selectedVenue);

@@ -2,6 +2,7 @@ package src;
 
 import src.database.DatabaseConnector;
 import src.database.EditDatabase;
+import src.guiWindow.MainWindow;
 
 import java.io.File;
 import java.sql.Connection;
@@ -9,7 +10,7 @@ import java.sql.SQLException;
 
 public class Main {
     public static void main(String[] args) throws SQLException {
-        File database = new File("src/bisDatabase.db");
+        File database = new File("bisDatabase.db");
         if(!database.exists()) {
             Connection conn = DatabaseConnector.connect();
             DatabaseConnector.buildDb(conn);

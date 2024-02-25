@@ -1,4 +1,4 @@
-package src;
+package src.eventObjects;
 
 public class Band {
     final private String bandName;

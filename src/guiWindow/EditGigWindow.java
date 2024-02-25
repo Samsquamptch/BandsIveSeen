@@ -1,10 +1,18 @@
-package src;
+package src.guiWindow;
 
 import com.github.lgooddatepicker.components.DatePicker;
 import com.github.lgooddatepicker.optionalusertools.DateChangeListener;
 import com.github.lgooddatepicker.zinternaltools.DateChangeEvent;
+import src.database.DeleteFromDatabase;
+import src.database.EditDatabase;
 import src.database.InsertToDatabase;
 import src.database.ReadFromDatabase;
+import src.eventObjects.Band;
+import src.eventObjects.Gig;
+import src.eventObjects.Venue;
+import src.jOption.JOptionBand;
+import src.jOption.JOptionFriend;
+import src.jOption.JOptionVenue;
 
 import javax.swing.*;
 import java.awt.*;
@@ -13,9 +21,11 @@ import java.awt.event.ActionListener;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Objects;
 
-public class AddGigWindow implements ActionListener, DateChangeListener {
+public class EditGigWindow implements ActionListener, DateChangeListener {
     DatePicker gigDate;
+    JComboBox<String> gigList;
     JComboBox<String> venueSelect;
     JComboBox<String> headlineSelect;
     JComboBox<String> support1Select;
@@ -29,19 +39,36 @@ public class AddGigWindow implements ActionListener, DateChangeListener {
     JComboBox<String> support4Rating;
     JComboBox<String> addFriend;
     JComboBox<String> removeFriend;
+    JButton deleteButton;
     JButton saveButton;
     JPanel sidePanel;
     JPanel editPanel;
     CreateWindow addWindow;
+    int gigDatabaseId;
     Gig selectedGig;
     private final Connection jdbcConnection;
 
-    public AddGigWindow(Connection connection){
+    public EditGigWindow(Connection connection){
         this.jdbcConnection = connection;
         this.selectedGig = new Gig();
     }
 
     public void newWindow() {
+        //Gig select menu
+        String[] gigData = ReadFromDatabase.selectGigs(this.jdbcConnection);
+        this.gigList = new JComboBox<>(gigData);
+        this.gigList.setPreferredSize(new Dimension(400,30));
+        this.gigList.addActionListener(this);
+        JPanel searchPanel = new JPanel();
+        searchPanel.add(this.gigList);
+
+        //Delete gig button
+        this.deleteButton = new JButton("Delete");
+        this.deleteButton.setPreferredSize(new Dimension(200,30));
+        this.deleteButton.addActionListener(this);
+        JPanel deleteButtonPanel = CreateWindow.createPanel("Delete gig");
+        deleteButtonPanel.add(this.deleteButton, BorderLayout.CENTER);
+
         //Save changes button
         this.saveButton = new JButton("Save");
         this.saveButton.setPreferredSize(new Dimension(200,30));
@@ -50,6 +77,8 @@ public class AddGigWindow implements ActionListener, DateChangeListener {
         saveButtonPanel.add(this.saveButton, BorderLayout.CENTER);
 
         JPanel optionPanel = new JPanel();
+        optionPanel.add(this.deleteButton);
+        optionPanel.add(new JPanel());
         optionPanel.add(this.saveButton);
 
         this.sidePanel = new JPanel();
@@ -57,12 +86,13 @@ public class AddGigWindow implements ActionListener, DateChangeListener {
         this.editPanel = new JPanel();
         setEditPanel();
 
-        this.addWindow = new CreateWindow("Add Gig", 900, 500);
-        this.addWindow.add(new JPanel(), BorderLayout.NORTH);
+        this.addWindow = new CreateWindow("Edit Gig", 900, 500);
+        this.addWindow.add(searchPanel, BorderLayout.NORTH);
         this.addWindow.add(this.sidePanel, BorderLayout.WEST);
         this.addWindow.add(this.editPanel, BorderLayout.CENTER);
         this.addWindow.add(optionPanel, BorderLayout.SOUTH);
     }
+
 
     public void setEditPanel() {
         String[] bandData = ReadFromDatabase.selectBands(this.jdbcConnection, true);
@@ -73,10 +103,7 @@ public class AddGigWindow implements ActionListener, DateChangeListener {
         //Date picker panel
         this.gigDate = new DatePicker();
         this.gigDate.enableInputMethods(false);
-        if (this.selectedGig.getEventDay().isEmpty()) {
-            this.gigDate.setDateToToday();
-            this.selectedGig.setEventDay(this.gigDate.toString());
-        } else {
+        if (!this.selectedGig.getEventDay().isEmpty()) {
             gigDate.setDate(this.selectedGig.getLocalDate());
         }
         this.gigDate.addDateChangeListener(this);
@@ -87,7 +114,9 @@ public class AddGigWindow implements ActionListener, DateChangeListener {
         String[] venueData = ReadFromDatabase.selectVenues(this.jdbcConnection, true);
         this.venueSelect = new JComboBox<>(venueData);
         this.venueSelect.addActionListener(this);
+        this.venueSelect.setEnabled(false);
         if (this.selectedGig.getLocation()!=null){
+            this.venueSelect.setEnabled(true);
             this.venueSelect.setSelectedItem(this.selectedGig.getLocation().toString());
         }
         JPanel venuePickerPanel = CreateWindow.createPanel("Gig Venue");
@@ -111,6 +140,14 @@ public class AddGigWindow implements ActionListener, DateChangeListener {
         this.removeFriend.addActionListener(this);
         JPanel removeFriendPanel = CreateWindow.createPanel("Remove Friend");
         removeFriendPanel.add(this.removeFriend, BorderLayout.CENTER);
+
+        if (this.selectedGig.getLocation()!=null){
+            this.addFriend.setEnabled(true);
+            this.removeFriend.setEnabled(true);
+        } else {
+            this.addFriend.setEnabled(false);
+            this.removeFriend.setEnabled(false);
+        }
 
         //Headline select panel
         this.headlineSelect = new JComboBox<>(bandData);
@@ -200,9 +237,7 @@ public class AddGigWindow implements ActionListener, DateChangeListener {
         JComboBox[] bandRatingArray = new JComboBox[]{this.headlineRating, this.support1Rating, this.support2Rating,
                 this.support3Rating, this.support4Rating};
         if (this.selectedGig.getHeadlineAct()==null) {
-            this.headlineSelect.setEnabled(true);
-            this.headlineRating.setEnabled(true);
-            for (int i = 1; i < 5; i++) {
+            for (int i = startVal; i < 5; i++) {
                 bandSelectArray[i].setEnabled(false);
                 bandRatingArray[i].setEnabled(false);
             }
@@ -256,23 +291,15 @@ public class AddGigWindow implements ActionListener, DateChangeListener {
         if (editPanel) {
             setEditPanel();
         }
-        String bandName = "";
-        String venueName = "";
-        if (this.selectedGig.getHeadlineAct() != null) {
-            bandName = this.selectedGig.getHeadlineAct().getBandName();
-        }
-        if (this.selectedGig.getLocation() != null) {
-            venueName = this.selectedGig.getLocation().toString();
-        }
         setSidePanel(this.selectedGig.getEventDay(),
-                venueName,
-                bandName,
+                this.selectedGig.getLocation().toString(),
+                this.selectedGig.getHeadlineAct().getBandName(),
                 this.selectedGig.getFriendsString(),
                 this.selectedGig.getPerformances());
     }
 
     public void friendSelectSettings(JComboBox<String> selectorItem) {
-        if (selectorItem.getSelectedItem().equals("Add New Friend")) {
+        if (Objects.requireNonNull(selectorItem.getSelectedItem()).equals("Add New Friend")) {
             String friendName = JOptionFriend.addFriend(this.jdbcConnection);
             if (friendName.isEmpty()) {
                 selectorItem.setSelectedIndex(0);
@@ -286,12 +313,12 @@ public class AddGigWindow implements ActionListener, DateChangeListener {
         }
         else if (selectorItem.getSelectedIndex() != 0) {
             if (selectorItem == this.addFriend) {
-                this.selectedGig.addWentWith(this.addFriend.getSelectedItem().toString());
+                this.selectedGig.addWentWith(Objects.requireNonNull(this.addFriend.getSelectedItem()).toString());
                 this.removeFriend.addItem(this.addFriend.getSelectedItem().toString());
                 this.addFriend.removeItem(this.addFriend.getSelectedItem());
                 this.addFriend.setSelectedIndex(0);
             } else {
-                this.selectedGig.removeWentWith(this.removeFriend.getSelectedItem().toString());
+                this.selectedGig.removeWentWith(Objects.requireNonNull(this.removeFriend.getSelectedItem()).toString());
                 this.addFriend.removeItem("Add New Friend");
                 this.addFriend.addItem(this.removeFriend.getSelectedItem().toString());
                 this.addFriend.addItem("Add New Friend");
@@ -309,7 +336,7 @@ public class AddGigWindow implements ActionListener, DateChangeListener {
     public void bandSelectSettings(JComboBox<String> selectorItem, int selectValue) {
         JComboBox[] bandSelectArray = new JComboBox[]{this.headlineSelect, this.support1Select, this.support2Select,
                 this.support3Select, this.support4Select};
-        if (selectorItem.getSelectedItem().equals("Add New Band")) {
+        if (Objects.requireNonNull(selectorItem.getSelectedItem()).equals("Add New Band")) {
             String bandName = JOptionBand.addBand(this.jdbcConnection);
             if (bandName.isEmpty()) {
                 return;
@@ -343,13 +370,7 @@ public class AddGigWindow implements ActionListener, DateChangeListener {
         }
         else if (selectorItem.getSelectedIndex()!=0) {
             String[] bandDetails = selectorItem.getSelectedItem().toString().split(" - ");
-            if (this.selectedGig.getHeadlineAct() == null) {
-                this.selectedGig.setHeadlineAct(new Band(bandDetails[0],
-                        bandDetails[2],
-                        bandDetails[1],
-                        this.headlineRating.getSelectedIndex()));
-            }
-            else if (selectValue == 1) {
+            if (selectValue == 1) {
                 this.selectedGig.setHeadlineAct(new Band(bandDetails[0],
                         bandDetails[2],
                         bandDetails[1],
@@ -374,9 +395,8 @@ public class AddGigWindow implements ActionListener, DateChangeListener {
     }
 
     public void setVenueSelect() {
-        if (this.venueSelect.getSelectedItem().equals("Add New Venue")) {
+        if (Objects.requireNonNull(this.venueSelect.getSelectedItem()).equals("Add New Venue")) {
             String addedVenue = JOptionVenue.addVenue(this.jdbcConnection);
-            System.out.println(addedVenue);
             if (addedVenue.isEmpty()) {
                 this.venueSelect.setSelectedIndex(0);
                 return;
@@ -396,7 +416,7 @@ public class AddGigWindow implements ActionListener, DateChangeListener {
     }
 
     public void bandRatingSettings(JComboBox<String> selectorItem, int selectValue) {
-        int intRating = Integer.parseInt(selectorItem.getSelectedItem().toString());
+        int intRating = Integer.parseInt(Objects.requireNonNull(selectorItem.getSelectedItem()).toString());
         if (selectValue >= this.selectedGig.getPerformances().size()) {
             selectorItem.setSelectedIndex(0);
             return;
@@ -405,58 +425,174 @@ public class AddGigWindow implements ActionListener, DateChangeListener {
         refreshPanels(false);
     }
 
+    public void setSelectedGig() throws SQLException {
+            String[] gigDetails = Objects.requireNonNull(this.gigList.getSelectedItem()).toString().split(" - ");
+            String[] venueAndBandId = ReadFromDatabase.getGigDetails(this.jdbcConnection, gigDatabaseId);
+            Venue selectedVenue = new Venue(venueAndBandId[1], venueAndBandId[2], false);
+            String[] bandDetails = ReadFromDatabase.getGigHeadlineDetails(this.jdbcConnection,
+                    Integer.parseInt(venueAndBandId[3]), gigDatabaseId);
+            Band selectedHeadline = new Band(bandDetails[0], bandDetails[1], bandDetails[2],
+                    Integer.parseInt(bandDetails[3]));
+            ArrayList<Band> gigPerformances = ReadFromDatabase.getGigPerformances(this.jdbcConnection, gigDatabaseId);
+            this.selectedGig = new Gig(gigDetails[1], selectedVenue, selectedHeadline);
+            for (Band performance : gigPerformances) {
+                if (!Objects.equals(performance.getBandName(), this.selectedGig.getHeadlineAct().getBandName())) {
+                    this.selectedGig.addPerformance(performance);
+                }
+            }
+            String[] gigFriends = ReadFromDatabase.getGigFriends(this.jdbcConnection, gigDatabaseId);
+            for (String friend : gigFriends) {
+                this.selectedGig.addWentWith(friend);
+            }
+    }
+
+    public void deleteGig() throws SQLException {
+        int deleteResponse = JOptionPane.showConfirmDialog(null,
+                "Are you sure you want to delete this gig permanently?",
+                "Confirm delete gig", JOptionPane.YES_NO_OPTION);
+        if (deleteResponse==0) {
+            DeleteFromDatabase.deleteGig(this.jdbcConnection, this.gigDatabaseId);
+            JOptionPane.showMessageDialog(null, "Gig has been deleted");
+            this.addWindow.dispose();
+        }
+    }
+
+    public void saveGigChanges() throws SQLException {
+        Gig updatedGig = this.selectedGig;
+        setSelectedGig();
+        if (!updatedGig.getHeadlineAct().equals(this.selectedGig.getHeadlineAct())) {
+            EditDatabase.changeGigHeadline(this.jdbcConnection, updatedGig.getHeadlineAct(), this.gigDatabaseId);
+        }
+        //Checks to see whether the current or updated gig has more performances, then sets the value to the
+        //smaller value. This is so an out-of-bounds error doesn't occur when both lists are compared.
+        int maxIteration = Math.min(updatedGig.getPerformances().size(), this.selectedGig.getPerformances().size());
+        for (int i = 0; i < maxIteration; i++) {
+            if (!updatedGig.getPerformances().get(i).equals(this.selectedGig.getPerformances().get(i))) {
+            EditDatabase.changePerformanceBand(this.jdbcConnection,
+                    updatedGig.getPerformances().get(i), this.selectedGig.getPerformances().get(i), this.gigDatabaseId);
+            }
+        }
+        if (updatedGig.getPerformances().size() > this.selectedGig.getPerformances().size()) {
+            for (int i = maxIteration; i < updatedGig.getPerformances().size(); i++) {
+                InsertToDatabase.insertPerformance(this.jdbcConnection, updatedGig.getPerformances().get(i), this.gigDatabaseId);
+            }
+        }
+        else if (updatedGig.getPerformances().size() < this.selectedGig.getPerformances().size()) {
+            for (int i = maxIteration; i < this.selectedGig.getPerformances().size(); i++) {
+                DeleteFromDatabase.deletePerformance(this.jdbcConnection, this.selectedGig.getPerformances().get(i), this.gigDatabaseId);
+            }
+        }
+        maxIteration = Math.min(updatedGig.getWentWith().size(), this.selectedGig.getWentWith().size());
+        for (int i = 0; i < maxIteration; i++) {
+            if (!updatedGig.getWentWith().get(i).equals(this.selectedGig.getWentWith().get(i))) {
+                EditDatabase.changeWentWith(this.jdbcConnection, updatedGig.getWentWith().get(i),
+                        this.selectedGig.getWentWith().get(i), this.gigDatabaseId);
+            }
+        }
+        if (updatedGig.getWentWith().size() > this.selectedGig.getWentWith().size()) {
+            for (int i = maxIteration; i < updatedGig.getWentWith().size(); i++) {
+                InsertToDatabase.insertAttendedWith(this.jdbcConnection, updatedGig.getWentWith().get(i), this.gigDatabaseId);
+            }
+        }
+        else if (updatedGig.getWentWith().size() < this.selectedGig.getWentWith().size()) {
+            for (int i = maxIteration; i < this.selectedGig.getWentWith().size(); i++) {
+                DeleteFromDatabase.deleteAttendedWith(this.jdbcConnection, this.selectedGig.getWentWith().get(i), this.gigDatabaseId);
+            }
+        }
+        if (!updatedGig.getLocation().equals(this.selectedGig.getLocation())) {
+            EditDatabase.changeGigVenue(this.jdbcConnection, updatedGig.getLocation(), this.gigDatabaseId);
+        }
+        if (!updatedGig.getLocalDate().equals(this.selectedGig.getLocalDate())) {
+            EditDatabase.changeGigDate(this.jdbcConnection, updatedGig.getEventDay(), this.gigDatabaseId);
+        }
+        JOptionPane.showMessageDialog(null, "Changes have been saved");
+        this.addWindow.dispose();
+    }
+
     @Override
     public void actionPerformed(ActionEvent e) {
-        if (e.getSource() == this.saveButton) {
-            if (!this.selectedGig.checkIfNull()){
-                JOptionPane.showMessageDialog(null,
-                        "Please ensure all required fields have been filled",
-                        "Gig details missing!",JOptionPane.WARNING_MESSAGE);
+        if ((e.getSource() == this.deleteButton || e.getSource() == this.saveButton) && this.selectedGig.getHeadlineAct()==null) {
+            JOptionPane.showMessageDialog(null,"Please select a gig before choosing this option",
+                    "No Gig Selected!", JOptionPane.WARNING_MESSAGE);
+        }
+        else if (e.getSource() == this.deleteButton) {
+            try { deleteGig();
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            }
+        }
+        else if (e.getSource() == this.saveButton) {
+            try {
+                saveGigChanges();
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            }
+        }
+        else if (e.getSource() == this.headlineSelect) {
+            bandSelectSettings(this.headlineSelect, 1);
+        }
+        else if (e.getSource() == this.support1Select) {
+            bandSelectSettings(this.support1Select, 2);
+        }
+        else if (e.getSource() == this.support2Select) {
+            bandSelectSettings(this.support2Select, 3);
+        }
+        else if (e.getSource() == this.support3Select) {
+            bandSelectSettings(this.support3Select, 4);
+        }
+        else if (e.getSource() == this.support4Select) {
+            bandSelectSettings(this.support4Select, 5);
+        }
+        else if (e.getSource() == this.headlineRating) {
+            bandRatingSettings(this.headlineRating, 0);
+        }
+        else if (e.getSource() == this.support1Rating) {
+            bandRatingSettings(this.support1Rating, 1);
+        }
+        else if (e.getSource() == this.support2Rating) {
+            bandRatingSettings(this.support2Rating, 2);
+        }
+        else if (e.getSource() == this.support3Rating) {
+            bandRatingSettings(this.support3Rating, 3);
+        }
+        else if (e.getSource() == this.support4Rating) {
+            bandRatingSettings(this.support4Rating, 4);
+        }
+        else if (e.getSource() == this.addFriend){
+            friendSelectSettings(this.addFriend);
+        }
+        else if (e.getSource() == this.removeFriend){
+            friendSelectSettings(this.removeFriend);
+        }
+        else if (e.getSource() == this.venueSelect){
+            setVenueSelect();
+        }
+        else if (e.getSource() == this.gigList){
+            if (this.gigList.getSelectedIndex()==0){
+                this.selectedGig = new Gig();
+                setSidePanel("", "", "", "", null);
+                setEditPanel();
                 return;
             }
-            int saveResponse = JOptionPane.showConfirmDialog(null,
-                    "Are you sure you want to save your changes to this gig?",
-                    "Confirm save gig", JOptionPane.YES_NO_OPTION);
-            if (saveResponse == 0) {
-                try {
-                    InsertToDatabase.insertGig(this.jdbcConnection, this.selectedGig);
-                } catch (SQLException ex) {
-                    throw new RuntimeException(ex);
-                }
-                this.addWindow.dispose();
+            String[] gigDetails = Objects.requireNonNull(this.gigList.getSelectedItem()).toString().split(" - ");
+            try {
+                this.gigDatabaseId = ReadFromDatabase.getGigId(this.jdbcConnection, gigDetails[0], gigDetails[1]);
+                setSelectedGig();
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
             }
-        } else if (e.getSource() == this.headlineSelect) {
-            bandSelectSettings(this.headlineSelect, 1);
-        } else if (e.getSource() == this.support1Select) {
-            bandSelectSettings(this.support1Select, 2);
-        } else if (e.getSource() == this.support2Select) {
-            bandSelectSettings(this.support2Select, 3);
-        } else if (e.getSource() == this.support3Select) {
-            bandSelectSettings(this.support3Select, 4);
-        } else if (e.getSource() == this.support4Select) {
-            bandSelectSettings(this.support4Select, 5);
-        } else if (e.getSource() == this.headlineRating) {
-            bandRatingSettings(this.headlineRating, 0);
-        } else if (e.getSource() == this.support1Rating) {
-            bandRatingSettings(this.support1Rating, 1);
-        } else if (e.getSource() == this.support2Rating) {
-            bandRatingSettings(this.support2Rating, 2);
-        } else if (e.getSource() == this.support3Rating) {
-            bandRatingSettings(this.support3Rating, 3);
-        } else if (e.getSource() == this.support4Rating) {
-            bandRatingSettings(this.support4Rating, 4);
-        } else if (e.getSource() == this.addFriend) {
-            friendSelectSettings(this.addFriend);
-        } else if (e.getSource() == this.removeFriend) {
-            friendSelectSettings(this.removeFriend);
-        } else if (e.getSource() == this.venueSelect) {
-            setVenueSelect();
+            refreshPanels(true);
         }
     }
 
     @Override
     public void dateChanged(DateChangeEvent dateChangeEvent) {
+        if (this.selectedGig.getHeadlineAct()==null) {
+            this.gigDate.clear();
+            return;
+        }
         this.selectedGig.setEventDay(this.gigDate.toString());
         refreshPanels(false);
     }
 }
+

@@ -1,11 +1,11 @@
-package src;
+package src.eventObjects;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 
 public class Festival extends Event {
     private String festivalName;
-    private ArrayList<FestivalDay> festivalDays;
+    private final ArrayList<FestivalDay> festivalDays;
 
     public Festival() {
         super();
