@@ -1,6 +1,9 @@
 # BandsIveSeen
 Bands I've Seen is a small application for recording which bands you've seen live at gigs or festivals. It was written entirely in Java (using the Swing Framework for the GUI), with all data stored on a sqlite database.
 
+![mainwindow](https://github.com/Samsquamptch/BandsIveSeen/assets/140660422/99f9cba2-b87e-4fa1-90a6-94b0f73f3e6a)
+
+
 ### Requirements
 This application requires JDK 21 or higher to run. You can find the download for OpenJDK 21 [here](https://openjdk.org/projects/jdk/21/). There are no other dependencies required to run the .jar or .exe.
 
